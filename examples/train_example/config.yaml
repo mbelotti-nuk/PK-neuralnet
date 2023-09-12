@@ -1,0 +1,48 @@
+save_directory: ""
+
+# Inputs
+inputs: ['energy', 'dist_source_tally','dist_shield_tally','mfp','theta','fi']
+inp_scaletype: {'energy': 'minmax', 'dist_source_tally': 'std', 'dist_shield_tally': 'std', 'mfp': 'std', 'theta': 'std', 'fi': 'std'}
+
+# Output
+output: "B"
+out_scaletype: {'B': 'std'}
+out_log_scale: True
+out_clip: [1, 1E+21]
+
+
+# Database specifications
+path_to_database: \\Users\\mario\\OneDrive\\Desktop\\UNED\\Phd\\PointKernelMethod\\NN\BenchMarkData\\CNN\\BData
+mesh_dim: [80,100,35]
+
+
+# Training specifications
+#
+# n_files: number of files from database to be used in training.
+# if None, all the files are used
+n_files: 200 #None
+#
+# samples_per_case: number of points used for training for each file of the database.
+# if None, all the points are used which corresponds to mesh_dim[0]*mesh_dim[1]*mesh_dim[2]
+samples_per_case: 100
+#
+# percentage for training/validation splitting
+percentage: 0.75
+
+
+# DNN architecture
+# a list that gives to each layer the corresponing number of neurons
+# note that f_maps[0] has to be equal to the number of inputs
+f_maps: [6,128,64,8]
+
+
+# Training parameters 
+batch_size: 2048
+n_epochs: 1
+patience: 10
+
+optimizer:
+  type: "adamw"
+  learning_rate: 0.001
+  weight_decay: 0.001
+

@@ -1,0 +1,10 @@
+save_path: ""
+save_name: "PKDNN"
+
+path_to_model: "Model_output_B_fmaps_[6, 128, 64, 8]\\NNmodel.pt"
+
+# DNN architecture
+# a list that gives to each layer the corresponing number of neurons
+# note that f_maps[0] has to be equal to the number of inputs
+f_maps: [6,128,64,8]
+

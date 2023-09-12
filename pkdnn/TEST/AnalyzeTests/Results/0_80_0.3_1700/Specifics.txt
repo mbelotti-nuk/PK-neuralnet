@@ -1,0 +1,3 @@
+Number of points with Error > 50 = 101 
+
+Which is the 0.036071428571428574 % over the total 
