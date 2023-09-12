@@ -17,7 +17,7 @@ setup(
     long_description=readme,
     author='Mario Belotti',
     author_email='mbelotti@ind.uned.es',
-    url='GITHUB URL',
+    url='https://github.com/mbelotti-nuk/PK-neuralnet',
     license=license,
     #packages=find_packages(exclude=('tests', 'docs')),
     packages = ['pkdnn', 'pkdnn.functionalities', 'pkdnn.NET','pkdnn.EXPORT'],
