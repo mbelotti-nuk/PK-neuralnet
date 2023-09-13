@@ -103,23 +103,26 @@ def plotSpatialDistribution(coord, errors, error_threshold, name=None):
     plt.savefig("{}_spatials_errors_distrib_THRESHOLD_{}.png".format(name, error_threshold))
     plt.close()
 
-def Plot2D(PredDose, RealDose, name):
+def plot_2D(predicted, real, name, path=None):
 
     plt.figure()
     fig = plt.gcf()
     fig.set_size_inches(30, 20)
 
     plt.subplot(1,2,1)
-    plt.title("Predicted Dose distribution", fontsize=18)
-    plt.imshow(PredDose[:, 0, :], cmap='jet', vmin = RealDose.min().item(), vmax = RealDose.max().item(), origin='lower')
+    plt.title("Predicted distribution", fontsize=18)
+    plt.imshow(predicted[:, 0, :], cmap='jet', vmin = real.min().item(), vmax = real.max().item(), origin='lower')
     plt.colorbar()
 
 
     plt.subplot(1,2,2)
-    plt.title("Real Dose distribution", fontsize=18)
-    plt.imshow(RealDose[:, 0, :], cmap='jet', vmin = RealDose.min().item(), vmax = RealDose.max().item(), origin='lower')
+    plt.title("Real distribution", fontsize=18)
+    plt.imshow(real[:, 0, :], cmap='jet', vmin = real.min().item(), vmax = real.max().item(), origin='lower')
     plt.colorbar()
 
+    if path!= None:
+        plt.savefig(os.path.join(path,"{}_2D_distribution.png".format(name)))
+    else:
+        plt.savefig("_2D_distribution{}.png".format(name))
 
-    plt.savefig("{}_2D_dose_distribution.png".format(name))
     plt.close()

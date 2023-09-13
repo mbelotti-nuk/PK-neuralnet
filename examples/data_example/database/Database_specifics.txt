@@ -1,0 +1,7 @@
+Output:		B
+Input0:		energy
+Input1:		dist_source_tally
+Input2:		dist_wall_tally
+Input3:		mfp
+Input4:		theta
+Input5:		fi

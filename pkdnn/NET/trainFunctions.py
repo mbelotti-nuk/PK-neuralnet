@@ -1,6 +1,7 @@
 import copy
 import torch
-from pkdnn.NET.pytorchtools import EarlyStopping
+from pkdnn.net.pytorchtools import EarlyStopping
+from pkdnn.net.datamanager import Dataset
 import matplotlib.pyplot as plt
 import time
 from torch import nn
@@ -8,7 +9,7 @@ import numpy as np
 import os
 
 
-def plot_result(train_loss_values, val_loss_values, train_acc_values, val_acc_values, save_path=None):
+def plot_results(train_loss_values, val_loss_values, train_acc_values, val_acc_values, save_path=None):
     plt.plot( train_loss_values, label = "Train Loss")
     plt.plot( val_loss_values, label = "Validation Loss")
     plt.title("Loss")
@@ -34,6 +35,15 @@ def plot_result(train_loss_values, val_loss_values, train_acc_values, val_acc_va
     plt.close()
 
 
+def print_scores(t0, train_loss, val_loss, train_acc, val_acc):
+    print("\tTrain Loss = " + str(train_loss), flush=True)
+    print("\tValidation Loss = " + str(val_loss), flush=True)
+    print("\n", flush=True)
+    print("\tTrain Accuracy = " + str(train_acc), flush=True)
+    print("\tValidation Accuracy = " + str(val_acc), flush=True)
+
+    print(f"\n|| Time epoch {time.time() - t0} s\n\n")
+    return
 
 def fwd_calculation(X, y, model, loss_fn, acc_fn):
     # Compute prediction and loss
@@ -86,8 +96,6 @@ def epoch(scope, loader, training=False):
                 tensors = [tensor.to(scope["device"]) for tensor in tensors]
         
         x, y = tensors
-
-        #print(f"batch index {batch_idx}")
         
        
         if scaler != None:
@@ -133,15 +141,23 @@ def epoch(scope, loader, training=False):
     return total_loss, total_acc
 
 
-def train(scope, train_dataset, val_dataset, patience=10, batch_size=256, save_path=None):
+def train(scope, train_dataset:Dataset, val_dataset:Dataset, 
+          patience:int=10, batch_size:int=256, save_path:str=None):
+    """_summary_
 
+    Args:
+        scope : dictionary containing infos about training
+        train_dataset (Dataset): dataset for training the NN
+        val_dataset (Dataset): dataset used for validating the NN training
+        patience (int, optional): number of epochs with no improvement on loss before stopping training. Defaults to 10.
+        batch_size (int, optional): size of batch. Defaults to 256.
+        save_path (str, optional): path in which save NN checkpoints. Defaults to None.
+
+    """
     early_stopping = EarlyStopping(patience, verbose=True)
 
-    train_loss_values = []
-    val_loss_values = []
-
-    train_acc_values = []
-    val_acc_values = []
+    train_loss_values, val_loss_values = [], []
+    train_acc_values, val_acc_values = [], []
 
     epochs = scope["epochs"]
     model = scope["model"]
@@ -150,9 +166,11 @@ def train(scope, train_dataset, val_dataset, patience=10, batch_size=256, save_p
     scope["best_val_loss"] = float("inf")
     scope["best_model"] = None
 
+    # Build dataloaders for training
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False) 
     
+    # Begin training
     skips = 0
     for epoch_id in range(1, epochs + 1):
         scope["epoch"] = epoch_id
@@ -163,10 +181,10 @@ def train(scope, train_dataset, val_dataset, patience=10, batch_size=256, save_p
         t0 = time.time()
 
         train_loss, train_acc = epoch(scope, train_loader,  training=True)
+
         scope["train_loss"] = train_loss
-         
         train_loss_values.append( train_loss )
-        train_acc_values.append( train_acc ) 
+        train_acc_values.append( train_acc )         
         
         del scope["dataset"]
         # Validation
@@ -175,13 +193,7 @@ def train(scope, train_dataset, val_dataset, patience=10, batch_size=256, save_p
             val_loss, val_acc = epoch(scope, val_loader, training=False)
         scope["val_loss"] = val_loss
 
-        print("\tTrain Loss = " + str(train_loss), flush=True)
-        print("\tValidation Loss = " + str(val_loss), flush=True)
-        print("\n", flush=True)
-        print("\tTrain Accuracy = " + str(train_acc), flush=True)
-        print("\tValidation Accuracy = " + str(val_acc), flush=True)
-
-        print(f"\n|| Time epoch {time.time() - t0} s\n\n")
+        print_scores(t0, train_loss, val_loss, train_acc, val_acc)
 
         val_loss_values.append( val_loss )
         val_acc_values.append( val_acc )
@@ -204,22 +216,24 @@ def train(scope, train_dataset, val_dataset, patience=10, batch_size=256, save_p
             print("Early stopping", flush=True)
             break
         
-    plot_result(train_loss_values, val_loss_values, train_acc_values, val_acc_values, save_path=save_path) 
+    plot_results(train_loss_values, val_loss_values, train_acc_values, val_acc_values, save_path=save_path) 
     print(f"Best score: Loss: {np.min(val_loss_values)}   Accuracy: {np.min(val_acc_values)}")
 
 
     return scope["best_model"],  scope["best_train_loss"], scope["best_val_loss"]
 
-def train_model(model, train_dataset, val_dataset, optimizer, mixed_precision=True, scheduler=True, 
-                epochs=100, batch_size=256, patience=10, device=0, save_path=None,**kwargs):
+def train_model(model, train_dataset:Dataset, val_dataset:Dataset, 
+                optimizer, mixed_precision:bool=True, scheduler:bool=True, 
+                epochs:int=100, batch_size:int=256, patience:int=10, device:int=0, save_path:str=None,
+                loss=None, accuracy=None, lr_scheduler=None,**kwargs):
     
     model = model.to(device)
     
     scope = {}
     
     scope["model"] = model
-    scope["loss_func"] = nn.MSELoss()
-    scope["acc_func"] = nn.L1Loss()
+    scope["loss_func"] = loss if loss!= None else nn.MSELoss()
+    scope["acc_func"] = accuracy if accuracy!=None else nn.L1Loss()
     
     scope["train_dataset"] = train_dataset
     scope["val_dataset"] = val_dataset
@@ -230,7 +244,7 @@ def train_model(model, train_dataset, val_dataset, optimizer, mixed_precision=Tr
     else:
         scope["scaler"] = None
     if scheduler:
-        scope["scheduler"] = torch.optim.lr_scheduler.ReduceLROnPlateau( optimizer, 'min', factor=0.5, patience=5 )
+        scope["scheduler"] = torch.optim.lr_scheduler.ReduceLROnPlateau( optimizer, 'min', factor=lr_scheduler['factor'], patience=lr_scheduler['patience'] )
     else:
         scope["scheduler"] = None
 

@@ -20,11 +20,14 @@ setup(
     url='https://github.com/mbelotti-nuk/PK-neuralnet',
     license=license,
     #packages=find_packages(exclude=('tests', 'docs')),
-    packages = ['pkdnn', 'pkdnn.functionalities', 'pkdnn.NET','pkdnn.EXPORT'],
+    packages = ['pkdnn', 'pkdnn.functionalities', 'pkdnn.net','pkdnn.export', 'pkdnn.inp_process'],
     entry_points={'console_scripts': [
         'trainpknn=pkdnn.train:main',
         'predictpknn=pkdnn.predict:main',
-        'savepknn=pkdnn.EXPORT.exportmodel:main']
-        }
+        'savepknn=pkdnn.export.exportmodel:main',
+        'databasepknn=pkdnn.inp_process.build_database:main']
+        },
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest']
 )
 

@@ -1,0 +1,50 @@
+#
+# "predictpkdnn" permits to test a pre-trained NN with a file from the database
+#
+#  From the prediction, 2 images are generated: 
+#  1. Distribution of errors [%]
+#  2. 2D distribution comparison between the predicted and the real output values on an the plane: {X, Y=0, Z}
+#
+
+
+# Path in which to save results
+save_path: ""
+
+
+# Path in which the trained neural network is saved (as a '.pt' file) 
+path_to_model: \Users\mario\OneDrive\Desktop\UNED\Phd\PointKernelMethod\PKnn\examples\model_example\NNmodel.pt
+# Path in which the scaler is saved (as a '.pickle' file) 
+path_to_scaler: \Users\mario\OneDrive\Desktop\UNED\Phd\PointKernelMethod\PKnn\examples\model_example\Scaler.pickle
+
+
+# Path point to the folder in which the database file is stored
+path_to_file: \\Users\\mario\\OneDrive\\Desktop\\UNED\\Phd\\PointKernelMethod\\NN\BenchMarkData\\CNN\\BData
+# Name of the database file used for test
+filename: "0_100_1_1100"
+
+#
+#
+# Neural network specifics
+#
+#
+
+# Neural network Inputs
+inputs: ['energy', 'dist_source_tally','dist_shield_tally','mfp','theta','fi']
+
+# Inputs that are present in the database files.
+# This input should be specified in case the inputs variable map a subset of the actual database input set.
+database_inputs: null
+  
+# Output
+output: "B"
+out_log_scale: True
+
+# DNN architecture
+# a list that gives to each layer the corresponing number of neurons
+# note that f_maps[0] has to be equal to the number of inputs
+f_maps: [6,128,64,8]
+
+# Database specifications
+# Number of mesh subdivisions on x, y and z 
+mesh_dim: [80,100,35]
+

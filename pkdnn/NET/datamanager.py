@@ -76,6 +76,9 @@ class Scaler:
         self.out_scale_1 = 0
         self.out_scale_2 = 0
 
+# ********************************************************************
+#                           Public members
+# ********************************************************************
 
     def fit_and_scale(self, X:dict[str,torch.tensor], Y:dict[str,torch.tensor]) -> tuple[dict[str,torch.tensor], dict[str,torch.tensor]]:
         """Fit scale parameters with the given X and Y and than scales X and Y
@@ -99,7 +102,7 @@ class Scaler:
             self.inp_scale_2[key]= scale2
             
             # Scale input feature
-            X[key] = self.scale_val(X[key], self.input_scale_type[key], scale1, scale2)
+            X[key] = self._scale_val(X[key], self.input_scale_type[key], scale1, scale2)
 
         # Scale output
         y = Y[self.out_key].detach()
@@ -109,7 +112,7 @@ class Scaler:
         self.out_scale_1 = scale1
         self.out_scale_2 = scale2
         # Scale
-        Y[self.out_key] = self.scale_val(Y[self.out_key], self.output_scale_type[self.out_key], scale1, scale2)
+        Y[self.out_key] = self._scale_val(Y[self.out_key], self.output_scale_type[self.out_key], scale1, scale2)
 
         return X, Y
 
@@ -125,13 +128,12 @@ class Scaler:
         """        
         # Scale input
         for key in X:
-            X[key] = self.scale_val(X[key], self.input_scale_type[key], self.inp_scale_1[key], self.inp_scale_2[key])
+            X[key] = self._scale_val(X[key], self.input_scale_type[key], self.inp_scale_1[key], self.inp_scale_2[key])
 
         # Scale output
-        Y[self.out_key] = self.scale_val(Y[self.out_key], self.output_scale_type[self.out_key], self.out_scale_1, self.out_scale_2)
+        Y[self.out_key] = self._scale_val(Y[self.out_key], self.output_scale_type[self.out_key], self.out_scale_1, self.out_scale_2)
 
         return X, Y
-
 
     def fit(self, X:torch.tensor, scale_type:str) -> tuple[torch.tensor, torch.tensor]:
         """Find scaling factors for a given tensor
@@ -155,21 +157,6 @@ class Scaler:
             scale2 = torch.std(X)
         return scale1, scale2
 
-
-    def scale_val(self, X:torch.tensor, scale_type:str, scale1:torch.tensor, scale2:torch.tensor) -> torch.tensor:
-        if scale_type.lower() == 'minmax':
-            X = (X-scale1)/(scale2-scale1)
-        elif scale_type.lower() == "std":
-            X = (X-scale1)/(scale2)
-        return X
-
-    def rescale(self, Y:torch.tensor, scale_type:str):
-        if scale_type.lower() == 'minmax':
-            Y = Y  * (self.out_scale_2 - self.out_scale_1) + self.out_scale_1
-        elif scale_type.lower() == "std":
-            Y = Y * (self.out_scale_2) + self.out_scale_1
-        return Y
-
     def denormalize(self, Y:torch.tensor) -> torch.tensor:
         """Re-scale the output to its starting values
 
@@ -179,7 +166,7 @@ class Scaler:
         Returns:
            torch.tensor: re-scaled output
         """        
-        Y = self.rescale(Y, self.output_scale_type[self.out_key])
+        Y = self._rescale(Y, self.output_scale_type[self.out_key])
         if self.log_scale:
             if self.out_key.lower() == "b":
                 Y = torch.exp(Y) - 1
@@ -189,13 +176,34 @@ class Scaler:
         return Y
 
 
+# ********************************************************************
+#                           Private members
+# ********************************************************************
+
+    def _scale_val(self, X:torch.tensor, scale_type:str, scale1:torch.tensor, scale2:torch.tensor) -> torch.tensor:
+        if scale_type.lower() == 'minmax':
+            X = (X-scale1)/(scale2-scale1)
+        elif scale_type.lower() == "std":
+            X = (X-scale1)/(scale2)
+        return X
+
+    def _rescale(self, Y:torch.tensor, scale_type:str):
+        if scale_type.lower() == 'minmax':
+            Y = Y  * (self.out_scale_2 - self.out_scale_1) + self.out_scale_1
+        elif scale_type.lower() == "std":
+            Y = Y * (self.out_scale_2) + self.out_scale_1
+        return Y
 
 
 
-class ReadInput:
+
+
+
+class Input_reader:
     """class that reads and manage data from database
     """    
-    def __init__(self, path:str, mesh_dim:list[int], inputs:list[str], Output:str='Dose', sample_per_case:int=20000):
+    def __init__(self, path:str, mesh_dim:list[int], inputs:list[str], 
+                 database_inputs:list[str]=None, Output:str='Dose', sample_per_case:int=20000):
         """Class that reads and manage data from database
 
         Args:
@@ -203,6 +211,8 @@ class ReadInput:
             mesh_dim (list[int]): list containing the number of subdivisions on x,y and z of the mesh, e.g., 
             mesh_dim=[80,100,35] is a 80x100x35 mesh on x y z
             inputs (list[str]): list containing the input to be considered. 
+            database_inputs (list[str]): list containing all the inputs that are present in database files. 
+            To be specified in the case in which the inputs list is a subset of the inputs present in the database. Default to None.
             The input available are: 'energy', 'dist_source_tally','dist_shield_tally','mfp','theta','fi'.
             Output (str, optional): Target. Defaults to 'Dose'.
             sample_per_case (int, optional): Number of values to be considered for training per each file in database.
@@ -216,15 +226,15 @@ class ReadInput:
         self.n_dim = int(mesh_dim[0]*mesh_dim[1]*mesh_dim[2])
 
         # List of strings of input
-        self.reference_inputs = ['energy', 'dist_source_tally','dist_shield_tally','mfp','theta','fi']
+        self.database_inputs = database_inputs if database_inputs != None else inputs
         self.reference_outpus = ['b', 'dose']
         for inp in inputs:    
-            assert inp.lower() in self.reference_inputs, f"{inp} is not a valid feature"
+            assert inp.lower() in self.database_inputs, f"{inp} is not a valid feature"
         self.inputs = inputs
         assert Output.lower() in self.reference_outpus, f"{Output} is not a valid output"
         self.Output = Output
         self.input_indices = []
-        self.map_inputs()
+        self._map_inputs()
         self.n_channels = len(inputs)
 
         assert sample_per_case <= self.n_dim, "The number of values per case is greater than the maximum number of values available"
@@ -235,17 +245,113 @@ class ReadInput:
         self.X = {}
         self.Y = {}
 
-    def map_inputs(self):
+# ********************************************************************
+#                           Public members
+# ********************************************************************
+
+    def read_data(self, out_log_scale:bool=True, num_inp_files:int=None, out_clip_values:list[float]=None):
+        """read data in database folder
+
+        Args:
+            out_log_scale (bool, optional): Use log scale for output. Defaults to True.
+            num_inp_files (int, optional): Take a random sub set of database of num_inp_files. If None, takes all the files present
+            out_clip_values (list[float], optional): list clip values ([min clip, max clip]) for output. Defaults to None.
+        """
+ 
+        path_to_database = self._database_path()
+        self.file_list = [f for f in listdir(path_to_database) if isfile(join(path_to_database, f))]
+
+        if num_inp_files != None:
+            self._sample_files(num_inp_files=num_inp_files)
+
+        #Initialize input and output dictionary to empty lists
+        self._initialize_input_output()
+
+        for f in self.file_list:
+            if f.split('_')[0] == "0":
+                self._process_data(file=f, 
+                                 path=os.path.join(path_to_database , f), 
+                                 out_log_scale=out_log_scale, 
+                                 samples_per_file=self.n_samples,
+                                 out_clip_values=out_clip_values)
+
+        # Permutation
+        self.shuffle()
+        return
+
+    def read_data_from_file(self, files:list[str], out_log_scale=True,out_clip_values:list[float]=None):
+        """read data present in files list in the database folder
+
+
+        Args:
+            files (list[str]): list of files to be read, e.g., ['0_10_1_1100', '0_20_1_1100', ...]
+            out_log_Scale (bool, optional): Use log scale for output. Defaults to True.
+            out_clip_values (list[float], optional): list clip values ([min clip, max clip]) for output. Defaults to None.
+        """        
+    
+        path_to_database = self._database_path()
+        #Initialize input dictionary to empty lists
+        self._initialize_input_output()
+        for f in files:
+            self._process_data(f, path=os.path.join(path_to_database , f), 
+                                samples_per_file=self.n_samples,
+                                out_log_scale=out_log_scale,
+                                out_clip_values=out_clip_values)
+        return
+
+    def shuffle(self):
+        """Randomize input and output order
+        """        
+        shuffle = torch.randperm(self.Y[self.Output].size()[0])
+        for key in self.X:
+            self.X[key] = self.X[key][shuffle]
+        
+        self.Y[self.Output] = self.Y[self.Output][shuffle]
+        # print(f"Y size {self.Y[self.Output].size()}")
+
+    def split_train_val(self, perc:float=0.85)->tuple[tuple[dict[str,torch.tensor], dict[str,torch.tensor]], tuple[dict[str,torch.tensor], dict[str,torch.tensor]]]:
+        """Split into train and validation set
+
+        Args:
+            perc (float, optional): Percentage for train set. Defaults to 0.85.
+
+        Returns:
+            tuple[tuple[dict[str,torch.tensor], dict[str,torch.tensor]], tuple[dict[str,torch.tensor], dict[str,torch.tensor]]]: 
+            returns two tuples of (input training, output training)  and (input validation, output validation) 
+        """        
+        n_train = int(len(self.Y[self.Output])*perc)
+        # print(f"N TRAIN: {n_train}")
+
+        XTrain = {}
+        XVal = {}
+        for key in self.X:
+            XTrain[key] = self.X[key][0:n_train]
+            XVal[key] = self.X[key][n_train:]
+
+
+        YTrain = {}
+        YVal = {}
+        YTrain[self.Output] = self.Y[self.Output][:n_train]
+        YVal[self.Output] = self.Y[self.Output][n_train:]
+
+        
+        return (XTrain, YTrain), (XVal, YVal)
+
+
+# ********************************************************************
+#                           Private members
+# ********************************************************************
+
+    def _map_inputs(self):
         list_of_ind = []
         i = 1
-        for inp in self.reference_inputs:
+        for inp in self.database_inputs:
             if inp in self.inputs:
                 list_of_ind.append(i)
             i += 1
         self.input_indices = list_of_ind
 
-
-    def LH_sampling(self, n_samples:int)->list[int]:
+    def _LH_sampling(self, n_samples:int)->list[int]:
         """Quasi Monte Carlo samping over mesh indices
 
         Args:
@@ -257,10 +363,10 @@ class ReadInput:
         sampler = qmc.LatinHypercube(d=3)
         low = [0,0,0]
         sample = sampler.integers(l_bounds=low, u_bounds=self.mesh_dim, n=n_samples)
-        ind_sample = self.get_index(sample)
+        ind_sample = self._get_index(sample)
         return ind_sample
 
-    def get_index(self, sample:list[list[int]])->list[int]:
+    def _get_index(self, sample:list[list[int]])->list[int]:
         """Transform [i,j,k] indices into array index
 
         Args:
@@ -270,103 +376,46 @@ class ReadInput:
             list[int]: array indices of LH sampling
         """
         return [   (self.mesh_dim[1]*self.mesh_dim[2])*ind_coord[0] + self.mesh_dim[2]*ind_coord[1] + ind_coord[2] for ind_coord in sample ]
-
-
-    def read_data(self, out_log_scale:bool=True, num_inp_files:int=None, out_clip_values:list[float]=None):
-        """read data in database folder
-
-        Args:
-            out_log_scale (bool, optional): Use log scale for output. Defaults to True.
-            num_inp_files (int, optional): Take a random sub set of database of num_inp_files. If None, takes all the files present
-            out_clip_values (list[float], optional): list clip values ([min clip, max clip]) for output. Defaults to None.
-        """
- 
-        path_to_database = self.database_path()
-        self.file_list = [f for f in listdir(path_to_database) if isfile(join(path_to_database, f))]
-
-        if num_inp_files != None:
-            self.sample_files(num_inp_files=num_inp_files)
-
-        #Initialize input and output dictionary to empty lists
-        self.initialize_input_output()
-
-        for f in self.file_list:
-            if f.split('_')[0] == "0":
-                self.process_data(file=f, 
-                                 path=os.path.join(path_to_database , f), 
-                                 out_log_scale=out_log_scale, 
-                                 samples_per_file=self.n_samples,
-                                 out_clip_values=out_clip_values)
-
-        # Permutation
-        self.shuffle()
-        return
-
-    def read_data_from_file(self, files:list[str], out_log_Scale=True,out_clip_values:list[float]=None):
-        """read data present in files list in the database folder
-
-
-        Args:
-            files (list[str]): list of files to be read, e.g., ['0_10_1_1100', '0_20_1_1100', ...]
-            out_log_Scale (bool, optional): Use log scale for output. Defaults to True.
-            out_clip_values (list[float], optional): list clip values ([min clip, max clip]) for output. Defaults to None.
-        """        
     
-        path_to_database = self.database_path()
-        #Initialize input dictionary to empty lists
-        self.initialize_input_output()
-        for f in files:
-            self.process_data(f, path=os.path.join(path_to_database , f), out_log_scale=out_log_Scale,
-                              out_clip_values=out_clip_values)
-        return
-
-    def database_path(self)->str:
+    def _database_path(self)->str:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         relative_path = ".."
         return os.path.join(current_dir, relative_path, self.path)
     
-    def initialize_input_output(self):
+    def _initialize_input_output(self):
         for names in self.inputs:
             self.X[names] = None
         self.Y[self.Output] = None
         return
 
-    def sample_files(self, num_inp_files):
+    def _sample_files(self, num_inp_files):
         indices = random.sample(range(1, len(self.file_list)), num_inp_files)
         files = [ self.file_list[i] for i in indices ]
-        # TestFiles = [ self.file_list[i]  for i in range(0, len(self.file_list)) if i not in indices ]
-        # self.write_test_files(TestFiles)
         self.file_list = files
         return      
 
-    def write_test_files(self, TestFiles):
-        fout = open("TestFiles.txt","w")
-        for f in TestFiles:
-            fout.write(f+"\n")
-        fout.close()  
-
-
-    def process_data(self, file:str, path:str, out_log_scale:bool=True, 
+    def _process_data(self, file:str, path:str, out_log_scale:bool=True, 
                      samples_per_file:int=None, 
                      out_clip_values:list[float]=None):
         
-        if samples_per_file!=None:
-            lhs_indices = self.LH_sampling(samples_per_file)
+        
+        if samples_per_file!=None and samples_per_file < self.n_dim:
+            lhs_indices = self._LH_sampling(samples_per_file)
         else:
             lhs_indices = None
         
-        arr = self.get_item(path)
+        arr = self._get_item(path)
         
         # Make output
         out_arr = arr[0:self.n_dim]
-        msk_ind = self.process_output(out_arr, out_log_scale, lhs_indices, out_clip_values)
+        msk_ind = self._process_output(out_arr, out_log_scale, lhs_indices, out_clip_values)
         
         # Make inputs
-        self.process_input(arr, file, lhs_indices, msk_ind)
+        self._process_input(arr, file, lhs_indices, msk_ind)
         
         return
 
-    def process_output(self, out_arr:np.array, out_log_scale:bool, 
+    def _process_output(self, out_arr:np.array, out_log_scale:bool, 
                        lhs_indices:None, out_clip_values:list[float]=None) -> list[int]:
         """Process the output data from one file in the database.
         The processing is made through:
@@ -412,7 +461,7 @@ class ReadInput:
         
         return msk_ind
 
-    def process_input(self, arr:np.array, file:str, lhs_indices:list[int]=None,
+    def _process_input(self, arr:np.array, file:str, lhs_indices:list[int]=None,
                       msk_ind:list[int]=None):  
         
         # MAKE INPUT
@@ -426,7 +475,7 @@ class ReadInput:
             else:
                 tensor = torch.from_numpy(input_arr)
 
-            name = self.reference_inputs[i-1]
+            name = self.database_inputs[i-1]
 
             # Latin hypercube sampling
             if lhs_indices != None:
@@ -440,18 +489,8 @@ class ReadInput:
             else:
                 self.X[name] = tensor
         return
-
-    def shuffle(self):
-        """Randomize input and output order
-        """        
-        shuffle = torch.randperm(self.Y[self.Output].size()[0])
-        for key in self.X:
-            self.X[key] = self.X[key][shuffle]
-        
-        self.Y[self.Output] = self.Y[self.Output][shuffle]
-        # print(f"Y size {self.Y[self.Output].size()}")
-
-    def get_item(self, fn:str) -> np.array:
+    
+    def _get_item(self, fn:str) -> np.array:
         """Binary file reader
 
         Args:
@@ -464,32 +503,3 @@ class ReadInput:
         a = array.array('f')
         a.fromfile(open(fn, 'rb'), os.path.getsize(fn) // a.itemsize)
         return  np.copy(a)
-
-    def split_train_val(self, perc:float=0.85)->tuple[tuple[dict[str,torch.tensor], dict[str,torch.tensor]], tuple[dict[str,torch.tensor], dict[str,torch.tensor]]]:
-        """Split into train and validation set
-
-        Args:
-            perc (float, optional): Percentage for train set. Defaults to 0.85.
-
-        Returns:
-            tuple[tuple[dict[str,torch.tensor], dict[str,torch.tensor]], tuple[dict[str,torch.tensor], dict[str,torch.tensor]]]: 
-            returns two tuples of (input training, output training)  and (input validation, output validation) 
-        """        
-        n_train = int(len(self.Y[self.Output])*perc)
-        # print(f"N TRAIN: {n_train}")
-
-        XTrain = {}
-        XVal = {}
-        for key in self.X:
-            XTrain[key] = self.X[key][0:n_train]
-            XVal[key] = self.X[key][n_train:]
-
-
-        YTrain = {}
-        YVal = {}
-        YTrain[self.Output] = self.Y[self.Output][:n_train]
-        YVal[self.Output] = self.Y[self.Output][n_train:]
-
-        
-        return (XTrain, YTrain), (XVal, YVal)
-

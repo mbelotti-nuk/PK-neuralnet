@@ -1,18 +1,41 @@
+#
+# 'trainpknn' permits to train a neural network from a specific database [see documentation]
+#
+# From the training, a folder will be created in which there will be stored:
+# 1. The neural network as a '.pt' format ( the 'checkpoint.pt' file, represent the last best performing neural network from the training process)
+# 2. The scaler, which handles scaling processes for input and output, saved as a '.pickle' file
+# 3. Images representing the Error on the test set, the behaviour of loss and accuracy terms
+#
+
+# Path in which the folder containing the results will be created
 save_directory: ""
 
-# Inputs
+
+# Neural network Inputs
 inputs: ['energy', 'dist_source_tally','dist_shield_tally','mfp','theta','fi']
+
+# Inputs that are present in the database files.
+# This input should be specified in case the inputs variable map a subset of the actual database input set.
+database_inputs: null
+  
+# Scaling type for each input
 inp_scaletype: {'energy': 'minmax', 'dist_source_tally': 'std', 'dist_shield_tally': 'std', 'mfp': 'std', 'theta': 'std', 'fi': 'std'}
 
-# Output
+
+# Neural newtork Output
 output: "B"
+# Output scaling type
 out_scaletype: {'B': 'std'}
+# Clip output to a [min, max]
+out_clip: [1, 1E+21]  
+# Use log-scale for training
 out_log_scale: True
-out_clip: [1, 1E+21]
 
 
 # Database specifications
-path_to_database: \\Users\\mario\\OneDrive\\Desktop\\UNED\\Phd\\PointKernelMethod\\NN\BenchMarkData\\CNN\\BData
+# Path pointing to the folder in which are stored database files
+path_to_database: \Users\mario\OneDrive\Desktop\UNED\Phd\PointKernelMethod\NN\BenchMarkData\CNN\BData
+# Number of voxels in X, Y, Z directions for the reference mesh in the database
 mesh_dim: [80,100,35]
 
 
@@ -41,8 +64,18 @@ batch_size: 2048
 n_epochs: 1
 patience: 10
 
+# Training metrics
+loss: "mse"
+accuracy: "l1"
+
+# Optimizer
 optimizer:
   type: "adamw"
   learning_rate: 0.001
   weight_decay: 0.001
 
+# Learning rate scheduler
+# ref: https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ReduceLROnPlateau.html
+lr_scheduler:
+  factor: 0.5 
+  patience: 5

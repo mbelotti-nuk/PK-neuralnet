@@ -1,7 +1,18 @@
+#
+# 'savepknn' permits to export the neural newtork saved a '.pt' model to a '.dat' format 
+# which can be read by NACARTE and used in SpaceClaim
+#
+#
+
+
+# Path in which the '.dat' model is saved
 save_path: ""
+# Name of the '.dat' file
 save_name: "PKDNN"
 
-path_to_model: "Model_output_B_fmaps_[6, 128, 64, 8]\\NNmodel.pt"
+
+# Path to the '.pt' neural network model
+path_to_model: \Users\mario\OneDrive\Desktop\UNED\Phd\PointKernelMethod\PKnn\examples\model_example\NNmodel.pt
 
 # DNN architecture
 # a list that gives to each layer the corresponing number of neurons

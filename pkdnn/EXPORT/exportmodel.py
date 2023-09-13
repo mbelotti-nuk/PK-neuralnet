@@ -4,7 +4,7 @@ import sys
 import os
 
 
-from ..NET.pkNN import PKNN
+from ..net.pk_nn import pknn
 import pickle
 from ..functionalities.config import load_config
 
@@ -17,7 +17,7 @@ def main():
         return
 
     try:
-        model = PKNN(config['f_maps']) 
+        model = pknn(config['f_maps']) 
         model.load_state_dict(torch.load(config["path_to_model"]))
     except Exception as e:
         print(e)
