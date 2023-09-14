@@ -1,6 +1,7 @@
 import os 
 import numpy as np  
 import array
+from typing import List as list
 
 class raw_reader:
 

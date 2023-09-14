@@ -8,13 +8,13 @@ import numpy as np
 from os import listdir
 from os.path import isfile, join
 from scipy.stats import qmc
-
+from typing import List as list, Dict as dict, Tuple, tuple
 
 class Dataset(Dataset):
     def __init__(self, X:dict[str,torch.tensor], Y:dict[str,torch.tensor]):
         self.X = X
         self.Y = Y
-        self.out_key = list(self.Y.keys())[0]
+        self.out_key = next(iter(self.Y)) 
 
     def __len__(self):
         return len(self.Y[self.out_key])
@@ -59,11 +59,11 @@ class Scaler:
 
         self.input_scale_type = input_scale_type
 
-        assert len(list(output_scale_type.keys())) < 2, "No more than one output is admitted"
+        assert len(output_scale_type.keys()) < 2, "No more than one output is admitted"
         self.output_scale_type = output_scale_type
 
         self.log_scale=log_scale
-        self.out_key = list(output_scale_type.keys())[0]
+        self.out_key = next(iter(output_scale_type)) 
         
         # Dictionaries containing scaling factors for each input feature
         # e.g., 

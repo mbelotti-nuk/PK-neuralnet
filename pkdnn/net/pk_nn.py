@@ -1,4 +1,5 @@
 from torch import nn
+from typing import List as list
 
 class pknn(nn.Module):
     """Deep Neural Network for Point Kernel applications

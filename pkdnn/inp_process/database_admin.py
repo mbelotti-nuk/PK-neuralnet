@@ -8,7 +8,7 @@ import os
 from numpy import linalg as LA
 import xml.etree.ElementTree as ET
 from multiprocessing import Pool
-
+from typing import List as list, Dict as dict
 
 class input_admin:
     """This class permits to calculate relevant values for the standard radiation configuration: 

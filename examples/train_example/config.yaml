@@ -42,7 +42,7 @@ mesh_dim: [80,100,35]
 # Training specifications
 #
 # n_files: number of files from database to be used in training.
-# if None, all the files are used
+# if null, all the files are used
 n_files: 200 #None
 #
 # samples_per_case: number of points used for training for each file of the database.
