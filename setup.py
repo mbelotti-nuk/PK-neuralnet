@@ -3,7 +3,6 @@
 
 from setuptools import setup, find_packages
 
-
 with open('README.md') as f:
     readme = f.read()
 
@@ -27,6 +26,8 @@ setup(
         'savepknn=pkdnn.export.exportmodel:main',
         'databasepknn=pkdnn.inp_process.build_database:main']
         },
+    py_version='>=3.8',
+    install_requires=['torch','seaborn'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest']
 )

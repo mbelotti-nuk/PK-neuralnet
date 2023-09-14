@@ -28,3 +28,16 @@ def load_config():
     args = parser.parse_args()
     config = load(args.config)
     return config
+
+
+
+def check_train_config(config):
+    entries = ["save_directory", "inputs", "database_inputs", "inp_scaletype",
+                "output", "out_scaletype", "out_clip", "out_log_scale", "path_to_database",
+                "mesh_dim", "n_files", "samples_per_case", "percentage", "f_maps", "batch_size",
+                "n_epochs", "patience", "loss", "accuracy", "optimizer", "lr_scheduler", "mixed_precision"]
+
+    for e in entries:
+        assert e in config, f"The entry {e} is missing in the .yaml file"
+
+

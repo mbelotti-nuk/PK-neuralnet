@@ -1,6 +1,6 @@
 import os
 from pkdnn.functionalities.graphics import kde_plot
-from pkdnn.functionalities.config import load_config
+from pkdnn.functionalities.config import load_config, check_train_config
 from pkdnn.net.trainFunctions import train_model
 from pkdnn.net.pk_nn import pknn
 from pkdnn.net.datamanager import Scaler, Dataset, Input_reader 
@@ -91,6 +91,7 @@ def main():
         print(f"Couldn't open config. file")
         return
 
+    check_train_config(config)
     
     device, save_path = set_environment(config)
 
@@ -134,7 +135,8 @@ def main():
     torch.manual_seed(0)
     pkdnn_model, train_loss, test_loss = train_model(
         model, train_dataset, validation_dataset, optimizer, device=device, epochs=config['n_epochs'], batch_size=config['batch_size'],
-        patience=config['patience'], save_path=save_path, loss=loss, accuracy=accuracy, lr_scheduler=config['lr_scheduler']
+        patience=config['patience'], save_path=save_path, loss=loss, accuracy=accuracy, lr_scheduler=config['lr_scheduler'],
+        mixed_precision=config['mixed_precision']
     )
     
 

@@ -36,91 +36,79 @@ def plot_results(train_loss_values, val_loss_values, train_acc_values, val_acc_v
 
 
 def print_scores(t0, train_loss, val_loss, train_acc, val_acc):
-    print("\tTrain Loss = " + str(train_loss), flush=True)
-    print("\tValidation Loss = " + str(val_loss), flush=True)
+    print("\ttrain loss = " + str(train_loss), flush=True)
+    print("\tvalidation loss = " + str(val_loss), flush=True)
     print("\n", flush=True)
-    print("\tTrain Accuracy = " + str(train_acc), flush=True)
-    print("\tValidation Accuracy = " + str(val_acc), flush=True)
+    print("\ttrain accuracy = " + str(train_acc), flush=True)
+    print("\tvalidation accuracy = " + str(val_acc), flush=True)
 
     print(f"\n|| Time epoch {time.time() - t0} s\n\n")
     return
 
-def fwd_calculation(X, y, model, loss_fn, acc_fn):
-    # Compute prediction and loss
-    pred =model(X)
-    loss = loss_fn(pred, y)
-    acc =  acc_fn(pred,y)
+def fwd_calculation(X, y, model, loss_fn, acc_fn, scaler=None):
+    if scaler != None:
+        with torch.cuda.amp.autocast():
+            pred =model(X)
+            loss = loss_fn(pred, y)
+            acc =  acc_fn(pred,y)
+    else:
+        # Compute prediction and loss
+        pred =model(X)
+        loss = loss_fn(pred, y)
+        acc =  acc_fn(pred,y)
+    # delete prediction tensor
     del pred
     return loss, acc
 
 
-def mixed_fwd_calculation(X, y, model, loss_fn, acc_fn):
-    with torch.cuda.amp.autocast():
-        pred =model(X)
-        loss = loss_fn(pred, y)
-        acc =  acc_fn(pred,y)
-        del pred
-    return loss, acc
+def to_device(tensors:torch.tensor, scope):
+    if "device" in scope and scope["device"] is not None:
+        if scope["device"] != "cpu":
+            tensors = [tensor.to(scope["device"], non_blocking=True) for tensor in tensors]
+        else:
+            tensors = [tensor.to(scope["device"]) for tensor in tensors]
+    x, y = tensors
+    return x, y    
 
 
 def epoch(scope, loader, training=False):
     
-    model = scope["model"]
-    optimizer = scope["optimizer"]
-
-    scaler = scope["scaler"]
-    scheduler = scope["scheduler"]
-    
-    loss_func = nn.MSELoss()
-    acc_func = nn.L1Loss()
+    model, optimizer = scope["model"], scope["optimizer"]    
+    loss_func, acc_func = scope["loss_func"], scope["acc_func"]
+    scaler, scheduler = scope["scaler"], scope["scheduler"]
 
     scope = copy.copy(scope)
-    scope["loader"] = loader
 
-    total_loss, total_acc, batches = 0, 0, 0
+    total_loss, total_acc, batches, size = 0, 0, 0, len(loader.dataset)
+
     if training:
         model.train()
     else:
         model.eval()
 
-    # batch accumulation parameter
-    accum_iter = 4 
- 
-    
+
     for batch_idx, tensors in enumerate(loader):
 
-        if "device" in scope and scope["device"] is not None:
-            if scope["device"] != "cpu":
-                tensors = [tensor.to(scope["device"], non_blocking=True) for tensor in tensors]
-            else:
-                tensors = [tensor.to(scope["device"]) for tensor in tensors]
+        x, y = to_device(tensors, scope)
         
-        x, y = tensors
-        
-       
-        if scaler != None:
-            loss, acc  = fwd_calculation(x, y, model, loss_func, acc_func)
-        else:
-            loss, acc  = mixed_fwd_calculation(x, y, model, loss_func, acc_func)
+        loss, acc  = fwd_calculation(x, y, model, loss_func, acc_func, scaler)
 
         if training:
-            # # normalize loss to account for batch accumulation
-            loss  = loss / accum_iter
             # backward pass
             if scaler != None:
                 scaler.scale(loss).backward()
+                scaler.step(optimizer)
+                scaler.update()
             else:
                 loss.backward()
+                optimizer.step()
             
             # weights update
-            if ((batch_idx + 1) % accum_iter == 0) or (batch_idx + 1 == len(loader)): 
-                if scaler != None:
-                    scaler.step(optimizer)
-                    scaler.update()
-                else:
-                    optimizer.step()
+            optimizer.zero_grad()
 
-                optimizer.zero_grad()
+            if batch_idx % 10000 == 0:
+                this_loss, this_acc, this_current = loss.item(), acc.item(), (batch_idx + 1) * len(x)
+                print(f"loss: {this_loss:>7f} acc:{this_acc:>7f} [{this_current:>5d}/{size:>5d}]")
         
         
         total_loss += loss.item() * x.size(0)
@@ -161,51 +149,52 @@ def train(scope, train_dataset:Dataset, val_dataset:Dataset,
 
     epochs = scope["epochs"]
     model = scope["model"]
-    scope = copy.copy(scope)
-    scope["best_train_loss"] = float("inf")
-    scope["best_val_loss"] = float("inf")
+    scope["best_train_loss"], scope["best_val_loss"]  = float("inf"), float("inf")
     scope["best_model"] = None
 
-    # Build dataloaders for training
+    scope = copy.copy(scope)
+
+    # Build dataloaders for training and validation
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False) 
     
     # Begin training
     skips = 0
     for epoch_id in range(1, epochs + 1):
-        scope["epoch"] = epoch_id
-        print("Epoch #" + str(epoch_id), flush=True)
-        # Training
-        scope["dataset"] = train_dataset
 
+        scope["epoch"] = epoch_id
+        print(f"Epoch # {epoch_id}\n-------------------------------", flush=True)
+        
         t0 = time.time()
 
+        # ============================================================
+        # Training
         train_loss, train_acc = epoch(scope, train_loader,  training=True)
-
-        scope["train_loss"] = train_loss
         train_loss_values.append( train_loss )
         train_acc_values.append( train_acc )         
-        
-        del scope["dataset"]
+        # ============================================================
+
+
+        # ============================================================
         # Validation
-        scope["dataset"] = val_dataset
         with torch.no_grad():
             val_loss, val_acc = epoch(scope, val_loader, training=False)
-        scope["val_loss"] = val_loss
-
-        print_scores(t0, train_loss, val_loss, train_acc, val_acc)
-
         val_loss_values.append( val_loss )
         val_acc_values.append( val_acc )
+        # ============================================================
+        
+        print_scores(t0, train_loss, val_loss, train_acc, val_acc)
 
-        del scope["dataset"]
-        # Selection
+
+        # ============================================================
+        # Check performance
         is_best = None
         if is_best is None:
             is_best = val_loss < scope["best_val_loss"]
         if is_best:
-            scope["best_train_loss"] = train_loss
-            scope["best_val_loss"] = val_loss
+            # Save metrics
+            scope["best_train_loss"], scope["best_val_loss"]   = train_loss, val_loss
+            # Save model
             scope["best_model"] = copy.deepcopy(model)
             print("Model saved!", flush=True)
             skips = 0
@@ -215,12 +204,14 @@ def train(scope, train_dataset:Dataset, val_dataset:Dataset,
         if early_stopping.early_stop:
             print("Early stopping", flush=True)
             break
-        
+        # ============================================================
+
+
     plot_results(train_loss_values, val_loss_values, train_acc_values, val_acc_values, save_path=save_path) 
     print(f"Best score: Loss: {np.min(val_loss_values)}   Accuracy: {np.min(val_acc_values)}")
 
-
     return scope["best_model"],  scope["best_train_loss"], scope["best_val_loss"]
+
 
 def train_model(model, train_dataset:Dataset, val_dataset:Dataset, 
                 optimizer, mixed_precision:bool=True, scheduler:bool=True, 
@@ -243,6 +234,7 @@ def train_model(model, train_dataset:Dataset, val_dataset:Dataset,
         scope["scaler"] = torch.cuda.amp.GradScaler()
     else:
         scope["scaler"] = None
+        
     if scheduler:
         scope["scheduler"] = torch.optim.lr_scheduler.ReduceLROnPlateau( optimizer, 'min', factor=lr_scheduler['factor'], patience=lr_scheduler['patience'] )
     else:

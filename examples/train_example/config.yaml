@@ -79,3 +79,5 @@ optimizer:
 lr_scheduler:
   factor: 0.5 
   patience: 5
+
+mixed_precision: True
