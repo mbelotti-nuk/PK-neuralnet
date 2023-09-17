@@ -338,7 +338,7 @@ class input_admin:
 
 
 
-class database_admin:
+class database_maker:
     """Read a raw MCNP file to extract input/output informations. The aim of this class is to create binary database file. 
     """    
     def __init__(self, inp_adm:input_admin, reader:raw_reader, 

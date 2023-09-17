@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pkdnn.export.exportsd &mdash; Point Kernel DNN 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Point Kernel DNN
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">pkdnn</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Point Kernel DNN</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pkdnn.export.exportsd</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pkdnn.export.exportsd</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1"># Copyright (c) .NET Foundation and Contributors.  All Rights Reserved.  See LICENSE in the project root for license information.</span>
+<span class="c1">#</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">leb128</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">_elem_type</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">dtype</span>
+
+    <span class="k">if</span> <span class="n">dt</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">uint8</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">dt</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">int8</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">dt</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">int16</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">2</span>
+    <span class="k">elif</span> <span class="n">dt</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">3</span>
+    <span class="k">elif</span> <span class="n">dt</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">4</span>
+    <span class="k">elif</span> <span class="n">dt</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">5</span>
+    <span class="k">elif</span> <span class="n">dt</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">6</span>
+    <span class="k">elif</span> <span class="n">dt</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">7</span>
+    <span class="k">elif</span> <span class="n">dt</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">11</span>
+    <span class="k">elif</span> <span class="n">dt</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">bfloat16</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">15</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">4711</span>
+
+<span class="k">def</span> <span class="nf">_write_tensor</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+    <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">leb128</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">_elem_type</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">leb128</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">leb128</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+    <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+
+<div class="viewcode-block" id="save_state_dict"><a class="viewcode-back" href="../../../pkdnn.export.html#pkdnn.export.exportsd.save_state_dict">[docs]</a><span class="k">def</span> <span class="nf">save_state_dict</span><span class="p">(</span><span class="n">sd</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Saves a PyToch state dictionary using the format that TorchSharp can</span>
+<span class="sd">    read.</span>
+
+<span class="sd">    :param sd: A dictionary produced by &#39;model.state_dict()&#39;</span>
+<span class="sd">    :param stream: An write stream opened for binary I/O.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">leb128</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sd</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">sd</span><span class="p">:</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">leb128</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">entry</span><span class="p">)))</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+        <span class="n">_write_tensor</span><span class="p">(</span><span class="n">sd</span><span class="p">[</span><span class="n">entry</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">_write_encoded_int64</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+    <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">leb128</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">_write_optim_name</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">),</span><span class="n">stream</span><span class="p">)</span>
+    <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">_write_bool</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+    <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;little&#39;</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">_write_int32</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+    <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;little&#39;</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">_write_int64</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+    <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;little&#39;</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">_write_conditional_state_tensor</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">state</span><span class="p">:</span>
+        <span class="n">_write_bool</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>                
+        <span class="n">buf</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">buf</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_write_bool</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_write_bool</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_tensor</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
+
+<div class="viewcode-block" id="save_sgd"><a class="viewcode-back" href="../../../pkdnn.export.html#pkdnn.export.exportsd.save_sgd">[docs]</a><span class="k">def</span> <span class="nf">save_sgd</span><span class="p">(</span><span class="n">optim</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+
+    <span class="n">_write_optim_name</span><span class="p">(</span><span class="s1">&#39;SGD&#39;</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="c1"># Write options</span>
+
+    <span class="k">for</span> <span class="n">pg</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>        
+        <span class="n">floats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;momentum&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;dampening&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;weight_decay&#39;</span><span class="p">]</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">floats</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+        <span class="n">_write_bool</span><span class="p">(</span><span class="n">pg</span><span class="p">[</span><span class="s1">&#39;nesterov&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+        <span class="n">_write_bool</span><span class="p">(</span><span class="n">pg</span><span class="p">[</span><span class="s1">&#39;maximize&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="c1"># Write state</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]:</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+            <span class="n">_write_conditional_state_tensor</span><span class="p">(</span><span class="s1">&#39;momentum_buffer&#39;</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>           </div>
+
+<div class="viewcode-block" id="save_asgd"><a class="viewcode-back" href="../../../pkdnn.export.html#pkdnn.export.exportsd.save_asgd">[docs]</a><span class="k">def</span> <span class="nf">save_asgd</span><span class="p">(</span><span class="n">optim</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+
+    <span class="n">_write_optim_name</span><span class="p">(</span><span class="s1">&#39;ASGD&#39;</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="c1"># Write options</span>
+
+    <span class="k">for</span> <span class="n">pg</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>        
+        <span class="n">floats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">floats</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+        <span class="n">_write_bool</span><span class="p">(</span><span class="n">pg</span><span class="p">[</span><span class="s1">&#39;maximize&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+        <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lambd&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;weight_decay&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;t0&#39;</span><span class="p">]</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">floats</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+
+    <span class="c1"># Write state</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]:</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+            <span class="n">_write_int64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()),</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+            <span class="n">floats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="p">[</span><span class="s1">&#39;eta&#39;</span><span class="p">]</span>       
+            <span class="n">floats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="p">[</span><span class="s1">&#39;mu&#39;</span><span class="p">]</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">floats</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+            <span class="n">_write_tensor</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;ax&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="save_rprop"><a class="viewcode-back" href="../../../pkdnn.export.html#pkdnn.export.exportsd.save_rprop">[docs]</a><span class="k">def</span> <span class="nf">save_rprop</span><span class="p">(</span><span class="n">optim</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+
+    <span class="n">_write_optim_name</span><span class="p">(</span><span class="s1">&#39;Rprop&#39;</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="c1"># Write options</span>
+
+    <span class="k">for</span> <span class="n">pg</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>        
+        <span class="n">floats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">floats</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+        <span class="n">_write_bool</span><span class="p">(</span><span class="n">pg</span><span class="p">[</span><span class="s1">&#39;maximize&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+        <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">etaminus</span><span class="p">,</span> <span class="n">etaplus</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;etas&#39;</span><span class="p">]</span>
+        <span class="n">min_step</span><span class="p">,</span> <span class="n">max_step</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;step_sizes&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">etaminus</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">etaplus</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">min_step</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_step</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">floats</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+
+    <span class="c1"># Write state</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]:</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+            <span class="n">_write_int64</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_tensor</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;prev&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_tensor</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;step_size&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="save_rmsprop"><a class="viewcode-back" href="../../../pkdnn.export.html#pkdnn.export.exportsd.save_rmsprop">[docs]</a><span class="k">def</span> <span class="nf">save_rmsprop</span><span class="p">(</span><span class="n">optim</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+
+    <span class="n">_write_optim_name</span><span class="p">(</span><span class="s1">&#39;RMSProp&#39;</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="c1"># Write options</span>
+
+    <span class="k">for</span> <span class="n">pg</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>        
+        <span class="n">floats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">floats</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+        <span class="n">_write_bool</span><span class="p">(</span><span class="n">pg</span><span class="p">[</span><span class="s1">&#39;maximize&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+        <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;momentum&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;eps&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;weight_decay&#39;</span><span class="p">]</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">floats</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+        <span class="n">_write_bool</span><span class="p">(</span><span class="n">pg</span><span class="p">[</span><span class="s1">&#39;centered&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="c1"># Write state</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]:</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+            <span class="n">_write_int64</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_tensor</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;square_avg&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_conditional_state_tensor</span><span class="p">(</span><span class="s1">&#39;momentum_buffer&#39;</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_conditional_state_tensor</span><span class="p">(</span><span class="s1">&#39;grad_avg&#39;</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="save_adam"><a class="viewcode-back" href="../../../pkdnn.export.html#pkdnn.export.exportsd.save_adam">[docs]</a><span class="k">def</span> <span class="nf">save_adam</span><span class="p">(</span><span class="n">optim</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+
+    <span class="n">_write_optim_name</span><span class="p">(</span><span class="s1">&#39;Adam&#39;</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="c1"># Write options</span>
+
+    <span class="k">for</span> <span class="n">pg</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>        
+        <span class="n">floats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>
+        <span class="n">beta1</span><span class="p">,</span> <span class="n">beta2</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;betas&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">beta1</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">beta2</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;eps&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;weight_decay&#39;</span><span class="p">]</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">floats</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+        <span class="n">_write_bool</span><span class="p">(</span><span class="n">pg</span><span class="p">[</span><span class="s1">&#39;amsgrad&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+        <span class="n">_write_bool</span><span class="p">(</span><span class="n">pg</span><span class="p">[</span><span class="s1">&#39;maximize&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="c1"># Write state</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]:</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+            <span class="n">_write_int64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()),</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_tensor</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;exp_avg&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_tensor</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;exp_avg_sq&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_conditional_state_tensor</span><span class="p">(</span><span class="s1">&#39;max_exp_avg_sq&#39;</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="save_adamw"><a class="viewcode-back" href="../../../pkdnn.export.html#pkdnn.export.exportsd.save_adamw">[docs]</a><span class="k">def</span> <span class="nf">save_adamw</span><span class="p">(</span><span class="n">optim</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+
+    <span class="n">_write_optim_name</span><span class="p">(</span><span class="s1">&#39;AdamW&#39;</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="c1"># Write options</span>
+
+    <span class="k">for</span> <span class="n">pg</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>        
+        <span class="n">floats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>
+        <span class="n">beta1</span><span class="p">,</span> <span class="n">beta2</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;betas&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">beta1</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">beta2</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;eps&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;weight_decay&#39;</span><span class="p">]</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">floats</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+        <span class="n">_write_bool</span><span class="p">(</span><span class="n">pg</span><span class="p">[</span><span class="s1">&#39;amsgrad&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+        <span class="n">_write_bool</span><span class="p">(</span><span class="n">pg</span><span class="p">[</span><span class="s1">&#39;maximize&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="c1"># Write state</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]:</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+            <span class="n">_write_int64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()),</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_tensor</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;exp_avg&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_tensor</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;exp_avg_sq&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_conditional_state_tensor</span><span class="p">(</span><span class="s1">&#39;max_exp_avg_sq&#39;</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="save_nadam"><a class="viewcode-back" href="../../../pkdnn.export.html#pkdnn.export.exportsd.save_nadam">[docs]</a><span class="k">def</span> <span class="nf">save_nadam</span><span class="p">(</span><span class="n">optim</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+
+    <span class="n">_write_optim_name</span><span class="p">(</span><span class="s1">&#39;NAdam&#39;</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="c1"># Write options</span>
+
+    <span class="k">for</span> <span class="n">pg</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>        
+        <span class="n">floats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>
+        <span class="n">beta1</span><span class="p">,</span> <span class="n">beta2</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;betas&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">beta1</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">beta2</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;eps&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;weight_decay&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;momentum_decay&#39;</span><span class="p">]</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">floats</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+
+    <span class="c1"># Write state</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]:</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+            <span class="n">_write_int64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()),</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+            <span class="n">floats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;mu_product&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>       
+            <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">floats</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+            <span class="n">_write_tensor</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;exp_avg&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_tensor</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;exp_avg_sq&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="save_radam"><a class="viewcode-back" href="../../../pkdnn.export.html#pkdnn.export.exportsd.save_radam">[docs]</a><span class="k">def</span> <span class="nf">save_radam</span><span class="p">(</span><span class="n">optim</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+
+    <span class="n">_write_optim_name</span><span class="p">(</span><span class="s1">&#39;RAdam&#39;</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="c1"># Write options</span>
+
+    <span class="k">for</span> <span class="n">pg</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>        
+        <span class="n">floats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>
+        <span class="n">beta1</span><span class="p">,</span> <span class="n">beta2</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;betas&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">beta1</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">beta2</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;eps&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;weight_decay&#39;</span><span class="p">]</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">floats</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+
+    <span class="c1"># Write state</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]:</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+            <span class="n">_write_int64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()),</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_tensor</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;exp_avg&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_tensor</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;exp_avg_sq&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="save_adamax"><a class="viewcode-back" href="../../../pkdnn.export.html#pkdnn.export.exportsd.save_adamax">[docs]</a><span class="k">def</span> <span class="nf">save_adamax</span><span class="p">(</span><span class="n">optim</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+
+    <span class="n">_write_optim_name</span><span class="p">(</span><span class="s1">&#39;Adamax&#39;</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="c1"># Write options</span>
+
+    <span class="k">for</span> <span class="n">pg</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>        
+        <span class="n">floats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>
+        <span class="n">beta1</span><span class="p">,</span> <span class="n">beta2</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;betas&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">beta1</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">beta2</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;eps&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;weight_decay&#39;</span><span class="p">]</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">floats</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+
+    <span class="c1"># Write state</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]:</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+            <span class="n">_write_int64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()),</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_tensor</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;exp_avg&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_tensor</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;exp_inf&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="save_adadelta"><a class="viewcode-back" href="../../../pkdnn.export.html#pkdnn.export.exportsd.save_adadelta">[docs]</a><span class="k">def</span> <span class="nf">save_adadelta</span><span class="p">(</span><span class="n">optim</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+
+    <span class="n">_write_optim_name</span><span class="p">(</span><span class="s1">&#39;Adadelta&#39;</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="c1"># Write options</span>
+
+    <span class="k">for</span> <span class="n">pg</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>        
+        <span class="n">floats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;rho&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;eps&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;weight_decay&#39;</span><span class="p">]</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">floats</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+        <span class="n">_write_bool</span><span class="p">(</span><span class="n">pg</span><span class="p">[</span><span class="s1">&#39;maximize&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="c1"># Write state</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]:</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+            <span class="n">_write_int64</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_tensor</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;square_avg&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_tensor</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;acc_delta&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="save_adagrad"><a class="viewcode-back" href="../../../pkdnn.export.html#pkdnn.export.exportsd.save_adagrad">[docs]</a><span class="k">def</span> <span class="nf">save_adagrad</span><span class="p">(</span><span class="n">optim</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+
+    <span class="n">_write_optim_name</span><span class="p">(</span><span class="s1">&#39;Adagrad&#39;</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+    <span class="n">_write_encoded_int64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="c1"># Write options</span>
+
+    <span class="k">for</span> <span class="n">pg</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="n">floats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>        
+        <span class="n">floats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;lr_decay&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;initial_accumulator_value&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;eps&#39;</span><span class="p">]</span>
+        <span class="n">floats</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">pg</span><span class="p">[</span><span class="s1">&#39;weight_decay&#39;</span><span class="p">]</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">floats</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+
+    <span class="c1"># Write state</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">optim</span><span class="o">.</span><span class="n">param_groups</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]:</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+            <span class="n">_write_int64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()),</span> <span class="n">stream</span><span class="p">)</span>
+            <span class="n">_write_tensor</span><span class="p">(</span><span class="n">st</span><span class="p">[</span><span class="s1">&#39;sum&#39;</span><span class="p">],</span> <span class="n">stream</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Mario Belotti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

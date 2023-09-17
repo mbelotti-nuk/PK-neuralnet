@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pkdnn.inp_process.database &mdash; Point Kernel DNN 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Point Kernel DNN
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">pkdnn</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Point Kernel DNN</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pkdnn.inp_process.database</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pkdnn.inp_process.database</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">qmc</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">from</span> <span class="nn">.binaryreader</span> <span class="kn">import</span> <span class="n">raw_reader</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">linalg</span> <span class="k">as</span> <span class="n">LA</span>
+<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">ET</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Pool</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span> <span class="k">as</span> <span class="nb">list</span><span class="p">,</span> <span class="n">Dict</span> <span class="k">as</span> <span class="nb">dict</span>
+
+<div class="viewcode-block" id="input_admin"><a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.input_admin">[docs]</a><span class="k">class</span> <span class="nc">input_admin</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This class permits to calculate relevant values for the standard radiation configuration: </span>
+<span class="sd">    point radiaiton source ||   wall   || tallies.</span>
+<span class="sd">    &quot;&quot;&quot;</span>     
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plane_normal</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">ro</span><span class="p">:</span><span class="nb">float</span> <span class="p">,</span><span class="n">mass_fraction</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">atomic_number</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">path_to_dose_conversion</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">path_to_mass_att_coeff</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                 <span class="n">energy</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plane_coords</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>    
+        <span class="sd">&quot;&quot;&quot;calculate relevant values for the standard radiation configuration: </span>
+<span class="sd">        point radiaiton source ||   wall   || tallies.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            plane_normal (np.array): normalized vector indicating the normale to the wall surface</span>
+<span class="sd">            ro (float): density of the wall&#39;s material</span>
+<span class="sd">            mass_fraction (list[float], optional): list of the fraction of each element into the materials&#39; wall. Defaults to None.</span>
+<span class="sd">            atomic_number (list[int], optional): list of the atomic number of each element into the materials&#39; wall. Defaults to None.</span>
+<span class="sd">            path_to_dose_conversion (str, optional): absolute path to dose conversion factors file. .</span>
+<span class="sd">            path_to_mass_att_coeff (str, optional): absolute path to mass attenuation coefficients file.</span>
+<span class="sd">            energy (float, optional):energy of the point radiation source. Defaults to None.</span>
+<span class="sd">            plane_coords (list[float], optional): coordinates of the planes of the wall. Defaults to None.</span>
+
+
+<span class="sd">        &quot;&quot;&quot;</span>    
+
+
+<span class="c1">#           The standard configuration with its reference system is like:</span>
+<span class="c1">#                                          </span>
+<span class="c1">#                                           Wall</span>
+<span class="c1">#                      point                 ___</span>
+<span class="c1">#                      source               |   |                  Tallies</span>
+<span class="c1">#    ^ Z                                    |   |                ___________</span>
+<span class="c1">#    |                   *                  |   |               |__|__|__|__|</span>
+<span class="c1">#    |                                      |   |               |__|__|__|__|   </span>
+<span class="c1">#    |--------&gt;                             |   |               |__|__|__|__|</span>
+<span class="c1">#              Y                            |___|</span>
+<span class="c1">#                                          p0   p1</span>
+
+
+        <span class="c1"># Parameters characterizing wall material</span>
+        <span class="c1"># Default to concrete values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mass_fraction</span> <span class="o">=</span> <span class="n">mass_fraction</span> <span class="k">if</span> <span class="n">mass_fraction</span> <span class="o">!=</span> <span class="kc">None</span> \
+            <span class="k">else</span> <span class="p">[</span><span class="mf">0.0056</span><span class="p">,</span> <span class="mf">0.497500</span><span class="p">,</span> <span class="mf">0.017100</span><span class="p">,</span> <span class="mf">0.002600</span><span class="p">,</span> <span class="mf">0.046900</span><span class="p">,</span> <span class="mf">0.314700</span><span class="p">,</span> <span class="mf">0.001300</span><span class="p">,</span> <span class="mf">0.019200</span><span class="p">,</span> <span class="mf">0.082800</span><span class="p">,</span> <span class="mf">0.012400</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomic_number</span> <span class="o">=</span> <span class="n">atomic_number</span> <span class="k">if</span> <span class="n">atomic_number</span> <span class="o">!=</span> <span class="kc">None</span> \
+            <span class="k">else</span> <span class="p">[</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">26</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ro</span> <span class="o">=</span> <span class="n">ro</span>
+
+        <span class="c1"># Energy bins and relative values of dose conversion factor</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path_to_dose_conversion</span><span class="p">),</span> <span class="s2">&quot;Dose conversion factor file was not found&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cv_energies</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cvs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data</span><span class="p">(</span><span class="n">path_to_dose_conversion</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># [ (pSv) /(gamma/cm^2) ]</span>
+        <span class="c1"># Absolute path to mass attenuation coefficients</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path_to_mass_att_coeff</span><span class="p">),</span> <span class="s2">&quot;Mass attenuation coefficient file was not found&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_to_mass_att_coeff</span> <span class="o">=</span> <span class="n">path_to_mass_att_coeff</span>
+
+
+        <span class="c1"># mu: Attenuation coefficient of the material</span>
+        <span class="c1"># ro: Density of materials&#39; wall</span>
+        <span class="c1"># dose_conversion_factor: # Flux to Dose conversion factor</span>
+        <span class="c1"># energy: energy of the source</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dose_conversion_factor</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">energy</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">define_energy</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
+
+        <span class="c1"># Wall variables</span>
+        <span class="c1"># Planes of the wall</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plane_normal</span> <span class="o">=</span> <span class="n">plane_normal</span>
+        <span class="c1"># Planes Y-coordinate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_define_wall_orientation</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">plane_coords</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">define_wall_coords</span><span class="p">(</span><span class="n">plane_coords</span><span class="p">)</span>
+        
+        <span class="c1"># Coefficients for NN</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist_source_tally</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angle</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist_source_wall</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist_wall_tally</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fi</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_slab_thickness</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="c1"># ********************************************************************</span>
+<span class="c1">#                           Public members</span>
+<span class="c1"># ********************************************************************</span>
+
+<div class="viewcode-block" id="input_admin.calculate_dose_direct_contribution"><a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.input_admin.calculate_dose_direct_contribution">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_dose_direct_contribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">tally</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Calulate the direct contribution to the dose at the tally</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            source (list[float]): source position</span>
+<span class="sd">            tally (list[float]): tally position</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: dose direct contribution</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sourceToTally</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">tally</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">source</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tally</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">source</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tally</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">source</span><span class="p">[</span><span class="mi">2</span><span class="p">]])</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist_source_tally</span> <span class="o">=</span> <span class="n">LA</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">sourceToTally</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_source_wall</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_wall_tally</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wall_intersection</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">tally</span> <span class="p">,</span><span class="n">sourceToTally</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_angle_between</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plane_normal</span><span class="p">,</span> <span class="n">sourceToTally</span><span class="p">)</span>
+
+        <span class="c1"># POLAR COORDINATES</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_polar_coordinates</span><span class="p">(</span><span class="n">sourceToTally</span><span class="p">)</span>
+
+        <span class="n">attenuation</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ro</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">)</span> <span class="c1"># t must be in cm</span>
+        <span class="n">uncoll_fi</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">dist_source_tally</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="c1"># [ gamma/cm^2 ]</span>
+        <span class="n">dose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dose_conversion_factor</span><span class="o">*</span><span class="n">uncoll_fi</span><span class="o">*</span><span class="n">attenuation</span>
+
+        <span class="k">return</span> <span class="n">dose</span></div>
+
+<div class="viewcode-block" id="input_admin.get_coefficients"><a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.input_admin.get_coefficients">[docs]</a>    <span class="k">def</span> <span class="nf">get_coefficients</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>    <span class="s1">&#39;energy&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">,</span>  <span class="s1">&#39;slab_thickness&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_slab_thickness</span><span class="p">,</span>             <span class="s1">&#39;dist_source_tally&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_source_tally</span><span class="p">,</span> \
+                    <span class="s1">&#39;delta_t&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span>  <span class="s1">&#39;angle&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="p">,</span>                         <span class="s1">&#39;theta&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span>\
+                    <span class="s1">&#39;fi&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">fi</span> <span class="p">,</span>          <span class="s1">&#39;dist_source_wall&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">dist_source_wall</span><span class="p">,</span>    <span class="s1">&#39;dist_wall_tally&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">dist_wall_tally</span><span class="p">,</span>\
+                    <span class="s1">&#39;mfp&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ro</span><span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu</span> <span class="p">}</span></div>
+    
+<div class="viewcode-block" id="input_admin.define_wall_coords"><a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.input_admin.define_wall_coords">[docs]</a>    <span class="k">def</span> <span class="nf">define_wall_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plane_coord</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;Instantiates the coordinates of the planes that defines the wall</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            plane_coord (list[float]): the two plane values (default on Y-axis)</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">plane_coord</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;There must be two values for plane_coord&quot;</span>
+        <span class="n">p0</span><span class="p">,</span> <span class="n">p1</span> <span class="o">=</span> <span class="n">plane_coord</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span><span class="o">&lt;</span><span class="nb">abs</span><span class="p">(</span><span class="n">p0</span><span class="p">)):</span>
+            <span class="n">p0</span><span class="p">,</span> <span class="n">p1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_swap</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p0</span> <span class="o">=</span> <span class="n">p0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p1</span> <span class="o">=</span> <span class="n">p1</span>
+        <span class="k">return</span></div>
+    
+<div class="viewcode-block" id="input_admin.define_energy"><a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.input_admin.define_energy">[docs]</a>    <span class="k">def</span> <span class="nf">define_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Instantiate energy and energy related coeffs.</span>
+<span class="sd">        In particular it defines: 1. energy [MeV], 2. Mass attenuation coefficiente, </span>
+<span class="sd">        3. Dose conversion factor</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            energy (float): _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">energy</span>
+        <span class="c1">#self.mu =  self.defineData(self.Mu_Energies, self.Mus)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_define_mass_att_coeff</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dose_conversion_factor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_define_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cv_energies</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cvs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="input_admin.slab_thickness"><a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.input_admin.slab_thickness">[docs]</a>    <span class="k">def</span> <span class="nf">slab_thickness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thick</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_slab_thickness</span> <span class="o">=</span> <span class="n">thick</span></div>
+
+<span class="c1"># ********************************************************************</span>
+<span class="c1">#                           Private members</span>
+<span class="c1"># ********************************************************************</span>
+
+    <span class="k">def</span> <span class="nf">_define_mass_att_coeff</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Calculates the mass attenuation coefficient for the material defined</span>
+<span class="sd">        in the input manager at the energy self.energy.</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: the mass attenuation coefficient</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_to_mass_att_coeff</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+        <span class="n">MU</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomic_number</span><span class="p">)):</span>
+            <span class="n">thismu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_mass_att_coeff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomic_number</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">root</span><span class="p">)</span>
+            <span class="n">MU</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_fraction</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">thismu</span>
+        <span class="k">return</span> <span class="n">MU</span>
+
+    <span class="k">def</span> <span class="nf">_swap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="p">):</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">t1</span>
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">t0</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">temp</span>
+        <span class="k">return</span> <span class="n">t0</span><span class="p">,</span> <span class="n">t1</span>
+    
+    <span class="k">def</span> <span class="nf">_define_wall_orientation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Defines if the wall surfaces are perpendicular to X, Y or Z</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.array: logical list of coordinates, where 0:X, 1:Y and 2:Z.</span>
+<span class="sd">            The first value of the list is the one perpendicular to wall surfaces</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="n">x_orientation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_angle_between</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plane_normal</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">y_orientation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_angle_between</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plane_normal</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">z_orientation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_angle_between</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plane_normal</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">x_orientation</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">x_orientation</span> <span class="o">==</span> <span class="mi">180</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">y_orientation</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">y_orientation</span> <span class="o">==</span> <span class="mi">180</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">z_orientation</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">z_orientation</span> <span class="o">==</span> <span class="mi">180</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only plane normals parallel to x, y or z axis are allowed&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_mass_att_coeff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Z</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
+        <span class="n">textE</span> <span class="o">=</span> <span class="n">root</span><span class="p">[</span><span class="n">Z</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">energies</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">textE</span><span class="p">]</span>
+
+        <span class="n">text_att_coeff</span> <span class="o">=</span> <span class="n">root</span><span class="p">[</span><span class="n">Z</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">mass_att_Coeff</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">text_att_coeff</span><span class="p">]</span>
+
+        <span class="n">mu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_define_data</span><span class="p">(</span><span class="n">energies</span><span class="p">,</span> <span class="n">mass_att_Coeff</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mu</span>
+    
+    <span class="k">def</span> <span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
+        <span class="n">fdata</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
+        <span class="n">read</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">energy</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fdata</span><span class="p">:</span>
+            <span class="n">lsplit</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">read</span><span class="p">:</span>
+                <span class="n">e</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">lsplit</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">mu_e</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">lsplit</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+                <span class="n">energy</span> <span class="o">+=</span> <span class="p">[</span><span class="n">e</span><span class="p">]</span>
+                <span class="n">data</span> <span class="o">+=</span> <span class="p">[</span><span class="n">mu_e</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lsplit</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">read</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">energy</span><span class="p">,</span> <span class="n">data</span>
+
+        <span class="n">downE</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">downMuE</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">upE</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">upMuE</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">energies</span><span class="p">)):</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">energies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">mu_e</span> <span class="o">=</span> <span class="n">datas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                
+            <span class="k">if</span><span class="p">(</span><span class="n">e</span> <span class="o">&lt;=</span> <span class="n">E</span><span class="p">):</span>
+                <span class="n">downE</span> <span class="o">=</span> <span class="n">e</span>
+                <span class="n">downMuE</span> <span class="o">=</span> <span class="n">mu_e</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">upE</span> <span class="o">=</span> <span class="n">e</span>
+                <span class="n">upMuE</span> <span class="o">=</span> <span class="n">mu_e</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">downE</span><span class="p">,</span> <span class="n">upE</span><span class="p">,</span> <span class="n">downMuE</span><span class="p">,</span> <span class="n">upMuE</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_define_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energies</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">datas</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Browse the energy bins until the bin in which self.energy fall is found.</span>
+<span class="sd">        Than perform an interpolation bewteen the datas for the two extreme of the bin. </span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            energies (list[float]): list of energy bins</span>
+<span class="sd">            datas (list[float]): list of corresponding data bins</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: interpolated data for energy=self.energy</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">downE</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">downMuE</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">upE</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">upMuE</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">energies</span><span class="p">)):</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">energies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">mu_e</span> <span class="o">=</span> <span class="n">datas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+               
+            <span class="k">if</span><span class="p">(</span><span class="n">e</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">):</span>
+                <span class="n">downE</span> <span class="o">=</span> <span class="n">e</span>
+                <span class="n">downMuE</span> <span class="o">=</span> <span class="n">mu_e</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">upE</span> <span class="o">=</span> <span class="n">e</span>
+                <span class="n">upMuE</span> <span class="o">=</span> <span class="n">mu_e</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">,</span> <span class="n">downE</span><span class="p">,</span> <span class="n">upE</span><span class="p">,</span> <span class="n">downMuE</span><span class="p">,</span> <span class="n">upMuE</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_interp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">):</span>
+        <span class="n">fract</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">x2</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">y1</span> <span class="o">+</span> <span class="p">(</span><span class="n">y2</span> <span class="o">-</span> <span class="n">y1</span><span class="p">)</span> <span class="o">*</span> <span class="n">fract</span>
+
+    <span class="k">def</span> <span class="nf">_wall_intersection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">tally</span><span class="p">,</span>  <span class="n">v</span><span class="p">):</span>
+        <span class="n">intersection_0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intersection_on_plane</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p0</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+        <span class="n">intersection_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intersection_on_plane</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+        <span class="n">intersection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">intersection_0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">intersection_1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">intersection_0</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">intersection_1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">intersection_0</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">intersection_1</span><span class="p">[</span><span class="mi">2</span><span class="p">]])</span>
+        
+        <span class="k">return</span> <span class="n">LA</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">intersection</span><span class="p">),</span> <span class="n">LA</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">source</span><span class="o">-</span><span class="n">intersection_0</span><span class="p">),</span> <span class="n">LA</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">tally</span><span class="o">-</span><span class="n">intersection_1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_intersection_on_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plane</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">p0</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Founds an intersection between the vector defined from point &#39;p0&#39; with direction &#39;v&#39; and the </span>
+<span class="sd">        plane defined by the value &#39;plane&#39; (the plane is always parallel to two axis, so its)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            plane (float): _description_</span>
+<span class="sd">            v (np.array): _description_</span>
+<span class="sd">            p0 (list[float]): _description_</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.array: point of the intersection</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+
+        <span class="c1"># equation system</span>
+        <span class="c1">#</span>
+        <span class="c1">#  x = x0 + vx*t</span>
+        <span class="c1">#  y = yo + vy*t</span>
+        <span class="c1">#  z = z0 + vz*t</span>
+        <span class="c1">#                            </span>
+        <span class="c1">#  set y = self.py to find position on plane</span>
+        <span class="c1">#  t = (y-y0)/vy </span>
+
+        <span class="n">intersection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">plane</span> <span class="o">-</span> <span class="n">p0</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span><span class="o">/</span><span class="n">v</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">p0</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">*</span><span class="n">t</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">p0</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">*</span><span class="n">t</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">p0</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span><span class="o">*</span><span class="n">t</span>
+
+        <span class="n">intersection</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="n">intersection</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="n">intersection</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">z</span>
+
+        <span class="k">return</span> <span class="n">intersection</span>
+
+    <span class="k">def</span> <span class="nf">_unit_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vector</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">vector</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_angle_between</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">):</span>
+        <span class="n">v1_u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unit_vector</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span>
+        <span class="n">v2_u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unit_vector</span><span class="p">(</span><span class="n">v2</span><span class="p">)</span>
+        <span class="n">radians</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v1_u</span><span class="p">,</span> <span class="n">v2_u</span><span class="p">),</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)),</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">radians</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_polar_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span> <span class="n">point</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dist_source_tally</span><span class="p">)</span>  <span class="p">)</span>
+        <span class="n">fi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span> <span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">LA</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> <span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">])))</span> <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">fi</span><span class="p">)</span></div>
+
+
+
+
+<div class="viewcode-block" id="database_maker"><a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.database_maker">[docs]</a><span class="k">class</span> <span class="nc">database_maker</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Read a raw MCNP file to extract input/output informations. The aim of this class is to create binary database file. </span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp_adm</span><span class="p">:</span><span class="n">input_admin</span><span class="p">,</span> <span class="n">reader</span><span class="p">:</span><span class="n">raw_reader</span><span class="p">,</span> 
+                 <span class="n">mesh_dim</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">source</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">p0</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read a raw MCNP file to extract input/output informations. From the reading process, two variables named &#39;database_input&#39;</span>
+<span class="sd">        and &#39;database_output&#39; are exctracted. The aim of this class is to create binary database file.  </span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            inp_adm (input_admin): a input administrator that calculates relevant values for the standard radiation configuration</span>
+<span class="sd">            reader (raw_reader): a class that reads raw MCNP results files</span>
+<span class="sd">            mesh_dim (list[int]): list containing the number of subdivisions on x,y and z of the mesh</span>
+<span class="sd">            source (list[float]): list containing the x, y, z coordinates [cm] of the source</span>
+<span class="sd">            p0 (float): plane coordinate value of the wall in the perpendicular axis [see input_admin class]</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh_dim</span> <span class="o">=</span> <span class="n">mesh_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inp_adm</span> <span class="o">=</span> <span class="n">inp_adm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reader</span> <span class="o">=</span> <span class="n">reader</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">py0</span> <span class="o">=</span> <span class="n">p0</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">database_input</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">database_output</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># ********************************************************************</span>
+<span class="c1">#                           Public members</span>
+<span class="c1"># ********************************************************************</span>
+
+<div class="viewcode-block" id="database_maker.read"><a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.database_maker.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">output</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_error</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reads a raw MCNP file (named &#39;filename&#39;) and extract the list of desidered inputs and the desired output.</span>
+<span class="sd">        After the reading process, two variables named &#39;database_input&#39; and &#39;database_output&#39; are exctracted.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename (str): name of the raw MCNP file</span>
+<span class="sd">            inputs (list[str]): list of the desired inputs for the database</span>
+<span class="sd">            output (str): desired output for the database</span>
+<span class="sd">            n_samples (int, optional): a number of n_samples is exctracted; n_samples should be lower than the total</span>
+<span class="sd">            number of samples. Defaults to None.</span>
+<span class="sd">            max_error (float, optional): the MCNP values with error&gt;max_error are not considered. Error is given as relative error, </span>
+<span class="sd">            spanning from 0 to 1. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_compliance</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+
+        <span class="c1"># Get variables from filename</span>
+        <span class="n">energy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">slab_thickness</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inp_adm</span><span class="o">.</span><span class="n">slab_thickness</span><span class="p">(</span> <span class="n">slab_thickness</span> <span class="p">)</span>
+        <span class="n">delta_y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">3</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta_y</span> <span class="c1"># y position of the source is the one present in filename</span>
+
+        <span class="c1"># Define tallies mesh geometry</span>
+        <span class="n">py1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">py0</span> <span class="o">+</span> <span class="n">slab_thickness</span>
+        <span class="n">origin</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">800</span><span class="p">,</span> <span class="n">py1</span><span class="p">,</span> <span class="mi">165</span><span class="p">]</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="p">[</span><span class="mi">800</span><span class="p">,</span> <span class="mi">4000</span> <span class="o">+</span> <span class="n">slab_thickness</span><span class="p">,</span> <span class="mi">765</span><span class="p">]</span>
+        
+        <span class="c1"># Read values from binary files containing MCNP results</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">set_mesh</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">binary_reader</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="c1"># Collect values</span>
+        <span class="c1">#self.errors = self.reader.errors</span>
+        <span class="n">coord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">coordinates</span>
+
+        <span class="c1"># Filter by errors</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">max_error</span><span class="o">!=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">max_error</span><span class="p">)</span>
+
+        <span class="c1"># Sample a sub-set of the inputs if required</span>
+        <span class="k">if</span> <span class="n">n_samples</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Sample coordinates and their index </span>
+            <span class="c1"># if there&#39;s a max_error specification, sampling is random</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">max_error</span><span class="o">!=</span><span class="kc">None</span><span class="p">):</span>
+                <span class="n">ind_sample</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">doses</span><span class="p">)),</span> <span class="n">n_samples</span><span class="p">)</span>
+            <span class="c1"># if there&#39;s not a max_error specification, sampling is made trough latin hypercube sampling</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">coord_ind_sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_LH_sampling</span><span class="p">(</span><span class="n">n_samples</span><span class="p">)</span>
+                <span class="n">ind_sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_index</span><span class="p">(</span><span class="n">coord_ind_sample</span><span class="p">)</span>
+
+            <span class="n">coord_sample</span> <span class="o">=</span> <span class="n">coord</span><span class="p">[</span><span class="n">ind_sample</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">coord_sample</span> <span class="o">=</span> <span class="n">coord</span>
+
+
+        <span class="c1"># Set the energy and the wall in self.inp_adm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve_case</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">py0</span><span class="p">,</span> <span class="n">py1</span><span class="p">])</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">database_input</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:[]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">}</span>
+        
+        <span class="n">dose_direct_contribution</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">inp_coeffs</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Calculate direct contribution to dose and get inputs</span>
+
+        <span class="c1"># for t in coord_sample:</span>
+        <span class="c1">#     dose_direct_contribution.append( self.inp_adm.calculate_dose_direct_contribution( self.source, t ) )</span>
+        <span class="c1">#     coeff = self.inp_adm.get_coefficients()</span>
+        <span class="c1">#     for key in self.database_input.keys():</span>
+        <span class="c1">#         self.database_input[key].append(coeff[key])</span>
+
+        <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+            <span class="n">dose_direct_contribution</span><span class="p">,</span> <span class="n">inp_coeffs</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">p</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task</span><span class="p">,</span> <span class="n">coord_sample</span><span class="o">.</span><span class="n">tolist</span><span class="p">()))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">inp_coeffs</span><span class="p">)):</span>
+            <span class="n">n_key</span> <span class="o">=</span> <span class="mi">0</span>    
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">database_input</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">database_input</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">inp_coeffs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">n_key</span><span class="p">]</span> <span class="p">)</span>
+                <span class="n">n_key</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        
+        <span class="c1"># Set output</span>
+        <span class="k">if</span> <span class="n">n_samples</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">output</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">database_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">doses</span><span class="p">[</span><span class="n">ind_sample</span><span class="p">]</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dose_direct_contribution</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">database_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">doses</span><span class="p">[</span><span class="n">ind_sample</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">output</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">database_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">doses</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dose_direct_contribution</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">database_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">doses</span>
+
+        <span class="k">return</span></div>
+    
+
+<div class="viewcode-block" id="database_maker.save_to_binary"><a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.database_maker.save_to_binary">[docs]</a>    <span class="k">def</span> <span class="nf">save_to_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_path</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save the variables &#39;database_output&#39; and &#39;database_input&#39; to save_path.</span>
+<span class="sd">        The variables are saved with this order: output, inputs[0], inputs[1] ...</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            save_path (str): absolute path were to save the database input/output info</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="n">lst</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">database_input</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+        <span class="n">lst</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database_output</span><span class="p">))</span>
+        <span class="n">lst</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">buffer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binary_converter</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="s1">&#39;bw&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+    <span class="c1"># @property</span>
+    <span class="c1"># def database_input(self):</span>
+    <span class="c1">#     return self.database_input</span>
+    <span class="c1"># @property</span>
+    <span class="c1"># def database_output(self):</span>
+    <span class="c1">#     return self.database_output</span>
+
+
+<span class="c1"># ********************************************************************</span>
+<span class="c1">#                           Private members</span>
+<span class="c1"># ********************************************************************</span>
+
+    <span class="k">def</span> <span class="nf">_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="n">dose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inp_adm</span><span class="o">.</span><span class="n">calculate_dose_direct_contribution</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">t</span> <span class="p">)</span>
+        <span class="n">coeff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inp_adm</span><span class="o">.</span><span class="n">get_coefficients</span><span class="p">()</span>
+        <span class="n">lst_coeffs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">database_input</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">lst_coeffs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coeff</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">dose</span><span class="p">,</span> <span class="n">lst_coeffs</span>
+
+    <span class="k">def</span> <span class="nf">_LH_sampling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+        <span class="n">sampler</span> <span class="o">=</span> <span class="n">qmc</span><span class="o">.</span><span class="n">LatinHypercube</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">low</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">sample</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">l_bounds</span><span class="o">=</span><span class="n">low</span><span class="p">,</span> <span class="n">u_bounds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_dim</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n_samples</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sample</span>
+    
+    <span class="k">def</span> <span class="nf">_get_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]):</span>
+        <span class="k">return</span> <span class="p">[</span>   <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_dim</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">*</span><span class="n">ind_coord</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_dim</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">ind_coord</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ind_coord</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">ind_coord</span> <span class="ow">in</span> <span class="n">samples</span> <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_retrieve_case</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">plane_coords</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inp_adm</span><span class="o">.</span><span class="n">define_energy</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inp_adm</span><span class="o">.</span><span class="n">define_wall_coords</span><span class="p">(</span><span class="n">plane_coords</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_binary_converter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">lst</span><span class="p">):</span>
+        <span class="n">lst</span> <span class="o">=</span> <span class="n">lst</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">f&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">),</span> <span class="o">*</span><span class="n">lst</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_check_compliance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">output</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+        <span class="n">inp_ref</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">,</span><span class="s1">&#39;slab_thickness&#39;</span><span class="p">,</span> <span class="s1">&#39;dist_source_tally&#39;</span><span class="p">,</span> <span class="s1">&#39;delta_t&#39;</span><span class="p">,</span> <span class="s1">&#39;angle&#39;</span><span class="p">,</span><span class="s1">&#39;theta&#39;</span><span class="p">,</span>\
+                    <span class="s1">&#39;fi&#39;</span><span class="p">,</span> <span class="s1">&#39;dist_source_wall&#39;</span><span class="p">,</span> <span class="s1">&#39;dist_wall_tally&#39;</span><span class="p">,</span> <span class="s1">&#39;mfp&#39;</span><span class="p">]</span>
+        <span class="n">out_ref</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;dose&#39;</span><span class="p">]</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inp_ref</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The input </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> is not a valid input&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">output</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">out_ref</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The output </span><span class="si">{</span><span class="n">output</span><span class="si">}</span><span class="s2"> is not a valid output&quot;</span><span class="p">)</span></div>
+            
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Mario Belotti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,11 +1,21 @@
+"""The train module is used for training a Point Kernel Neural Network for a specific database.
+To use train module, a '.yaml' file has to be used as the one present in /examples/train_example/config.yaml.
+Into this '.yaml' file, the path to a binary databse file has to be given.
+To run the command: 
+``$ predictipkdnn.exe --config [path_to_config_file]``"""
+
+
+
+
+
 import os
 from pkdnn.functionalities.graphics import kde_plot
 from pkdnn.functionalities.config import load_config, check_train_config
 from pkdnn.net.trainFunctions import train_model
-from pkdnn.net.pk_nn import pknn
-from pkdnn.net.datamanager import Scaler, Dataset, Input_reader 
+from pkdnn.net.pk_nn import pknn, make_prediction
+from pkdnn.net.datamanager import Scaler, Dataset, database_reader 
 
-from .predict import make_test
+from .predict import make_prediction
 import torch
 import gc
 import pickle
@@ -63,7 +73,7 @@ def set_training_vars(config, model):
 
 def input_data_processing(config):
     # Read data
-    Reader = Input_reader(config['path_to_database'], config['mesh_dim'], 
+    Reader = database_reader(config['path_to_database'], config['mesh_dim'], 
                     config['inputs'], config['database_inputs'], config['output'], sample_per_case=config['samples_per_case'])
     Reader.read_data(num_inp_files = config['n_files'], out_log_scale=config['out_log_scale'],out_clip_values=config['out_clip'])
 
@@ -84,6 +94,7 @@ def input_data_processing(config):
 
 
 def main():
+    
     try:
         config = load_config()
     except Exception as e: 
@@ -161,7 +172,7 @@ def main():
     # ======================================================================================
     
     pkdnn_model.to("cpu")
-    res = make_test(validation_dataset, pkdnn_model, scaler, config)
+    res = make_prediction(validation_dataset, pkdnn_model, scaler, config)
     errors = res[0]
     kde_plot(errors.detach().flatten().tolist(), "Test set errors", path=save_path)
 

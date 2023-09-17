@@ -23,11 +23,11 @@ setup(
     entry_points={'console_scripts': [
         'trainpknn=pkdnn.train:main',
         'predictpknn=pkdnn.predict:main',
-        'savepknn=pkdnn.export.exportmodel:main',
-        'databasepknn=pkdnn.inp_process.build_database:main']
+        'savepknn=pkdnn.exportmodel:main',
+        'databasepknn=pkdnn.build_database:main']
         },
     py_version='>=3.8',
-    install_requires=['torch','seaborn'],
+    install_requires=['torch==2.0.0','seaborn','scipy'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest']
 )

@@ -36,6 +36,7 @@ def plot_results(train_loss_values, val_loss_values, train_acc_values, val_acc_v
 
 
 def print_scores(t0, train_loss, val_loss, train_acc, val_acc):
+    print("\n")
     print("\ttrain loss = " + str(train_loss), flush=True)
     print("\tvalidation loss = " + str(val_loss), flush=True)
     print("\n", flush=True)

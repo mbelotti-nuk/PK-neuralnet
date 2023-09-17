@@ -1,3 +1,4 @@
+import torch
 from torch import nn
 from typing import List as list
 
@@ -6,6 +7,7 @@ class pknn(nn.Module):
 
     """
     def __init__(self, layer_sizes:list[int]):
+        
         """Deep Neural Network for Point Kernel applications
 
         Args:
@@ -25,3 +27,21 @@ class pknn(nn.Module):
         # out += 1 # Bias for build up factor
         return out
      
+
+def make_prediction( dataset, model, scaler, config, test_file=False ) -> (torch.tensor, torch.tensor, torch.tensor):
+    
+    X, Y = dataset.getall()
+
+    out = model(X.to("cpu").unsqueeze(0))
+
+    # Denormalize
+    Y = scaler.denormalize(Y.detach())
+    out = scaler.denormalize(out.detach())
+
+    Errors = 100*(out-Y)/Y
+    
+    if test_file:
+        out = out.flatten().reshape((config['mesh_dim'][0], config['mesh_dim'][1], config['mesh_dim'][2]))
+        Y = Y.flatten().reshape((config['mesh_dim'][0], config['mesh_dim'][1], config['mesh_dim'][2]))
+
+    return (Errors, out, Y)

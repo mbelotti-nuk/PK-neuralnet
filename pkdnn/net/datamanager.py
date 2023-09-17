@@ -8,7 +8,7 @@ import numpy as np
 from os import listdir
 from os.path import isfile, join
 from scipy.stats import qmc
-from typing import List as list, Dict as dict, Tuple, tuple
+from typing import List as list, Dict as dict, Tuple as tuple
 
 class Dataset(Dataset):
     def __init__(self, X:dict[str,torch.tensor], Y:dict[str,torch.tensor]):
@@ -45,17 +45,19 @@ class Dataset(Dataset):
 
 
 
-class Scaler:
+class Scaler:    
     """Class that handles scaling input and output
     """
     def __init__(self, input_scale_type:dict[str,str], output_scale_type:dict[str,str], log_scale:bool =False):
-        """Class that handles scaling input and output
+        """Initialize class
 
-        Args:
-            input_scale_type (dict[str,str]): Dictionary that links each input with the scaling type e.g., {'Energy','minmax'}. Two scale types are admitted: 'minmax', 'std'
-            output_scale_type (dict[str,str]): Dictionary that links output with the scaling type
-            log_scale (bool, optional): Check if output is scaled by logarithm. Defaults to False.
-        """        
+        :param input_scale_type: Dictionary that links each input with the scaling type e.g., {'Energy','minmax'}. Two scale types are admitted: 'minmax', 'std'
+        :type input_scale_type: dict[str,str]
+        :param output_scale_type: Dictionary that links output with the scaling type.
+        :type output_scale_type: dict[str,str]
+        :param log_scale: Check if output is scaled by logarithm, defaults to False
+        :type log_scale: bool, optional
+        """
 
         self.input_scale_type = input_scale_type
 
@@ -81,22 +83,21 @@ class Scaler:
 # ********************************************************************
 
     def fit_and_scale(self, X:dict[str,torch.tensor], Y:dict[str,torch.tensor]) -> tuple[dict[str,torch.tensor], dict[str,torch.tensor]]:
-        """Fit scale parameters with the given X and Y and than scales X and Y
+        """Fit the input (X) and output tensor (Y) finding the corresponding scaling factors for each features and than scales X and Y. 
 
-        
-        Args:
-            X (dict[str,torch.tensor]): Input dictionary
-            Y (dict[str,torch.tensor]): Output dictionary
-
-        Returns:
-            tuple[dict[str,torch.tensor], dict[str,torch.tensor]]: Returns a tuple with X and Y scaled
+        :param X: Input dictionary.
+        :type X: dict[str,torch.tensor]
+        :param Y: Input dictionary.
+        :type Y: dict[str,torch.tensor]
+        :return: Returns a tuple with X and Y scaled.
+        :rtype: tuple[dict[str,torch.tensor], dict[str,torch.tensor]]
         """        
         # Scale input
         # Iteration over all input features
         for key in X:
             x = X[key].detach()
             # Find scaling factors 
-            scale1, scale2 = self.fit(x, self.input_scale_type[key])
+            scale1, scale2 = self._fit(x, self.input_scale_type[key])
             # Save
             self.inp_scale_1[key] = scale1
             self.inp_scale_2[key]= scale2
@@ -107,7 +108,7 @@ class Scaler:
         # Scale output
         y = Y[self.out_key].detach()
         # Find scaling factors
-        scale1, scale2 = self.fit(y, self.output_scale_type[self.out_key])
+        scale1, scale2 = self._fit(y, self.output_scale_type[self.out_key])
         # Save
         self.out_scale_1 = scale1
         self.out_scale_2 = scale2
@@ -116,26 +117,56 @@ class Scaler:
 
         return X, Y
 
-    def scale(self, X:torch.tensor, Y:torch.tensor)-> tuple[dict[str,torch.tensor], dict[str,torch.tensor]]:
-        """Scales given X and Y
+    def scale(self, X:dict[str,torch.tensor], Y:dict[str,torch.tensor])-> tuple[dict[str,torch.tensor], dict[str,torch.tensor]]:
+        """Scales the given input (X) and output (Y) tensors.
 
-        Args:
-            X (torch.tensor): Input dicitonary
-            Y (torch.tensor): Ouptut dictionary
-
-        Returns:
-            tuple[dict[str,torch.tensor], dict[str,torch.tensor]]: Returns a tuple with X and Y scaled
+        :param X: Input dictionary.
+        :type X: dict[str,torch.tensor]
+        :param Y: Ouptut dictionary
+        :type Y: dict[str,torch.tensor]
+        :return: Returns a tuple with X and Y scaled.
+        :rtype: tuple[dict[str,torch.tensor], dict[str,torch.tensor]]
         """        
+        
         # Scale input
         for key in X:
+            assert self.inp_scale_1.has_key(key) and self.inp_scale_2.has_key(key), "The input scale parameters are not defined. To correclty run 'scale' function, first use 'fit_and_scale' function" 
             X[key] = self._scale_val(X[key], self.input_scale_type[key], self.inp_scale_1[key], self.inp_scale_2[key])
 
         # Scale output
+        assert self.out_scale_1.has_key(key) and self.out_scale_2.has_key(key), f"The output scale parameters are not defined because the output {key} does not exist" 
         Y[self.out_key] = self._scale_val(Y[self.out_key], self.output_scale_type[self.out_key], self.out_scale_1, self.out_scale_2)
 
         return X, Y
 
-    def fit(self, X:torch.tensor, scale_type:str) -> tuple[torch.tensor, torch.tensor]:
+
+    def denormalize(self, Y:torch.tensor) -> torch.tensor:
+
+        """Re-scale the output to its starting values
+
+        :param Y: Ouptut tensor
+        :type Y: torch.tensor
+        :return: re-scaled output
+        :rtype: torch.tensor
+        """
+
+        Y = self._rescale(Y, self.output_scale_type[self.out_key])
+        if self.log_scale:
+            if self.out_key.lower() == "b":
+                Y = torch.exp(Y) - 1
+            else:
+                Y = torch.exp(Y) 
+
+        return Y
+
+
+# ********************************************************************
+#                           Private members
+# ********************************************************************
+
+    def _fit(self, X:torch.tensor, scale_type:str) -> tuple[torch.tensor, torch.tensor]:
+
+        
         """Find scaling factors for a given tensor
 
         Args:
@@ -157,29 +188,6 @@ class Scaler:
             scale2 = torch.std(X)
         return scale1, scale2
 
-    def denormalize(self, Y:torch.tensor) -> torch.tensor:
-        """Re-scale the output to its starting values
-
-        Args:
-            Y (torch.tensor): Output
-
-        Returns:
-           torch.tensor: re-scaled output
-        """        
-        Y = self._rescale(Y, self.output_scale_type[self.out_key])
-        if self.log_scale:
-            if self.out_key.lower() == "b":
-                Y = torch.exp(Y) - 1
-            else:
-                Y = torch.exp(Y) 
-
-        return Y
-
-
-# ********************************************************************
-#                           Private members
-# ********************************************************************
-
     def _scale_val(self, X:torch.tensor, scale_type:str, scale1:torch.tensor, scale2:torch.tensor) -> torch.tensor:
         if scale_type.lower() == 'minmax':
             X = (X-scale1)/(scale2-scale1)
@@ -199,7 +207,7 @@ class Scaler:
 
 
 
-class Input_reader:
+class database_reader:
     """class that reads and manage data from database
     """    
     def __init__(self, path:str, mesh_dim:list[int], inputs:list[str], 
@@ -225,7 +233,7 @@ class Input_reader:
         self.mesh_dim = mesh_dim
         self.n_dim = int(mesh_dim[0]*mesh_dim[1]*mesh_dim[2])
 
-        # List of strings of input
+
         self.database_inputs = database_inputs if database_inputs != None else inputs
         self.reference_outpus = ['b', 'dose']
         for inp in inputs:    

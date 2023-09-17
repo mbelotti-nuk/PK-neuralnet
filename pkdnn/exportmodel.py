@@ -1,12 +1,13 @@
+"""The exportmodel module exports a Neural Network saved as a '.pt' file to a compatible file ('.dat') for usage into NACARTE.
+To use export module, a '.yaml' file has to be used as the one present in /examples/export_example/config.yaml.
+To run the command: 
+``$ exportpkdnn.exe --config [path_to_config_file]`` """
+
 import torch
-from . import exportsd
-import sys
+from .export import exportsd
 import os
-
-
-from ..net.pk_nn import pknn
-import pickle
-from ..functionalities.config import load_config
+from .net.pk_nn import pknn
+from .functionalities.config import load_config
 
 def main():
     try:
