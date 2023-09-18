@@ -3,17 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pkdnn.inp_process.database &mdash; Point Kernel DNN 0.0.1 documentation</title>
+  <title>pkdnn.inp_process.database &mdash; Point Kernel Deep Neural Network 0.0.1 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -28,7 +29,7 @@
           
           
           <a href="../../../index.html" class="icon icon-home">
-            Point Kernel DNN
+            Point Kernel Deep Neural Network
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -40,10 +41,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">pkdnn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Package.html">pkdnn Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Modules of pkdnn</a></li>
 </ul>
 
         </div>
@@ -52,7 +54,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">Point Kernel DNN</a>
+          <a href="../../../index.html">Point Kernel Deep Neural Network</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -83,14 +85,16 @@
 <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Pool</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span> <span class="k">as</span> <span class="nb">list</span><span class="p">,</span> <span class="n">Dict</span> <span class="k">as</span> <span class="nb">dict</span>
 
-<div class="viewcode-block" id="input_admin"><a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.input_admin">[docs]</a><span class="k">class</span> <span class="nc">input_admin</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;This class permits to calculate relevant values for the standard radiation configuration: </span>
+<div class="viewcode-block" id="input_admin">
+<a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.input_admin">[docs]</a>
+<span class="k">class</span> <span class="nc">input_admin</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class permits to calculate relevant values for the standard radiation configuration: </span>
 <span class="sd">    point radiaiton source ||   wall   || tallies.</span>
 <span class="sd">    &quot;&quot;&quot;</span>     
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plane_normal</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">ro</span><span class="p">:</span><span class="nb">float</span> <span class="p">,</span><span class="n">mass_fraction</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">atomic_number</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">path_to_dose_conversion</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">path_to_mass_att_coeff</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
                  <span class="n">energy</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plane_coords</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>    
-        <span class="sd">&quot;&quot;&quot;calculate relevant values for the standard radiation configuration: </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;calculate relevant values for the standard radiation configuration: </span>
 <span class="sd">        point radiaiton source ||   wall   || tallies.</span>
 
 <span class="sd">        Args:</span>
@@ -166,8 +170,10 @@
 <span class="c1">#                           Public members</span>
 <span class="c1"># ********************************************************************</span>
 
-<div class="viewcode-block" id="input_admin.calculate_dose_direct_contribution"><a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.input_admin.calculate_dose_direct_contribution">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_dose_direct_contribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">tally</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Calulate the direct contribution to the dose at the tally</span>
+<div class="viewcode-block" id="input_admin.calculate_dose_direct_contribution">
+<a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.input_admin.calculate_dose_direct_contribution">[docs]</a>
+    <span class="k">def</span> <span class="nf">calculate_dose_direct_contribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">tally</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calulate the direct contribution to the dose at the tally</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            source (list[float]): source position</span>
@@ -191,14 +197,20 @@
 
         <span class="k">return</span> <span class="n">dose</span></div>
 
-<div class="viewcode-block" id="input_admin.get_coefficients"><a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.input_admin.get_coefficients">[docs]</a>    <span class="k">def</span> <span class="nf">get_coefficients</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="input_admin.get_coefficients">
+<a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.input_admin.get_coefficients">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_coefficients</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span>    <span class="s1">&#39;energy&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">,</span>  <span class="s1">&#39;slab_thickness&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_slab_thickness</span><span class="p">,</span>             <span class="s1">&#39;dist_source_tally&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_source_tally</span><span class="p">,</span> \
                     <span class="s1">&#39;delta_t&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span><span class="p">,</span>  <span class="s1">&#39;angle&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="p">,</span>                         <span class="s1">&#39;theta&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span>\
                     <span class="s1">&#39;fi&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">fi</span> <span class="p">,</span>          <span class="s1">&#39;dist_source_wall&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">dist_source_wall</span><span class="p">,</span>    <span class="s1">&#39;dist_wall_tally&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">dist_wall_tally</span><span class="p">,</span>\
                     <span class="s1">&#39;mfp&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ro</span><span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu</span> <span class="p">}</span></div>
+
     
-<div class="viewcode-block" id="input_admin.define_wall_coords"><a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.input_admin.define_wall_coords">[docs]</a>    <span class="k">def</span> <span class="nf">define_wall_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plane_coord</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
-        <span class="sd">&quot;&quot;&quot;Instantiates the coordinates of the planes that defines the wall</span>
+<div class="viewcode-block" id="input_admin.define_wall_coords">
+<a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.input_admin.define_wall_coords">[docs]</a>
+    <span class="k">def</span> <span class="nf">define_wall_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plane_coord</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiates the coordinates of the planes that defines the wall</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            plane_coord (list[float]): the two plane values (default on Y-axis)</span>
@@ -210,9 +222,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">p0</span> <span class="o">=</span> <span class="n">p0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">p1</span> <span class="o">=</span> <span class="n">p1</span>
         <span class="k">return</span></div>
+
     
-<div class="viewcode-block" id="input_admin.define_energy"><a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.input_admin.define_energy">[docs]</a>    <span class="k">def</span> <span class="nf">define_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Instantiate energy and energy related coeffs.</span>
+<div class="viewcode-block" id="input_admin.define_energy">
+<a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.input_admin.define_energy">[docs]</a>
+    <span class="k">def</span> <span class="nf">define_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate energy and energy related coeffs.</span>
 <span class="sd">        In particular it defines: 1. energy [MeV], 2. Mass attenuation coefficiente, </span>
 <span class="sd">        3. Dose conversion factor</span>
 
@@ -224,15 +239,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_define_mass_att_coeff</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dose_conversion_factor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_define_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cv_energies</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cvs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="input_admin.slab_thickness"><a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.input_admin.slab_thickness">[docs]</a>    <span class="k">def</span> <span class="nf">slab_thickness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thick</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+
+<div class="viewcode-block" id="input_admin.slab_thickness">
+<a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.input_admin.slab_thickness">[docs]</a>
+    <span class="k">def</span> <span class="nf">slab_thickness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thick</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_slab_thickness</span> <span class="o">=</span> <span class="n">thick</span></div>
+
 
 <span class="c1"># ********************************************************************</span>
 <span class="c1">#                           Private members</span>
 <span class="c1"># ********************************************************************</span>
 
     <span class="k">def</span> <span class="nf">_define_mass_att_coeff</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Calculates the mass attenuation coefficient for the material defined</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the mass attenuation coefficient for the material defined</span>
 <span class="sd">        in the input manager at the energy self.energy.</span>
 
 <span class="sd">        Args:</span>
@@ -256,7 +275,7 @@
         <span class="k">return</span> <span class="n">t0</span><span class="p">,</span> <span class="n">t1</span>
     
     <span class="k">def</span> <span class="nf">_define_wall_orientation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Defines if the wall surfaces are perpendicular to X, Y or Z</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Defines if the wall surfaces are perpendicular to X, Y or Z</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            np.array: logical list of coordinates, where 0:X, 1:Y and 2:Z.</span>
@@ -319,7 +338,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">downE</span><span class="p">,</span> <span class="n">upE</span><span class="p">,</span> <span class="n">downMuE</span><span class="p">,</span> <span class="n">upMuE</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_define_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energies</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">datas</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Browse the energy bins until the bin in which self.energy fall is found.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Browse the energy bins until the bin in which self.energy fall is found.</span>
 <span class="sd">        Than perform an interpolation bewteen the datas for the two extreme of the bin. </span>
 
 <span class="sd">        Args:</span>
@@ -359,7 +378,7 @@
         <span class="k">return</span> <span class="n">LA</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">intersection</span><span class="p">),</span> <span class="n">LA</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">source</span><span class="o">-</span><span class="n">intersection_0</span><span class="p">),</span> <span class="n">LA</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">tally</span><span class="o">-</span><span class="n">intersection_1</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_intersection_on_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plane</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">p0</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Founds an intersection between the vector defined from point &#39;p0&#39; with direction &#39;v&#39; and the </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Founds an intersection between the vector defined from point &#39;p0&#39; with direction &#39;v&#39; and the </span>
 <span class="sd">        plane defined by the value &#39;plane&#39; (the plane is always parallel to two axis, so its)</span>
 
 <span class="sd">        Args:</span>
@@ -411,12 +430,15 @@
 
 
 
-<div class="viewcode-block" id="database_maker"><a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.database_maker">[docs]</a><span class="k">class</span> <span class="nc">database_maker</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Read a raw MCNP file to extract input/output informations. The aim of this class is to create binary database file. </span>
+
+<div class="viewcode-block" id="database_maker">
+<a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.database_maker">[docs]</a>
+<span class="k">class</span> <span class="nc">database_maker</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read a raw MCNP file to extract input/output informations. The aim of this class is to create binary database file. </span>
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp_adm</span><span class="p">:</span><span class="n">input_admin</span><span class="p">,</span> <span class="n">reader</span><span class="p">:</span><span class="n">raw_reader</span><span class="p">,</span> 
                  <span class="n">mesh_dim</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">source</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">p0</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Read a raw MCNP file to extract input/output informations. From the reading process, two variables named &#39;database_input&#39;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read a raw MCNP file to extract input/output informations. From the reading process, two variables named &#39;database_input&#39;</span>
 <span class="sd">        and &#39;database_output&#39; are exctracted. The aim of this class is to create binary database file.  </span>
 
 <span class="sd">        Args:</span>
@@ -441,8 +463,10 @@
 <span class="c1">#                           Public members</span>
 <span class="c1"># ********************************************************************</span>
 
-<div class="viewcode-block" id="database_maker.read"><a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.database_maker.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">output</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_error</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Reads a raw MCNP file (named &#39;filename&#39;) and extract the list of desidered inputs and the desired output.</span>
+<div class="viewcode-block" id="database_maker.read">
+<a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.database_maker.read">[docs]</a>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">output</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_error</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads a raw MCNP file (named &#39;filename&#39;) and extract the list of desidered inputs and the desired output.</span>
 <span class="sd">        After the reading process, two variables named &#39;database_input&#39; and &#39;database_output&#39; are exctracted.</span>
 
 <span class="sd">        Args:</span>
@@ -537,10 +561,13 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">database_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">doses</span>
 
         <span class="k">return</span></div>
+
     
 
-<div class="viewcode-block" id="database_maker.save_to_binary"><a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.database_maker.save_to_binary">[docs]</a>    <span class="k">def</span> <span class="nf">save_to_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_path</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Save the variables &#39;database_output&#39; and &#39;database_input&#39; to save_path.</span>
+<div class="viewcode-block" id="database_maker.save_to_binary">
+<a class="viewcode-back" href="../../../pkdnn.inp_process.html#pkdnn.inp_process.database.database_maker.save_to_binary">[docs]</a>
+    <span class="k">def</span> <span class="nf">save_to_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_path</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the variables &#39;database_output&#39; and &#39;database_input&#39; to save_path.</span>
 <span class="sd">        The variables are saved with this order: output, inputs[0], inputs[1] ...</span>
 
 <span class="sd">        Args:</span>
@@ -553,6 +580,7 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="s1">&#39;bw&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
         <span class="k">return</span></div>
+
 
     <span class="c1"># @property</span>
     <span class="c1"># def database_input(self):</span>
@@ -602,6 +630,7 @@
 
         <span class="k">if</span> <span class="n">output</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">out_ref</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The output </span><span class="si">{</span><span class="n">output</span><span class="si">}</span><span class="s2"> is not a valid output&quot;</span><span class="p">)</span></div>
+
             
     
 </pre></div>

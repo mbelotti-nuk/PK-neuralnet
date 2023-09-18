@@ -130,11 +130,10 @@ class Scaler:
         
         # Scale input
         for key in X:
-            assert self.inp_scale_1.has_key(key) and self.inp_scale_2.has_key(key), "The input scale parameters are not defined. To correclty run 'scale' function, first use 'fit_and_scale' function" 
+            assert (key in self.inp_scale_1) and (key in self.inp_scale_2), "The input scale parameters are not defined. To correclty run 'scale' function, first use 'fit_and_scale' function" 
             X[key] = self._scale_val(X[key], self.input_scale_type[key], self.inp_scale_1[key], self.inp_scale_2[key])
 
         # Scale output
-        assert self.out_scale_1.has_key(key) and self.out_scale_2.has_key(key), f"The output scale parameters are not defined because the output {key} does not exist" 
         Y[self.out_key] = self._scale_val(Y[self.out_key], self.output_scale_type[self.out_key], self.out_scale_1, self.out_scale_2)
 
         return X, Y

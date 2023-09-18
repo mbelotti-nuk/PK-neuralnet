@@ -3,17 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pkdnn.net.datamanager &mdash; Point Kernel DNN 0.0.1 documentation</title>
+  <title>pkdnn.net.datamanager &mdash; Point Kernel Deep Neural Network 0.0.1 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -28,7 +29,7 @@
           
           
           <a href="../../../index.html" class="icon icon-home">
-            Point Kernel DNN
+            Point Kernel Deep Neural Network
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -40,10 +41,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">pkdnn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Package.html">pkdnn Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Modules of pkdnn</a></li>
 </ul>
 
         </div>
@@ -52,7 +54,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">Point Kernel DNN</a>
+          <a href="../../../index.html">Point Kernel Deep Neural Network</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -83,7 +85,9 @@
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">qmc</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span> <span class="k">as</span> <span class="nb">list</span><span class="p">,</span> <span class="n">Dict</span> <span class="k">as</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">Tuple</span> <span class="k">as</span> <span class="nb">tuple</span>
 
-<div class="viewcode-block" id="Dataset"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.Dataset">[docs]</a><span class="k">class</span> <span class="nc">Dataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+<div class="viewcode-block" id="Dataset">
+<a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.Dataset">[docs]</a>
+<span class="k">class</span> <span class="nc">Dataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="n">Y</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span>
@@ -104,7 +108,9 @@
        
         <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
 
-<div class="viewcode-block" id="Dataset.getall"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.Dataset.getall">[docs]</a>    <span class="k">def</span> <span class="nf">getall</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]:</span>
+<div class="viewcode-block" id="Dataset.getall">
+<a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.Dataset.getall">[docs]</a>
+    <span class="k">def</span> <span class="nf">getall</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]:</span>
         <span class="n">lst</span><span class="o">=</span><span class="p">[]</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">:</span>
             <span class="n">lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
@@ -114,15 +120,19 @@
         <span class="n">y</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out_key</span><span class="p">]</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         
-        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span></div></div>
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span></div>
+</div>
 
 
 
-<div class="viewcode-block" id="Scaler"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.Scaler">[docs]</a><span class="k">class</span> <span class="nc">Scaler</span><span class="p">:</span>    
-    <span class="sd">&quot;&quot;&quot;Class that handles scaling input and output</span>
+
+<div class="viewcode-block" id="Scaler">
+<a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.Scaler">[docs]</a>
+<span class="k">class</span> <span class="nc">Scaler</span><span class="p">:</span>    
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class that handles scaling input and output</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_scale_type</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="nb">str</span><span class="p">],</span> <span class="n">output_scale_type</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="nb">str</span><span class="p">],</span> <span class="n">log_scale</span><span class="p">:</span><span class="nb">bool</span> <span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialize class</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize class</span>
 
 <span class="sd">        :param input_scale_type: Dictionary that links each input with the scaling type e.g., {&#39;Energy&#39;,&#39;minmax&#39;}. Two scale types are admitted: &#39;minmax&#39;, &#39;std&#39;</span>
 <span class="sd">        :type input_scale_type: dict[str,str]</span>
@@ -155,8 +165,10 @@
 <span class="c1">#                           Public members</span>
 <span class="c1"># ********************************************************************</span>
 
-<div class="viewcode-block" id="Scaler.fit_and_scale"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.Scaler.fit_and_scale">[docs]</a>    <span class="k">def</span> <span class="nf">fit_and_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="n">Y</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot;Fit the input (X) and output tensor (Y) finding the corresponding scaling factors for each features and than scales X and Y. </span>
+<div class="viewcode-block" id="Scaler.fit_and_scale">
+<a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.Scaler.fit_and_scale">[docs]</a>
+    <span class="k">def</span> <span class="nf">fit_and_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="n">Y</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit the input (X) and output tensor (Y) finding the corresponding scaling factors for each features and than scales X and Y. </span>
 
 <span class="sd">        :param X: Input dictionary.</span>
 <span class="sd">        :type X: dict[str,torch.tensor]</span>
@@ -190,8 +202,11 @@
 
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span></div>
 
-<div class="viewcode-block" id="Scaler.scale"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.Scaler.scale">[docs]</a>    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="n">Y</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">])</span><span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot;Scales the given input (X) and output (Y) tensors.</span>
+
+<div class="viewcode-block" id="Scaler.scale">
+<a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.Scaler.scale">[docs]</a>
+    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="n">Y</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">])</span><span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Scales the given input (X) and output (Y) tensors.</span>
 
 <span class="sd">        :param X: Input dictionary.</span>
 <span class="sd">        :type X: dict[str,torch.tensor]</span>
@@ -203,19 +218,21 @@
         
         <span class="c1"># Scale input</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">X</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">inp_scale_1</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">inp_scale_2</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="s2">&quot;The input scale parameters are not defined. To correclty run &#39;scale&#39; function, first use &#39;fit_and_scale&#39; function&quot;</span> 
+            <span class="k">assert</span> <span class="p">(</span><span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inp_scale_1</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inp_scale_2</span><span class="p">),</span> <span class="s2">&quot;The input scale parameters are not defined. To correclty run &#39;scale&#39; function, first use &#39;fit_and_scale&#39; function&quot;</span> 
             <span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale_val</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_scale_type</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">inp_scale_1</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">inp_scale_2</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
 
         <span class="c1"># Scale output</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_scale_1</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_scale_2</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;The output scale parameters are not defined because the output </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> does not exist&quot;</span> 
         <span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale_val</span><span class="p">(</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out_key</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_scale_type</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out_key</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_scale_1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_scale_2</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span></div>
 
 
-<div class="viewcode-block" id="Scaler.denormalize"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.Scaler.denormalize">[docs]</a>    <span class="k">def</span> <span class="nf">denormalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Y</span><span class="p">:</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">:</span>
 
-        <span class="sd">&quot;&quot;&quot;Re-scale the output to its starting values</span>
+<div class="viewcode-block" id="Scaler.denormalize">
+<a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.Scaler.denormalize">[docs]</a>
+    <span class="k">def</span> <span class="nf">denormalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Y</span><span class="p">:</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">:</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Re-scale the output to its starting values</span>
 
 <span class="sd">        :param Y: Ouptut tensor</span>
 <span class="sd">        :type Y: torch.tensor</span>
@@ -233,14 +250,15 @@
         <span class="k">return</span> <span class="n">Y</span></div>
 
 
+
 <span class="c1"># ********************************************************************</span>
 <span class="c1">#                           Private members</span>
 <span class="c1"># ********************************************************************</span>
 
     <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">scale_type</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]:</span>
 
-        
-        <span class="sd">&quot;&quot;&quot;Find scaling factors for a given tensor</span>
+<span class="w">        </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find scaling factors for a given tensor</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            X (torch.tensor): input tensor</span>
@@ -280,12 +298,15 @@
 
 
 
-<div class="viewcode-block" id="database_reader"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.database_reader">[docs]</a><span class="k">class</span> <span class="nc">database_reader</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;class that reads and manage data from database</span>
+
+<div class="viewcode-block" id="database_reader">
+<a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.database_reader">[docs]</a>
+<span class="k">class</span> <span class="nc">database_reader</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;class that reads and manage data from database</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">mesh_dim</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">inputs</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> 
                  <span class="n">database_inputs</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Output</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;Dose&#39;</span><span class="p">,</span> <span class="n">sample_per_case</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">20000</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Class that reads and manage data from database</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Class that reads and manage data from database</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            path (str): realtive path to database files</span>
@@ -330,8 +351,10 @@
 <span class="c1">#                           Public members</span>
 <span class="c1"># ********************************************************************</span>
 
-<div class="viewcode-block" id="database_reader.read_data"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.database_reader.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">out_log_scale</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_inp_files</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_clip_values</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;read data in database folder</span>
+<div class="viewcode-block" id="database_reader.read_data">
+<a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.database_reader.read_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">out_log_scale</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_inp_files</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_clip_values</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;read data in database folder</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            out_log_scale (bool, optional): Use log scale for output. Defaults to True.</span>
@@ -360,8 +383,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span><span class="p">()</span>
         <span class="k">return</span></div>
 
-<div class="viewcode-block" id="database_reader.read_data_from_file"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.database_reader.read_data_from_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_data_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">files</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">out_log_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">out_clip_values</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;read data present in files list in the database folder</span>
+
+<div class="viewcode-block" id="database_reader.read_data_from_file">
+<a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.database_reader.read_data_from_file">[docs]</a>
+    <span class="k">def</span> <span class="nf">read_data_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">files</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">out_log_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">out_clip_values</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;read data present in files list in the database folder</span>
 
 
 <span class="sd">        Args:</span>
@@ -380,18 +406,24 @@
                                 <span class="n">out_clip_values</span><span class="o">=</span><span class="n">out_clip_values</span><span class="p">)</span>
         <span class="k">return</span></div>
 
-<div class="viewcode-block" id="database_reader.shuffle"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.database_reader.shuffle">[docs]</a>    <span class="k">def</span> <span class="nf">shuffle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Randomize input and output order</span>
+
+<div class="viewcode-block" id="database_reader.shuffle">
+<a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.database_reader.shuffle">[docs]</a>
+    <span class="k">def</span> <span class="nf">shuffle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Randomize input and output order</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="n">shuffle</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Output</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">shuffle</span><span class="p">]</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Output</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Output</span><span class="p">][</span><span class="n">shuffle</span><span class="p">]</span></div>
+
         <span class="c1"># print(f&quot;Y size {self.Y[self.Output].size()}&quot;)</span>
 
-<div class="viewcode-block" id="database_reader.split_train_val"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.database_reader.split_train_val">[docs]</a>    <span class="k">def</span> <span class="nf">split_train_val</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perc</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.85</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]],</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]]]:</span>
-        <span class="sd">&quot;&quot;&quot;Split into train and validation set</span>
+<div class="viewcode-block" id="database_reader.split_train_val">
+<a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.database_reader.split_train_val">[docs]</a>
+    <span class="k">def</span> <span class="nf">split_train_val</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perc</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.85</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]],</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Split into train and validation set</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            perc (float, optional): Percentage for train set. Defaults to 0.85.</span>
@@ -419,6 +451,7 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">XTrain</span><span class="p">,</span> <span class="n">YTrain</span><span class="p">),</span> <span class="p">(</span><span class="n">XVal</span><span class="p">,</span> <span class="n">YVal</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># ********************************************************************</span>
 <span class="c1">#                           Private members</span>
 <span class="c1"># ********************************************************************</span>
@@ -433,7 +466,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">input_indices</span> <span class="o">=</span> <span class="n">list_of_ind</span>
 
     <span class="k">def</span> <span class="nf">_LH_sampling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">:</span><span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Quasi Monte Carlo samping over mesh indices</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Quasi Monte Carlo samping over mesh indices</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            n_samples (int): number of desired samples</span>
@@ -448,7 +481,7 @@
         <span class="k">return</span> <span class="n">ind_sample</span>
 
     <span class="k">def</span> <span class="nf">_get_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]])</span><span class="o">-&gt;</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Transform [i,j,k] indices into array index</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform [i,j,k] indices into array index</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            list[list[int]]: list of [i,j,k] indices of LH sampling</span>
@@ -498,7 +531,7 @@
 
     <span class="k">def</span> <span class="nf">_process_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">out_arr</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">out_log_scale</span><span class="p">:</span><span class="nb">bool</span><span class="p">,</span> 
                        <span class="n">lhs_indices</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_clip_values</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Process the output data from one file in the database.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process the output data from one file in the database.</span>
 <span class="sd">        The processing is made through:</span>
 <span class="sd">        1. Latin Hypercube Sampling</span>
 <span class="sd">        2. Clipping</span>
@@ -572,7 +605,7 @@
         <span class="k">return</span>
     
     <span class="k">def</span> <span class="nf">_get_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Binary file reader</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Binary file reader</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            fn (str): file</span>
@@ -584,6 +617,7 @@
         <span class="n">a</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s1">&#39;f&#39;</span><span class="p">)</span>
         <span class="n">a</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span> <span class="o">//</span> <span class="n">a</span><span class="o">.</span><span class="n">itemsize</span><span class="p">)</span>
         <span class="k">return</span>  <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">a</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>

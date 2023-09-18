@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pkdnn.functionalities package &mdash; Point Kernel DNN 0.0.1 documentation</title>
+  <title>pkdnn.functionalities package &mdash; Point Kernel Deep Neural Network 0.0.1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -31,7 +32,7 @@
           
           
           <a href="index.html" class="icon icon-home">
-            Point Kernel DNN
+            Point Kernel Deep Neural Network
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -42,12 +43,19 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-</ul>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">pkdnn</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Package.html">pkdnn Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules of pkdnn</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="pkdnn.html">pkdnn package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pkdnn.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pkdnn.html#module-pkdnn.build_database">pkdnn.build_database module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pkdnn.html#module-pkdnn.exportmodel">pkdnn.exportmodel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pkdnn.html#module-pkdnn.predict">pkdnn.predict module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pkdnn.html#module-pkdnn.train">pkdnn.train module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pkdnn.html#module-pkdnn">Module contents</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="pkdnn.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="pkdnn.export.html">pkdnn.export package</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">pkdnn.functionalities package</a></li>
@@ -55,12 +63,6 @@
 <li class="toctree-l4"><a class="reference internal" href="pkdnn.net.html">pkdnn.net package</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="pkdnn.html#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pkdnn.html#module-pkdnn.build_database">pkdnn.build_database module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pkdnn.html#module-pkdnn.exportmodel">pkdnn.exportmodel module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pkdnn.html#module-pkdnn.predict">pkdnn.predict module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pkdnn.html#module-pkdnn.train">pkdnn.train module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pkdnn.html#module-pkdnn">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -73,7 +75,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">Point Kernel DNN</a>
+          <a href="index.html">Point Kernel Deep Neural Network</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -81,7 +83,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="modules.html">pkdnn</a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Modules of pkdnn</a></li>
           <li class="breadcrumb-item"><a href="pkdnn.html">pkdnn package</a></li>
       <li class="breadcrumb-item active">pkdnn.functionalities package</li>
       <li class="wy-breadcrumbs-aside">
@@ -94,68 +96,68 @@
            <div itemprop="articleBody">
              
   <section id="pkdnn-functionalities-package">
-<h1>pkdnn.functionalities package<a class="headerlink" href="#pkdnn-functionalities-package" title="Permalink to this headline"></a></h1>
+<h1>pkdnn.functionalities package<a class="headerlink" href="#pkdnn-functionalities-package" title="Link to this heading"></a></h1>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
 <section id="module-pkdnn.functionalities.config">
-<span id="pkdnn-functionalities-config-module"></span><h2>pkdnn.functionalities.config module<a class="headerlink" href="#module-pkdnn.functionalities.config" title="Permalink to this headline"></a></h2>
+<span id="pkdnn-functionalities-config-module"></span><h2>pkdnn.functionalities.config module<a class="headerlink" href="#module-pkdnn.functionalities.config" title="Link to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pkdnn.functionalities.config.check_train_config">
-<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.config.</span></span><span class="sig-name descname"><span class="pre">check_train_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/config.html#check_train_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.config.check_train_config" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.config.</span></span><span class="sig-name descname"><span class="pre">check_train_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/config.html#check_train_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.config.check_train_config" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pkdnn.functionalities.config.load">
-<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.config.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/config.html#load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.config.load" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.config.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/config.html#load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.config.load" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pkdnn.functionalities.config.load_config">
-<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.config.</span></span><span class="sig-name descname"><span class="pre">load_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/config.html#load_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.config.load_config" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.config.</span></span><span class="sig-name descname"><span class="pre">load_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/config.html#load_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.config.load_config" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
 <section id="module-pkdnn.functionalities.graphics">
-<span id="pkdnn-functionalities-graphics-module"></span><h2>pkdnn.functionalities.graphics module<a class="headerlink" href="#module-pkdnn.functionalities.graphics" title="Permalink to this headline"></a></h2>
+<span id="pkdnn-functionalities-graphics-module"></span><h2>pkdnn.functionalities.graphics module<a class="headerlink" href="#module-pkdnn.functionalities.graphics" title="Link to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pkdnn.functionalities.graphics.hist_plot">
-<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.graphics.</span></span><span class="sig-name descname"><span class="pre">hist_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/graphics.html#hist_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.graphics.hist_plot" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.graphics.</span></span><span class="sig-name descname"><span class="pre">hist_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/graphics.html#hist_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.graphics.hist_plot" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pkdnn.functionalities.graphics.kde_plot">
-<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.graphics.</span></span><span class="sig-name descname"><span class="pre">kde_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/graphics.html#kde_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.graphics.kde_plot" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.graphics.</span></span><span class="sig-name descname"><span class="pre">kde_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/graphics.html#kde_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.graphics.kde_plot" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pkdnn.functionalities.graphics.list_kde_plot">
-<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.graphics.</span></span><span class="sig-name descname"><span class="pre">list_kde_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/graphics.html#list_kde_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.graphics.list_kde_plot" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.graphics.</span></span><span class="sig-name descname"><span class="pre">list_kde_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/graphics.html#list_kde_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.graphics.list_kde_plot" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pkdnn.functionalities.graphics.plot">
-<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.graphics.</span></span><span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nameVar1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/graphics.html#plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.graphics.plot" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.graphics.</span></span><span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nameVar1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/graphics.html#plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.graphics.plot" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pkdnn.functionalities.graphics.plotSpatialDistribution">
-<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.graphics.</span></span><span class="sig-name descname"><span class="pre">plotSpatialDistribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coord</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/graphics.html#plotSpatialDistribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.graphics.plotSpatialDistribution" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.graphics.</span></span><span class="sig-name descname"><span class="pre">plotSpatialDistribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coord</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/graphics.html#plotSpatialDistribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.graphics.plotSpatialDistribution" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pkdnn.functionalities.graphics.plotXY">
-<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.graphics.</span></span><span class="sig-name descname"><span class="pre">plotXY</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/graphics.html#plotXY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.graphics.plotXY" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.graphics.</span></span><span class="sig-name descname"><span class="pre">plotXY</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/graphics.html#plotXY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.graphics.plotXY" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pkdnn.functionalities.graphics.plot_2D">
-<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.graphics.</span></span><span class="sig-name descname"><span class="pre">plot_2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">real</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/graphics.html#plot_2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.graphics.plot_2D" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pkdnn.functionalities.graphics.</span></span><span class="sig-name descname"><span class="pre">plot_2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">real</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/functionalities/graphics.html#plot_2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.functionalities.graphics.plot_2D" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
 <section id="module-pkdnn.functionalities">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pkdnn.functionalities" title="Permalink to this headline"></a></h2>
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pkdnn.functionalities" title="Link to this heading"></a></h2>
 </section>
 </section>
 

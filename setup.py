@@ -27,7 +27,7 @@ setup(
         'databasepknn=pkdnn.build_database:main']
         },
     py_version='>=3.8',
-    install_requires=['torch==2.0.0','seaborn','scipy'],
+    install_requires=['torch==2.0.0','numpy','matplotlib','seaborn','scipy','leb128'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest']
 )

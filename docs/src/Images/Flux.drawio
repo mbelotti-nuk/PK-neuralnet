@@ -1,0 +1,85 @@
+<mxfile host="app.diagrams.net" modified="2023-09-18T14:41:48.226Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36" etag="JzMCcM0zELL-4HHRr58S" version="21.7.5" type="device">
+  <diagram name="Page-1" id="12e1b939-464a-85fe-373e-61e167be1490">
+    <mxGraphModel dx="1687" dy="1071" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1.5" pageWidth="1169" pageHeight="826" background="none" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="60da8b9f42644d3a-2" value="" style="whiteSpace=wrap;html=1;rounded=1;shadow=0;strokeWidth=8;fontSize=20;align=center;" parent="1" vertex="1">
+          <mxGeometry x="279" y="405" width="280" height="430" as="geometry" />
+        </mxCell>
+        <mxCell id="60da8b9f42644d3a-3" value="MCNP run" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;shadow=0;fontSize=27;fontColor=#050505;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="279" y="425" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="60da8b9f42644d3a-4" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;INPUT :&lt;/b&gt;&lt;br&gt;MCNP input file with a standard radiation configuration&lt;br&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;shadow=0;fontSize=14;fontColor=#0A0A0A;" parent="1" vertex="1">
+          <mxGeometry x="289" y="500" width="260" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="60da8b9f42644d3a-6" value="" style="line;strokeWidth=2;html=1;rounded=0;shadow=0;fontSize=27;align=center;" parent="1" vertex="1">
+          <mxGeometry x="299" y="485" width="240" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="60da8b9f42644d3a-7" value="" style="line;strokeWidth=2;html=1;rounded=0;shadow=0;fontSize=27;align=center;" parent="1" vertex="1">
+          <mxGeometry x="299" y="660.5" width="240" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="60da8b9f42644d3a-17" value="" style="whiteSpace=wrap;html=1;rounded=1;shadow=0;strokeWidth=8;fontSize=20;align=center;" parent="1" vertex="1">
+          <mxGeometry x="645" y="405" width="280" height="430" as="geometry" />
+        </mxCell>
+        <mxCell id="60da8b9f42644d3a-18" value="Binary raw file" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;shadow=0;fontSize=27;fontColor=#0F0F0F;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="645" y="425" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="60da8b9f42644d3a-24" value="" style="whiteSpace=wrap;html=1;rounded=1;shadow=0;strokeWidth=8;fontSize=20;align=center;" parent="1" vertex="1">
+          <mxGeometry x="1009" y="405" width="280" height="430" as="geometry" />
+        </mxCell>
+        <mxCell id="60da8b9f42644d3a-25" value="Database" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;shadow=0;fontSize=27;fontColor=#030303;fontStyle=1" parent="1" vertex="1">
+          <mxGeometry x="1009" y="425" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="60da8b9f42644d3a-36" value="&lt;font color=&quot;#000000&quot;&gt;&lt;b&gt;PKDNN TRAINING&lt;/b&gt;&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=0;strokeWidth=6;fontSize=14;align=center;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+          <mxGeometry x="1359" y="545.5" width="115" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="6eq-42ANzmisygdSYDYC-3" value="" style="line;strokeWidth=2;html=1;rounded=0;shadow=0;fontSize=27;align=center;" vertex="1" parent="1">
+          <mxGeometry x="665" y="485" width="240" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="6eq-42ANzmisygdSYDYC-4" value="" style="line;strokeWidth=2;html=1;rounded=0;shadow=0;fontSize=27;align=center;" vertex="1" parent="1">
+          <mxGeometry x="665" y="660.5" width="240" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="6eq-42ANzmisygdSYDYC-5" value="" style="line;strokeWidth=2;html=1;rounded=0;shadow=0;fontSize=27;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1029" y="485" width="240" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="6eq-42ANzmisygdSYDYC-6" value="" style="line;strokeWidth=2;html=1;rounded=0;shadow=0;fontSize=27;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1029" y="660.5" width="240" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="6eq-42ANzmisygdSYDYC-7" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;OUTPUT :&lt;/b&gt;&lt;br&gt;MCNP meshtal file containing dose ambient values for the mesh defined in the MCNP input&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;shadow=0;fontSize=14;fontColor=#0A0A0A;" vertex="1" parent="1">
+          <mxGeometry x="289" y="680" width="260" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="6eq-42ANzmisygdSYDYC-12" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1299" y="608.82" as="sourcePoint" />
+            <mxPoint x="1349" y="608.82" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6eq-42ANzmisygdSYDYC-13" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="945" y="608.82" as="sourcePoint" />
+            <mxPoint x="995" y="608.82" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6eq-42ANzmisygdSYDYC-14" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="579" y="610" as="sourcePoint" />
+            <mxPoint x="629" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6eq-42ANzmisygdSYDYC-19" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;INPUT :&lt;/b&gt;&lt;br&gt;MCNP meshtal file&lt;br&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;shadow=0;fontSize=14;fontColor=#0A0A0A;" vertex="1" parent="1">
+          <mxGeometry x="655" y="500" width="260" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="6eq-42ANzmisygdSYDYC-21" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;INPUT :&lt;/b&gt;&lt;br&gt;Binary raw file&lt;br&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;shadow=0;fontSize=14;fontColor=#0A0A0A;" vertex="1" parent="1">
+          <mxGeometry x="1019" y="500" width="260" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="6eq-42ANzmisygdSYDYC-23" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;OUTPUT :&lt;/b&gt;&lt;br&gt;Binary file containing ambient dose values and their relative errors&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;shadow=0;fontSize=14;fontColor=#0A0A0A;" vertex="1" parent="1">
+          <mxGeometry x="655" y="680" width="260" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="6eq-42ANzmisygdSYDYC-24" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;OUTPUT :&lt;/b&gt;&lt;br&gt;Binary file containing the desired input/output of the Point Kernel Deep Neural Network&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;shadow=0;fontSize=14;fontColor=#0A0A0A;" vertex="1" parent="1">
+          <mxGeometry x="1019" y="680" width="260" height="120" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
