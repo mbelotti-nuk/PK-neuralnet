@@ -79,7 +79,6 @@ def main():
         database_mkr.read(filename, inputs=config['inputs'], output=config['output'])
 
         database_mkr.save_to_binary(join(config['database_folder_path'], filename))
-        break
 
 if __name__ == '__main__':
     main()

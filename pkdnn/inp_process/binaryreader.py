@@ -4,12 +4,20 @@ import array
 from typing import List as list
 
 class raw_reader:
-
+    """Class that reads binary MCNP meshtal files
+    """
     def __init__(self, path:str, size:int):
+        """Initializer
+
+        :param path: path to raw binary MCNP meshtal file
+        :type path: str
+        :param size: number of voxels in the mesh
+        :type size: int
+        """    
         self.path = path
         self.size = size
-        self.doses = []
-        self.errors = []
+        self._doses = []
+        self._errors = []
         self.coordinates = []
 
     def binary_reader(self, filename:str):
@@ -20,8 +28,8 @@ class raw_reader:
         a.fromfile(open(fn, 'rb'), os.path.getsize(fn) // a.itemsize)
         arr = np.copy(a)
 
-        self.doses = arr[:self.size]
-        self.errors = arr[self.size:]
+        self._doses = arr[:self.size]
+        self._errors = arr[self.size:]
 
     def set_mesh(self, origin:list[float], end:list[float], counts:list[int]):
         xDiv = self.get_division(origin[0], end[0], counts[0] )
@@ -47,9 +55,27 @@ class raw_reader:
         return div
     
     def filter(self, max_Error=1):
-        if(len(self.coordinates) != len(self.doses) | len(self.coordinates) == 0 | len(self.doses) == 0):
+        if(len(self.coordinates) != len(self._doses) | len(self.coordinates) == 0 | len(self._doses) == 0):
             raise Exception("Error")
-        mask = self.errors < max_Error
-        self.doses = self.doses[mask]
-        self.errors = self.errors[mask]
+        mask = self._errors < max_Error
+        self._doses = self._doses[mask]
+        self._errors = self._errors[mask]
         self.coordinates = self.coordinates[mask]
+
+    @property
+    def dose(self)->np.array:
+        """Return the doses inside the raw MCNP meshtal file
+
+        :return: dose
+        :rtype: np.array
+        """                
+        return self._doses
+    
+    @property
+    def errors(self)->np.array:
+        """Return the errors inside the raw MCNP meshtal file
+
+        :return: errors
+        :rtype: np.array
+        """                
+        return self._errors

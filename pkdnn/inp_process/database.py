@@ -412,7 +412,7 @@ class database_maker:
             # Sample coordinates and their index 
             # if there's a max_error specification, sampling is random
             if (max_error!=None):
-                ind_sample = random.sample(range(0, len(self.reader.doses)), n_samples)
+                ind_sample = random.sample(range(0, len(self.reader._doses)), n_samples)
             # if there's not a max_error specification, sampling is made trough latin hypercube sampling
             else:
                 coord_ind_sample = self._LH_sampling(n_samples)
@@ -454,14 +454,14 @@ class database_maker:
         # Set output
         if n_samples != None:
             if output.lower() == 'b':
-                self.database_output = self.reader.doses[ind_sample]/np.array(dose_direct_contribution)
+                self.database_output = self.reader._doses[ind_sample]/np.array(dose_direct_contribution)
             else:
-                self.database_output = self.reader.doses[ind_sample]
+                self.database_output = self.reader._doses[ind_sample]
         else:
             if output.lower() == 'b':
-                self.database_output = self.reader.doses/np.array(dose_direct_contribution)
+                self.database_output = self.reader._doses/np.array(dose_direct_contribution)
             else:
-                self.database_output = self.reader.doses
+                self.database_output = self.reader._doses
 
         return
     
