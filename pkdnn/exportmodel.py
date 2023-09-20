@@ -18,15 +18,15 @@ def main():
         return
 
     try:
-        model = pknn(config['f_maps']) 
-        model.load_state_dict(torch.load(config["path_to_model"]))
+        model = pknn(config['nn_spec']['f_maps']) 
+        model.load_state_dict(torch.load(config['io_paths']["path_to_model"]))
     except Exception as e:
         print(e)
         print("Failed to create NN model")
 
     
     try:
-        f = open(os.path.join(config["save_path"],config["save_name"]+".dat"), "wb")
+        f = open(os.path.join(config['io_paths']["save_path"],config['io_paths']["save_name"]+".dat"), "wb")
         exportsd.save_state_dict(model.to("cpu").state_dict(), f)
         f.close()
     except Exception as e:

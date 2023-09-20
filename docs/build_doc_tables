@@ -1,0 +1,5 @@
+
+yamldoc  ../examples/export_example/config.yaml  > src/tables/export_example.md
+yamldoc  ../examples/train_example/config.yaml   > src/tables/train_example.md
+yamldoc  ../examples/input_process_example/config.yaml   > src/tables/inp_proc_example.md
+yamldoc  ../examples/predict_example/config.yaml   > src/tables/predict_example.md

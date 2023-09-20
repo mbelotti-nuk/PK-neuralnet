@@ -106,10 +106,39 @@
 <dt class="sig sig-object py" id="pkdnn.inp_process.binaryreader.raw_reader">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pkdnn.inp_process.binaryreader.</span></span><span class="sig-name descname"><span class="pre">raw_reader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/inp_process/binaryreader.html#raw_reader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.inp_process.binaryreader.raw_reader" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that reads binary MCNP meshtal files</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pkdnn.inp_process.binaryreader.raw_reader.binary_reader">
 <span class="sig-name descname"><span class="pre">binary_reader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/inp_process/binaryreader.html#raw_reader.binary_reader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.inp_process.binaryreader.raw_reader.binary_reader" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pkdnn.inp_process.binaryreader.raw_reader.dose">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dose</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><a class="headerlink" href="#pkdnn.inp_process.binaryreader.raw_reader.dose" title="Link to this definition"></a></dt>
+<dd><p>Return the doses inside the raw MCNP meshtal file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dose</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pkdnn.inp_process.binaryreader.raw_reader.errors">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">errors</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">array</span></em><a class="headerlink" href="#pkdnn.inp_process.binaryreader.raw_reader.errors" title="Link to this definition"></a></dt>
+<dd><p>Return the errors inside the raw MCNP meshtal file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>errors</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pkdnn.inp_process.binaryreader.raw_reader.filter">

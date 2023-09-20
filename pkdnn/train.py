@@ -40,8 +40,8 @@ def set_environment(config):
         gc.collect()
 
     # Create path for save directory
-    parent_dir = config['save_directory']
-    directory ="Model_output_"+str(config['output'])+"_fmaps_"+str(config['f_maps'])
+    parent_dir = config['io_paths']['save_directory']
+    directory ="Model_output_"+str(config['out_spec']['output'])+"_fmaps_"+str(config['nn_spec']['f_maps'])
     save_path = os.path.join(parent_dir,directory)
     # Make directory 
     if not os.path.isdir(save_path):
@@ -62,10 +62,10 @@ def set_training_vars(config, model):
                 weight_decay= config['optimizer']['weight_decay']
     )
 
-    assert config['loss'].lower() in metrics, f"The loss function {config['loss']} does not exist"
-    assert config['accuracy'].lower() in metrics, f"The loss function {config['accuracy']} does not exist"
-    Loss = metrics[config['loss']]
-    Acc = metrics[config['accuracy']]
+    assert config['metrics']['loss'].lower() in metrics, f"The loss function {config['metrics']['loss']} does not exist"
+    assert config['metrics']['accuracy'].lower() in metrics, f"The loss function {config['metrics']['accuracy']} does not exist"
+    Loss = metrics[config['metrics']['loss']]
+    Acc = metrics[config['metrics']['accuracy']]
 
 
     return optimizer, Loss, Acc
@@ -73,15 +73,15 @@ def set_training_vars(config, model):
 
 def input_data_processing(config):
     # Read data
-    Reader = database_reader(config['path_to_database'], config['mesh_dim'], 
-                    config['inputs'], config['database_inputs'], config['output'], sample_per_case=config['samples_per_case'])
-    Reader.read_data(num_inp_files = config['n_files'], out_log_scale=config['out_log_scale'],out_clip_values=config['out_clip'])
+    Reader = database_reader(config['io_paths']['path_to_database'], config['out_spec']['mesh_dim'], 
+                    config['inp_spec']['inputs'], config['inp_spec']['database_inputs'], config['out_spec']['output'], sample_per_case=config['nn_spec']['samples_per_case'])
+    Reader.read_data(num_inp_files = config['nn_spec']['n_files'], out_log_scale=config['out_spec']['out_log_scale'],out_clip_values=config['out_spec']['out_clip'])
 
     # Split into Train and Validatioin
-    TrainSet, ValSet = Reader.split_train_val(config['percentage'])
+    TrainSet, ValSet = Reader.split_train_val(config['n_spec']['percentage'])
 
     # Scale
-    scaler = Scaler(config['inp_scaletype'], config['out_scaletype'], config['out_log_scale'])
+    scaler = Scaler(config['inp_spec']['inp_scaletype'], config['out_spec']['out_scaletype'], config['out_spec']['out_log_scale'])
     TrainSet = ( scaler.fit_and_scale(TrainSet[0], TrainSet[1]) )
     ValSet = ( scaler.scale(ValSet[0], ValSet[1]) )    
 
@@ -113,7 +113,7 @@ def main():
     # ======================================================================================
 
     # Build Neural Net
-    model = pknn(config['f_maps']) 
+    model = pknn(config['nn_spec']['f_maps']) 
     print("NN model summary:")
     print(model)   
     # Create optimizer
@@ -145,9 +145,9 @@ def main():
     # Set seed 
     torch.manual_seed(0)
     pkdnn_model, train_loss, test_loss = train_model(
-        model, train_dataset, validation_dataset, optimizer, device=device, epochs=config['n_epochs'], batch_size=config['batch_size'],
-        patience=config['patience'], save_path=save_path, loss=loss, accuracy=accuracy, lr_scheduler=config['lr_scheduler'],
-        mixed_precision=config['mixed_precision']
+        model, train_dataset, validation_dataset, optimizer, device=device, epochs=config['nn_spec']['n_epochs'], batch_size=config['nn_spec']['batch_size'],
+        patience=config['nn_spec']['patience'], save_path=save_path, loss=loss, accuracy=accuracy, lr_scheduler=config['lr_scheduler'],
+        mixed_precision=config['nn_spec']['mixed_precision']
     )
     
 

@@ -19,7 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Configuration Parameters Reference" href="parameters.html" />
+    <link rel="next" title="Database process moduel - parameters" href="tables/inp_proc_example.html" />
     <link rel="prev" title="pkdnn Package" href="Package.html" /> 
 </head>
 
@@ -48,13 +48,22 @@
 <li class="toctree-l1"><a class="reference internal" href="Theory.html">Theory</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Package.html">pkdnn Package</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#database-creation">Database creation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#training">Training</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#predict">Predict</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="parameters.html">Configuration Parameters Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#database-creation">Database creation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tables/inp_proc_example.html">Database process moduel - parameters</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#export-to-nacarte">Export to NACARTE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pkdnn-training">Pkdnn training</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tables/train_example.html">Pkdnn training module - parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pkdnn-prediction">Pkdnn prediction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tables/predict_example.html">Pkdnn prediction module - parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#export-to-nacarte">Export to NACARTE</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tables/export_example.html">Export to NACARTE module - parameters</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">Modules of pkdnn</a></li>
@@ -86,34 +95,102 @@
              
   <section id="usage">
 <h1>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h1>
-<p>The pkdnn package has 4 functions to be used</p>
+<dl class="simple">
+<dt>The pkdnn package has 4 functions to be used:</dt><dd><ul class="simple">
+<li><p>Database creation</p></li>
+<li><p>Pkdnn training</p></li>
+<li><p>Pkdnn prediction</p></li>
+<li><p>Export to NACARTE</p></li>
+</ul>
+</dd>
+</dl>
+<p>Each function take as an input a ‘.yaml’ file. An example of a ‘.yaml’ file is available
+for each function in the <code class="docutils literal notranslate"><span class="pre">examples\</span></code> folder present at the root of the package.</p>
 <section id="database-creation">
 <h2>Database creation<a class="headerlink" href="#database-creation" title="Link to this heading"></a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">databasepknn</span><span class="o">.</span><span class="n">exe</span> <span class="o">--</span><span class="n">config</span> <span class="n">path</span> <span class="n">to</span> <span class="n">config</span> <span class="n">file</span>
-</pre></div>
-</div>
-</section>
-<section id="training">
-<h2>Training<a class="headerlink" href="#training" title="Link to this heading"></a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">trainpkdnn</span><span class="o">.</span><span class="n">exe</span> <span class="o">--</span><span class="n">config</span> <span class="n">path</span> <span class="n">to</span> <span class="n">config</span> <span class="n">file</span>
-</pre></div>
-</div>
-</section>
-<section id="predict">
-<h2>Predict<a class="headerlink" href="#predict" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p>This module is used to convert raw MCNP meshtal files to database files that
+can be used to train a pkdnn.</p>
+</div></blockquote>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Parameters:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="parameters.html">Configuration Parameters Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tables/inp_proc_example.html">Database process moduel - parameters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tables/inp_proc_example.html#io-paths"><code class="docutils literal notranslate"><span class="pre">io_paths</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tables/inp_proc_example.html#inp-spec"><code class="docutils literal notranslate"><span class="pre">inp_spec</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tables/inp_proc_example.html#out-spec"><code class="docutils literal notranslate"><span class="pre">out_spec</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tables/inp_proc_example.html#geom-spec"><code class="docutils literal notranslate"><span class="pre">geom_spec</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tables/inp_proc_example.html#mat-spec"><code class="docutils literal notranslate"><span class="pre">mat_spec</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">predictpkdnn</span><span class="o">.</span><span class="n">exe</span> <span class="o">--</span><span class="n">config</span> <span class="n">path</span> <span class="n">to</span> <span class="n">config</span> <span class="n">file</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">databasepknn</span><span class="o">.</span><span class="n">exe</span> <span class="o">--</span><span class="n">config</span> <span class="n">path</span>\<span class="n">to</span>\<span class="n">config</span>\<span class="n">file</span>
+</pre></div>
+</div>
+</section>
+<section id="pkdnn-training">
+<h2>Pkdnn training<a class="headerlink" href="#pkdnn-training" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p>This module is used to train a pkdnn from a list of database files.</p>
+</div></blockquote>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Parameters:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tables/train_example.html">Pkdnn training module - parameters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tables/train_example.html#io-paths"><code class="docutils literal notranslate"><span class="pre">io_paths</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tables/train_example.html#inp-spec"><code class="docutils literal notranslate"><span class="pre">inp_spec</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tables/train_example.html#out-spec"><code class="docutils literal notranslate"><span class="pre">out_spec</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tables/train_example.html#nn-spec"><code class="docutils literal notranslate"><span class="pre">nn_spec</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tables/train_example.html#training-parameters"><code class="docutils literal notranslate"><span class="pre">training_parameters</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tables/train_example.html#metrics"><code class="docutils literal notranslate"><span class="pre">metrics</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tables/train_example.html#optimizer"><code class="docutils literal notranslate"><span class="pre">optimizer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tables/train_example.html#lr-scheduler"><code class="docutils literal notranslate"><span class="pre">lr_scheduler</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">trainpkdnn</span><span class="o">.</span><span class="n">exe</span> <span class="o">--</span><span class="n">config</span> <span class="n">path</span>\<span class="n">to</span>\<span class="n">config</span>\<span class="n">file</span>
+</pre></div>
+</div>
+</section>
+<section id="pkdnn-prediction">
+<h2>Pkdnn prediction<a class="headerlink" href="#pkdnn-prediction" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p>This module is used to make predicitons with a trained pkdnn from a database file.</p>
+</div></blockquote>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Parameters:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tables/predict_example.html">Pkdnn prediction module - parameters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tables/predict_example.html#io-paths"><code class="docutils literal notranslate"><span class="pre">io_paths</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tables/predict_example.html#inp-spec"><code class="docutils literal notranslate"><span class="pre">inp_spec</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tables/predict_example.html#out-spec"><code class="docutils literal notranslate"><span class="pre">out_spec</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tables/predict_example.html#nn-spec"><code class="docutils literal notranslate"><span class="pre">nn_spec</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">predictpkdnn</span><span class="o">.</span><span class="n">exe</span> <span class="o">--</span><span class="n">config</span> <span class="n">path</span>\<span class="n">to</span>\<span class="n">config</span>\<span class="n">file</span>
 </pre></div>
 </div>
 </section>
 <section id="export-to-nacarte">
 <h2>Export to NACARTE<a class="headerlink" href="#export-to-nacarte" title="Link to this heading"></a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">savepknn</span><span class="o">.</span><span class="n">exe</span> <span class="o">--</span><span class="n">config</span> <span class="n">path</span> <span class="n">to</span> <span class="n">config</span> <span class="n">file</span>
+<blockquote>
+<div><p>This module is used to export pkdnn in Pytorch format to a format compatible with NACARTE</p>
+</div></blockquote>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Parameters:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tables/export_example.html">Export to NACARTE module - parameters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tables/export_example.html#io-paths"><code class="docutils literal notranslate"><span class="pre">io_paths</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tables/export_example.html#nn-spec"><code class="docutils literal notranslate"><span class="pre">nn_spec</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">savepknn</span><span class="o">.</span><span class="n">exe</span> <span class="o">--</span><span class="n">config</span> <span class="n">path</span>\<span class="n">to</span>\<span class="n">config</span>\<span class="n">file</span>
 </pre></div>
 </div>
 </section>
@@ -124,7 +201,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Package.html" class="btn btn-neutral float-left" title="pkdnn Package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="parameters.html" class="btn btn-neutral float-right" title="Configuration Parameters Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="tables/inp_proc_example.html" class="btn btn-neutral float-right" title="Database process moduel - parameters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

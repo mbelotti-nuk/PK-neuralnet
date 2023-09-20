@@ -41,7 +41,7 @@ def make_prediction( dataset, model, scaler, config, test_file=False ) -> (torch
     Errors = 100*(out-Y)/Y
     
     if test_file:
-        out = out.flatten().reshape((config['mesh_dim'][0], config['mesh_dim'][1], config['mesh_dim'][2]))
-        Y = Y.flatten().reshape((config['mesh_dim'][0], config['mesh_dim'][1], config['mesh_dim'][2]))
+        out = out.flatten().reshape((config['out_spec']['mesh_dim'][0], config['out_spec']['mesh_dim'][1], config['out_spec']['mesh_dim'][2]))
+        Y = Y.flatten().reshape((config['out_spec']['mesh_dim'][0], config['out_spec']['mesh_dim'][1], config['out_spec']['mesh_dim'][2]))
 
     return (Errors, out, Y)

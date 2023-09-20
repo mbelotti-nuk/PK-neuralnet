@@ -18,10 +18,10 @@ def write_specifics(config):
     :param config: the path to the '.yaml' file
     :type config: '.yaml'
     """    
-    fout = open(join(config['database_folder_path'],'Database_specifics.txt'),'w')
+    fout = open(join(config['io_paths']['database_folder_path'],'Database_specifics.txt'),'w')
     lines = ""
-    lines+= f"Output:\t\t{config['output']}\n"
-    for i, inp in enumerate(config['inputs']):
+    lines+= f"Output:\t\t{config['out_spec']['output']}\n"
+    for i, inp in enumerate(config['inp_spec']['inputs']):
         lines+= f"Input{i}:\t\t{inp}\n"
 
     fout.write(lines)
@@ -51,21 +51,21 @@ def main():
         print(f"Couldn't open config. file")
         return
 
-    lst = [f for f in listdir(config['raw_path']) if isfile(join(config['raw_path'], f))]
+    lst = [f for f in listdir(config['io_paths']['raw_path']) if isfile(join(config['io_paths']['raw_path'], f))]
     print('Number of files: ' + str(len(lst)))
 
-    mesh_dim = config['mesh_dim']
+    mesh_dim = config['out_spec']['mesh_dim']
     n_dim = int(mesh_dim[0]*mesh_dim[1]*mesh_dim[2])
 
     # Set Binary File Reader
-    reader = raw_reader(config['raw_path'], n_dim )
+    reader = raw_reader(config['io_paths']['raw_path'], n_dim )
     # Set calculator
-    inp_adm = input_admin(plane_normal=config['wall_normal'], ro=config['ro'],
-                          mass_fraction=config['mass_fraction'], atomic_number=config['atomic_number'], 
-                          path_to_dose_conversion=config['path_to_dose_conversion'], 
-                          path_to_mass_att_coeff=config['path_to_mass_att_coeff'])
+    inp_adm = input_admin(plane_normal=config['geom_spec']['wall_normal'], ro=config['mat_spec']['ro'],
+                          mass_fraction=config['mat_spec']['mass_fraction'], atomic_number=config['mat_spec']['atomic_number'], 
+                          path_to_dose_conversion=config['mat_spec']['path_to_dose_conversion'], 
+                          path_to_mass_att_coeff=config['mat_spec']['path_to_mass_att_coeff'])
     # Set database maker
-    database_mkr = database_maker(inp_adm, reader, mesh_dim, config['source'], config['p0']) 
+    database_mkr = database_maker(inp_adm, reader, mesh_dim, config['geom_spec']['source'], config['geom_spec']['p0']) 
 
     counter = 0
     write_specifics(config)
@@ -76,9 +76,9 @@ def main():
 
         counter += 1 
         print(f"Processing {filename}; number {counter} of {len(lst)}")
-        database_mkr.read(filename, inputs=config['inputs'], output=config['output'])
+        database_mkr.read(filename, inputs=config['inp_spec']['inputs'], output=config['out_spec']['output'])
 
-        database_mkr.save_to_binary(join(config['database_folder_path'], filename))
+        database_mkr.save_to_binary(join(config['io_paths']['database_folder_path'], filename))
 
 if __name__ == '__main__':
     main()
