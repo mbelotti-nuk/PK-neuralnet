@@ -83,8 +83,8 @@ class input_admin:
         self.dist_source_tally = 0
         self.delta_t = 0
         self.angle = 0
-        self.dist_source_shield = 0
-        self.dist_shield_tally = 0
+        self.dist_source_wall = 0
+        self.dist_wall_tally = 0
         self.theta = 0
         self.fi = 0
         self._slab_thickness = 0
@@ -106,7 +106,7 @@ class input_admin:
         sourceToTally = np.array([tally[0]-source[0], tally[1]-source[1], tally[2]-source[2]])
         
         self.dist_source_tally = LA.norm(sourceToTally)
-        self.delta_t, self.dist_source_shield, self.dist_shield_tally = self._wall_intersection(source, tally ,sourceToTally)
+        self.delta_t, self.dist_source_wall, self.dist_wall_tally = self._wall_intersection(source, tally ,sourceToTally)
         self.angle = self._angle_between(self.plane_normal, sourceToTally)
 
         # POLAR COORDINATES
@@ -121,7 +121,7 @@ class input_admin:
     def get_coefficients(self):
         return {    'energy': self.energy,  'slab_thickness': self._slab_thickness,             'dist_source_tally': self.dist_source_tally, \
                     'delta_t':self.delta_t,  'angle':self.angle,                         'theta':self.theta,\
-                    'fi':self.fi ,          'dist_source_shield':self.dist_source_shield,    'dist_shield_tally':self.dist_shield_tally,\
+                    'fi':self.fi ,          'dist_source_wall':self.dist_source_wall,    'dist_wall_tally':self.dist_wall_tally,\
                     'mfp':self.delta_t * self.ro* self.mu }
     
     def define_wall_coords(self, plane_coord:list[float]):
@@ -522,6 +522,7 @@ class database_maker:
         inp_ref = ['energy','slab_thickness', 'dist_source_tally', 'delta_t', 'angle','theta',\
                     'fi', 'dist_source_shield', 'dist_shield_tally', 'mfp']
         out_ref = ['b', 'dose']
+        print("bau")
         for i in inputs:
             if i not in inp_ref:
                 raise Exception(f"The input {i} is not a valid input")
