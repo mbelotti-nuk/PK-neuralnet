@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pkdnn package &mdash; Point Kernel Deep Neural Network 0.0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pkdnn.export package" href="pkdnn.export.html" />
+    <link rel="prev" title="Modules of pkdnn" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Point Kernel Deep Neural Network
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Package.html">pkdnn Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules of pkdnn</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">pkdnn package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pkdnn.build_database">pkdnn.build_database module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pkdnn.exportmodel">pkdnn.exportmodel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pkdnn.predict">pkdnn.predict module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pkdnn.train">pkdnn.train module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pkdnn">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pkdnn.export.html">pkdnn.export package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pkdnn.functionalities.html">pkdnn.functionalities package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pkdnn.inp_process.html">pkdnn.inp_process package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pkdnn.net.html">pkdnn.net package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Point Kernel Deep Neural Network</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Modules of pkdnn</a></li>
+      <li class="breadcrumb-item active">pkdnn package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/pkdnn.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pkdnn-package">
+<h1>pkdnn package<a class="headerlink" href="#pkdnn-package" title="Permalink to this headline"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+<p>Here you can find the modules available in pkdnn.</p>
+</section>
+<section id="module-pkdnn.build_database">
+<span id="pkdnn-build-database-module"></span><h2>pkdnn.build_database module<a class="headerlink" href="#module-pkdnn.build_database" title="Permalink to this headline"></a></h2>
+<p>The build_database module is used for creating database files from binary files containing a meshtal MCNP result.
+To use build_database module, a ‘.yaml’ file has to be used as the one present in /examples/input_process_example/config.yaml.
+Into this ‘.yaml’ file, the path to a binary databse file has to be given.
+To run the command:</p>
+<p><code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">pkdnn.build_database.exe</span> <span class="pre">--config</span> <span class="pre">[path_to_config_file]</span></code></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pkdnn.build_database.main">
+<span class="sig-prename descclassname"><span class="pre">pkdnn.build_database.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/build_database.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.build_database.main" title="Permalink to this definition"></a></dt>
+<dd><p>Converts binary MCNP files into the database use for pkdnn training.</p>
+<p>To run this command, a ‘.yaml’ file should be provided with the following specifications:</p>
+<ul class="simple">
+<li><p>inputs : a list of string providing the inputs of the database among the possible ones.</p></li>
+<li><p>output : a string containing the output type of the database.</p></li>
+<li><p>database_folder_path: absolute path to the folder in which the user want to store the database files.</p></li>
+<li><p>raw_path : absolute path to the folder in which are stored the binary files containing the MCNP meshtal results.</p></li>
+<li><p>mesh_dim: list of integers containing the number of voxels on x,y and z in the mesh.</p></li>
+<li><p>p0 : wall coordinate of the axis perpendicular to it.</p></li>
+<li><p>wall_normal : normal to the wall.</p></li>
+<li><p>source : coordinate of the source.</p></li>
+<li><p>atomic_number: list of atomic numbers of the elements of the wall’s material.</p></li>
+<li><p>mass_fraction: list of the mass fraction of the elements of the wall’s material.</p></li>
+<li><p>ro : density of the wall’s material.</p></li>
+<li><p>path_to_dose_conversion : absolute path to the flux to dose conversion factors.</p></li>
+<li><p>path_to_mass_att_coeff : absolute path to the mass attenuation coefficients of the wall’s material.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pkdnn.build_database.write_specifics">
+<span class="sig-prename descclassname"><span class="pre">pkdnn.build_database.</span></span><span class="sig-name descname"><span class="pre">write_specifics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/build_database.html#write_specifics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.build_database.write_specifics" title="Permalink to this definition"></a></dt>
+<dd><p>Writes a text file containing the output and the input present in the database folder</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> (<em>'.yaml'</em>) – the path to the ‘.yaml’ file</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pkdnn.exportmodel">
+<span id="pkdnn-exportmodel-module"></span><h2>pkdnn.exportmodel module<a class="headerlink" href="#module-pkdnn.exportmodel" title="Permalink to this headline"></a></h2>
+<p>The exportmodel module exports a Neural Network saved as a ‘.pt’ file to a compatible file (‘.dat’) for usage into NACARTE.
+To use export module, a ‘.yaml’ file has to be used as the one present in /examples/export_example/config.yaml.
+To run the command:
+<code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">exportpkdnn.exe</span> <span class="pre">--config</span> <span class="pre">[path_to_config_file]</span></code></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pkdnn.exportmodel.main">
+<span class="sig-prename descclassname"><span class="pre">pkdnn.exportmodel.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/exportmodel.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.exportmodel.main" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-pkdnn.predict">
+<span id="pkdnn-predict-module"></span><h2>pkdnn.predict module<a class="headerlink" href="#module-pkdnn.predict" title="Permalink to this headline"></a></h2>
+<p>The predict module is used for checking the prediction of Neural Network.
+To use prediction module, a ‘.yaml’ file has to be used as the one present in /examples/predict_example/config.yaml.
+Into this ‘.yaml’ file, the path to a binary databse file has to be given.
+To run the command:
+<code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">predictipkdnn.exe</span> <span class="pre">--config</span> <span class="pre">[path_to_config_file]</span></code></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pkdnn.predict.main">
+<span class="sig-prename descclassname"><span class="pre">pkdnn.predict.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/predict.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.predict.main" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-pkdnn.train">
+<span id="pkdnn-train-module"></span><h2>pkdnn.train module<a class="headerlink" href="#module-pkdnn.train" title="Permalink to this headline"></a></h2>
+<p>The train module is used for training a Point Kernel Neural Network for a specific database.
+To use train module, a ‘.yaml’ file has to be used as the one present in /examples/train_example/config.yaml.
+Into this ‘.yaml’ file, the path to a binary databse file has to be given.
+To run the command:
+<code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">predictipkdnn.exe</span> <span class="pre">--config</span> <span class="pre">[path_to_config_file]</span></code></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pkdnn.train.input_data_processing">
+<span class="sig-prename descclassname"><span class="pre">pkdnn.train.</span></span><span class="sig-name descname"><span class="pre">input_data_processing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/train.html#input_data_processing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.train.input_data_processing" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pkdnn.train.main">
+<span class="sig-prename descclassname"><span class="pre">pkdnn.train.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/train.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.train.main" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pkdnn.train.set_environment">
+<span class="sig-prename descclassname"><span class="pre">pkdnn.train.</span></span><span class="sig-name descname"><span class="pre">set_environment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/train.html#set_environment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.train.set_environment" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pkdnn.train.set_training_vars">
+<span class="sig-prename descclassname"><span class="pre">pkdnn.train.</span></span><span class="sig-name descname"><span class="pre">set_training_vars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/train.html#set_training_vars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.train.set_training_vars" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-pkdnn">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pkdnn" title="Permalink to this headline"></a></h2>
+</section>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pkdnn.export.html">pkdnn.export package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pkdnn.export.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pkdnn.export.html#module-pkdnn.export.exportsd">pkdnn.export.exportsd module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pkdnn.export.html#module-pkdnn.export.importsd">pkdnn.export.importsd module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pkdnn.export.html#module-pkdnn.export">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pkdnn.functionalities.html">pkdnn.functionalities package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pkdnn.functionalities.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pkdnn.functionalities.html#module-pkdnn.functionalities.config">pkdnn.functionalities.config module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pkdnn.functionalities.html#module-pkdnn.functionalities.graphics">pkdnn.functionalities.graphics module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pkdnn.functionalities.html#module-pkdnn.functionalities">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pkdnn.inp_process.html">pkdnn.inp_process package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pkdnn.inp_process.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pkdnn.inp_process.html#module-pkdnn.inp_process.binaryreader">pkdnn.inp_process.binaryreader module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pkdnn.inp_process.html#module-pkdnn.inp_process.database">pkdnn.inp_process.database module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pkdnn.inp_process.html#module-pkdnn.inp_process">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pkdnn.net.html">pkdnn.net package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pkdnn.net.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pkdnn.net.html#module-pkdnn.net.datamanager">pkdnn.net.datamanager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pkdnn.net.html#module-pkdnn.net.pk_nn">pkdnn.net.pk_nn module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pkdnn.net.html#module-pkdnn.net.pytorchtools">pkdnn.net.pytorchtools module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pkdnn.net.html#module-pkdnn.net.trainFunctions">pkdnn.net.trainFunctions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pkdnn.net.html#module-pkdnn.net">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="Modules of pkdnn" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pkdnn.export.html" class="btn btn-neutral float-right" title="pkdnn.export package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Mario Belotti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

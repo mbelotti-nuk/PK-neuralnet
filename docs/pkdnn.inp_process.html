@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pkdnn.inp_process package &mdash; Point Kernel Deep Neural Network 0.0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pkdnn.net package" href="pkdnn.net.html" />
+    <link rel="prev" title="pkdnn.functionalities package" href="pkdnn.functionalities.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Point Kernel Deep Neural Network
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Package.html">pkdnn Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules of pkdnn</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pkdnn.html">pkdnn package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pkdnn.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pkdnn.html#module-pkdnn.build_database">pkdnn.build_database module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pkdnn.html#module-pkdnn.exportmodel">pkdnn.exportmodel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pkdnn.html#module-pkdnn.predict">pkdnn.predict module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pkdnn.html#module-pkdnn.train">pkdnn.train module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pkdnn.html#module-pkdnn">Module contents</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="pkdnn.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pkdnn.export.html">pkdnn.export package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pkdnn.functionalities.html">pkdnn.functionalities package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">pkdnn.inp_process package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pkdnn.net.html">pkdnn.net package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Point Kernel Deep Neural Network</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Modules of pkdnn</a></li>
+          <li class="breadcrumb-item"><a href="pkdnn.html">pkdnn package</a></li>
+      <li class="breadcrumb-item active">pkdnn.inp_process package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/pkdnn.inp_process.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pkdnn-inp-process-package">
+<h1>pkdnn.inp_process package<a class="headerlink" href="#pkdnn-inp-process-package" title="Permalink to this headline"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-pkdnn.inp_process.binaryreader">
+<span id="pkdnn-inp-process-binaryreader-module"></span><h2>pkdnn.inp_process.binaryreader module<a class="headerlink" href="#module-pkdnn.inp_process.binaryreader" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pkdnn.inp_process.binaryreader.raw_reader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pkdnn.inp_process.binaryreader.</span></span><span class="sig-name descname"><span class="pre">raw_reader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/inp_process/binaryreader.html#raw_reader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.inp_process.binaryreader.raw_reader" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that reads binary MCNP meshtal files</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pkdnn.inp_process.binaryreader.raw_reader.binary_reader">
+<span class="sig-name descname"><span class="pre">binary_reader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/inp_process/binaryreader.html#raw_reader.binary_reader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.inp_process.binaryreader.raw_reader.binary_reader" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pkdnn.inp_process.binaryreader.raw_reader.dose">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dose</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.array</span></em><a class="headerlink" href="#pkdnn.inp_process.binaryreader.raw_reader.dose" title="Permalink to this definition"></a></dt>
+<dd><p>Return the doses inside the raw MCNP meshtal file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>dose</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pkdnn.inp_process.binaryreader.raw_reader.errors">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">errors</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.array</span></em><a class="headerlink" href="#pkdnn.inp_process.binaryreader.raw_reader.errors" title="Permalink to this definition"></a></dt>
+<dd><p>Return the errors inside the raw MCNP meshtal file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>errors</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pkdnn.inp_process.binaryreader.raw_reader.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_Error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/inp_process/binaryreader.html#raw_reader.filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.inp_process.binaryreader.raw_reader.filter" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pkdnn.inp_process.binaryreader.raw_reader.get_division">
+<span class="sig-name descname"><span class="pre">get_division</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">End</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/inp_process/binaryreader.html#raw_reader.get_division"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.inp_process.binaryreader.raw_reader.get_division" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pkdnn.inp_process.binaryreader.raw_reader.set_mesh">
+<span class="sig-name descname"><span class="pre">set_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">counts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/inp_process/binaryreader.html#raw_reader.set_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.inp_process.binaryreader.raw_reader.set_mesh" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pkdnn.inp_process.database">
+<span id="pkdnn-inp-process-database-module"></span><h2>pkdnn.inp_process.database module<a class="headerlink" href="#module-pkdnn.inp_process.database" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pkdnn.inp_process.database.database_maker">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pkdnn.inp_process.database.</span></span><span class="sig-name descname"><span class="pre">database_maker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inp_adm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pkdnn.inp_process.database.input_admin" title="pkdnn.inp_process.database.input_admin"><span class="pre">pkdnn.inp_process.database.input_admin</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reader</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pkdnn.inp_process.binaryreader.raw_reader" title="pkdnn.inp_process.binaryreader.raw_reader"><span class="pre">pkdnn.inp_process.binaryreader.raw_reader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/inp_process/database.html#database_maker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.inp_process.database.database_maker" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Read a raw MCNP file to extract input/output informations. The aim of this class is to create binary database file.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pkdnn.inp_process.database.database_maker.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/inp_process/database.html#database_maker.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.inp_process.database.database_maker.read" title="Permalink to this definition"></a></dt>
+<dd><p>Reads a raw MCNP file (named ‘filename’) and extract the list of desidered inputs and the desired output.
+After the reading process, two variables named ‘database_input’ and ‘database_output’ are exctracted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – name of the raw MCNP file</p></li>
+<li><p><strong>inputs</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – list of the desired inputs for the database</p></li>
+<li><p><strong>output</strong> (<em>str</em>) – desired output for the database</p></li>
+<li><p><strong>n_samples</strong> (<em>int</em><em>, </em><em>optional</em>) – a number of n_samples is exctracted; n_samples should be lower than the total</p></li>
+<li><p><strong>None.</strong> (<em>spanning from 0 to 1. Defaults to</em>) – </p></li>
+<li><p><strong>max_error</strong> (<em>float</em><em>, </em><em>optional</em>) – the MCNP values with error&gt;max_error are not considered. Error is given as relative error,</p></li>
+<li><p><strong>None.</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pkdnn.inp_process.database.database_maker.save_to_binary">
+<span class="sig-name descname"><span class="pre">save_to_binary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/inp_process/database.html#database_maker.save_to_binary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.inp_process.database.database_maker.save_to_binary" title="Permalink to this definition"></a></dt>
+<dd><p>Save the variables ‘database_output’ and ‘database_input’ to save_path.
+The variables are saved with this order: output, inputs[0], inputs[1] …</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>save_path</strong> (<em>str</em>) – absolute path were to save the database input/output info</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pkdnn.inp_process.database.input_admin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pkdnn.inp_process.database.</span></span><span class="sig-name descname"><span class="pre">input_admin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plane_normal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ro</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass_fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atomic_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_to_dose_conversion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_to_mass_att_coeff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane_coords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/inp_process/database.html#input_admin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.inp_process.database.input_admin" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class permits to calculate relevant values for the standard radiation configuration:
+point radiaiton source ||   wall   || tallies.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pkdnn.inp_process.database.input_admin.calculate_dose_direct_contribution">
+<span class="sig-name descname"><span class="pre">calculate_dose_direct_contribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tally</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/pkdnn/inp_process/database.html#input_admin.calculate_dose_direct_contribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.inp_process.database.input_admin.calculate_dose_direct_contribution" title="Permalink to this definition"></a></dt>
+<dd><p>Calulate the direct contribution to the dose at the tally</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – source position</p></li>
+<li><p><strong>tally</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – tally position</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dose direct contribution</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pkdnn.inp_process.database.input_admin.define_energy">
+<span class="sig-name descname"><span class="pre">define_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/inp_process/database.html#input_admin.define_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.inp_process.database.input_admin.define_energy" title="Permalink to this definition"></a></dt>
+<dd><p>Instantiate energy and energy related coeffs.
+In particular it defines: 1. energy [MeV], 2. Mass attenuation coefficiente,
+3. Dose conversion factor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>energy</strong> (<em>float</em>) – _description_</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pkdnn.inp_process.database.input_admin.define_wall_coords">
+<span class="sig-name descname"><span class="pre">define_wall_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plane_coord</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/inp_process/database.html#input_admin.define_wall_coords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.inp_process.database.input_admin.define_wall_coords" title="Permalink to this definition"></a></dt>
+<dd><p>Instantiates the coordinates of the planes that defines the wall</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>plane_coord</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – the two plane values (default on Y-axis)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pkdnn.inp_process.database.input_admin.get_coefficients">
+<span class="sig-name descname"><span class="pre">get_coefficients</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/inp_process/database.html#input_admin.get_coefficients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.inp_process.database.input_admin.get_coefficients" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pkdnn.inp_process.database.input_admin.slab_thickness">
+<span class="sig-name descname"><span class="pre">slab_thickness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">thick</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pkdnn/inp_process/database.html#input_admin.slab_thickness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pkdnn.inp_process.database.input_admin.slab_thickness" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pkdnn.inp_process">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pkdnn.inp_process" title="Permalink to this headline"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pkdnn.functionalities.html" class="btn btn-neutral float-left" title="pkdnn.functionalities package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pkdnn.net.html" class="btn btn-neutral float-right" title="pkdnn.net package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Mario Belotti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

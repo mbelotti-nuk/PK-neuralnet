@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pkdnn.net.datamanager &mdash; Point Kernel Deep Neural Network 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Point Kernel Deep Neural Network
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Package.html">pkdnn Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Modules of pkdnn</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Point Kernel Deep Neural Network</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pkdnn.net.datamanager</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pkdnn.net.datamanager</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">array</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">listdir</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">isfile</span><span class="p">,</span> <span class="n">join</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">qmc</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span> <span class="k">as</span> <span class="nb">list</span><span class="p">,</span> <span class="n">Dict</span> <span class="k">as</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">Tuple</span> <span class="k">as</span> <span class="nb">tuple</span>
+
+<div class="viewcode-block" id="Dataset"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.Dataset">[docs]</a><span class="k">class</span> <span class="nc">Dataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="n">Y</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_key</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">))</span> 
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out_key</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="n">lst</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">:</span>
+            <span class="n">lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">index</span><span class="p">])</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>       
+
+        <span class="n">y</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out_key</span><span class="p">][</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+       
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+
+<div class="viewcode-block" id="Dataset.getall"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.Dataset.getall">[docs]</a>    <span class="k">def</span> <span class="nf">getall</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]:</span>
+        <span class="n">lst</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">:</span>
+            <span class="n">lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>       
+
+        <span class="n">y</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out_key</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span></div></div>
+
+
+
+<div class="viewcode-block" id="Scaler"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.Scaler">[docs]</a><span class="k">class</span> <span class="nc">Scaler</span><span class="p">:</span>    
+    <span class="sd">&quot;&quot;&quot;Class that handles scaling input and output</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_scale_type</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="nb">str</span><span class="p">],</span> <span class="n">output_scale_type</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="nb">str</span><span class="p">],</span> <span class="n">log_scale</span><span class="p">:</span><span class="nb">bool</span> <span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize class</span>
+
+<span class="sd">        :param input_scale_type: Dictionary that links each input with the scaling type e.g., {&#39;Energy&#39;,&#39;minmax&#39;}. Two scale types are admitted: &#39;minmax&#39;, &#39;std&#39;</span>
+<span class="sd">        :type input_scale_type: dict[str,str]</span>
+<span class="sd">        :param output_scale_type: Dictionary that links output with the scaling type.</span>
+<span class="sd">        :type output_scale_type: dict[str,str]</span>
+<span class="sd">        :param log_scale: Check if output is scaled by logarithm, defaults to False</span>
+<span class="sd">        :type log_scale: bool, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_scale_type</span> <span class="o">=</span> <span class="n">input_scale_type</span>
+
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_scale_type</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;No more than one output is admitted&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_scale_type</span> <span class="o">=</span> <span class="n">output_scale_type</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_scale</span><span class="o">=</span><span class="n">log_scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_key</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">output_scale_type</span><span class="p">))</span> 
+        
+        <span class="c1"># Dictionaries containing scaling factors for each input feature</span>
+        <span class="c1"># e.g., </span>
+        <span class="c1"># inp_scale_1 = {&#39;Energy&#39;:1.000} </span>
+        <span class="c1"># Scale2 = {&#39;Energy&#39;:3.000}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inp_scale_1</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inp_scale_2</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Scaling factors for output</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_scale_1</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_scale_2</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="c1"># ********************************************************************</span>
+<span class="c1">#                           Public members</span>
+<span class="c1"># ********************************************************************</span>
+
+<div class="viewcode-block" id="Scaler.fit_and_scale"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.Scaler.fit_and_scale">[docs]</a>    <span class="k">def</span> <span class="nf">fit_and_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="n">Y</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Fit the input (X) and output tensor (Y) finding the corresponding scaling factors for each features and than scales X and Y. </span>
+
+<span class="sd">        :param X: Input dictionary.</span>
+<span class="sd">        :type X: dict[str,torch.tensor]</span>
+<span class="sd">        :param Y: Input dictionary.</span>
+<span class="sd">        :type Y: dict[str,torch.tensor]</span>
+<span class="sd">        :return: Returns a tuple with X and Y scaled.</span>
+<span class="sd">        :rtype: tuple[dict[str,torch.tensor], dict[str,torch.tensor]]</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="c1"># Scale input</span>
+        <span class="c1"># Iteration over all input features</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">X</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+            <span class="c1"># Find scaling factors </span>
+            <span class="n">scale1</span><span class="p">,</span> <span class="n">scale2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_scale_type</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+            <span class="c1"># Save</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inp_scale_1</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">scale1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inp_scale_2</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">=</span> <span class="n">scale2</span>
+            
+            <span class="c1"># Scale input feature</span>
+            <span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale_val</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_scale_type</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">scale1</span><span class="p">,</span> <span class="n">scale2</span><span class="p">)</span>
+
+        <span class="c1"># Scale output</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out_key</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+        <span class="c1"># Find scaling factors</span>
+        <span class="n">scale1</span><span class="p">,</span> <span class="n">scale2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_scale_type</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out_key</span><span class="p">])</span>
+        <span class="c1"># Save</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_scale_1</span> <span class="o">=</span> <span class="n">scale1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_scale_2</span> <span class="o">=</span> <span class="n">scale2</span>
+        <span class="c1"># Scale</span>
+        <span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale_val</span><span class="p">(</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out_key</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_scale_type</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out_key</span><span class="p">],</span> <span class="n">scale1</span><span class="p">,</span> <span class="n">scale2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span></div>
+
+<div class="viewcode-block" id="Scaler.scale"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.Scaler.scale">[docs]</a>    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="n">Y</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">])</span><span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Scales the given input (X) and output (Y) tensors.</span>
+
+<span class="sd">        :param X: Input dictionary.</span>
+<span class="sd">        :type X: dict[str,torch.tensor]</span>
+<span class="sd">        :param Y: Ouptut dictionary</span>
+<span class="sd">        :type Y: dict[str,torch.tensor]</span>
+<span class="sd">        :return: Returns a tuple with X and Y scaled.</span>
+<span class="sd">        :rtype: tuple[dict[str,torch.tensor], dict[str,torch.tensor]]</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        
+        <span class="c1"># Scale input</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">X</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inp_scale_1</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inp_scale_2</span><span class="p">),</span> <span class="s2">&quot;The input scale parameters are not defined. To correclty run &#39;scale&#39; function, first use &#39;fit_and_scale&#39; function&quot;</span> 
+            <span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale_val</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_scale_type</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">inp_scale_1</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">inp_scale_2</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+        <span class="c1"># Scale output</span>
+        <span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale_val</span><span class="p">(</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out_key</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_scale_type</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out_key</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_scale_1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_scale_2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span></div>
+
+
+<div class="viewcode-block" id="Scaler.denormalize"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.Scaler.denormalize">[docs]</a>    <span class="k">def</span> <span class="nf">denormalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Y</span><span class="p">:</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">:</span>
+
+        <span class="sd">&quot;&quot;&quot;Re-scale the output to its starting values</span>
+
+<span class="sd">        :param Y: Ouptut tensor</span>
+<span class="sd">        :type Y: torch.tensor</span>
+<span class="sd">        :return: re-scaled output</span>
+<span class="sd">        :rtype: torch.tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">Y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rescale</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_scale_type</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out_key</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_scale</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span>
+                <span class="n">Y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">Y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> 
+
+        <span class="k">return</span> <span class="n">Y</span></div>
+
+
+<span class="c1"># ********************************************************************</span>
+<span class="c1">#                           Private members</span>
+<span class="c1"># ********************************************************************</span>
+
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">scale_type</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]:</span>
+
+        
+        <span class="sd">&quot;&quot;&quot;Find scaling factors for a given tensor</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (torch.tensor): input tensor</span>
+<span class="sd">            scale_type (str): the type of scaling</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[torch.tensor, torch.tensor]: a tuple with the scaling factors. If the scaling factor is &#39;minmax&#39;, returns (MIN value, MAX value). </span>
+<span class="sd">            If the scaling is &#39;std&#39; return (MEAN value, STD value).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Min - Max scaling</span>
+        <span class="k">if</span> <span class="n">scale_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;minmax&#39;</span><span class="p">:</span>
+            <span class="n">scale1</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">scale2</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="c1"># Standard deviation scaling</span>
+        <span class="k">elif</span> <span class="n">scale_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;std&quot;</span><span class="p">:</span>
+            <span class="n">scale1</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">scale2</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">scale1</span><span class="p">,</span> <span class="n">scale2</span>
+
+    <span class="k">def</span> <span class="nf">_scale_val</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">scale_type</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">scale1</span><span class="p">:</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">scale2</span><span class="p">:</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">scale_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;minmax&#39;</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="o">-</span><span class="n">scale1</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">scale2</span><span class="o">-</span><span class="n">scale1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">scale_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;std&quot;</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="o">-</span><span class="n">scale1</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">scale2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X</span>
+
+    <span class="k">def</span> <span class="nf">_rescale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Y</span><span class="p">:</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">scale_type</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">scale_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;minmax&#39;</span><span class="p">:</span>
+            <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span>  <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_scale_2</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_scale_1</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_scale_1</span>
+        <span class="k">elif</span> <span class="n">scale_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;std&quot;</span><span class="p">:</span>
+            <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_scale_2</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_scale_1</span>
+        <span class="k">return</span> <span class="n">Y</span></div>
+
+
+
+
+
+
+<div class="viewcode-block" id="database_reader"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.database_reader">[docs]</a><span class="k">class</span> <span class="nc">database_reader</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;class that reads and manage data from database</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">mesh_dim</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">inputs</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> 
+                 <span class="n">database_inputs</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Output</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;Dose&#39;</span><span class="p">,</span> <span class="n">sample_per_case</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">20000</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class that reads and manage data from database</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (str): realtive path to database files</span>
+<span class="sd">            mesh_dim (list[int]): list containing the number of subdivisions on x,y and z of the mesh, e.g., </span>
+<span class="sd">            mesh_dim=[80,100,35] is a 80x100x35 mesh on x y z</span>
+<span class="sd">            inputs (list[str]): list containing the input to be considered. </span>
+<span class="sd">            database_inputs (list[str]): list containing all the inputs that are present in database files. </span>
+<span class="sd">            To be specified in the case in which the inputs list is a subset of the inputs present in the database. Default to None.</span>
+<span class="sd">            The input available are: &#39;energy&#39;, &#39;dist_source_tally&#39;,&#39;dist_shield_tally&#39;,&#39;mfp&#39;,&#39;theta&#39;,&#39;fi&#39;.</span>
+<span class="sd">            Output (str, optional): Target. Defaults to &#39;Dose&#39;.</span>
+<span class="sd">            sample_per_case (int, optional): Number of values to be considered for training per each file in database.</span>
+<span class="sd">             If None, all the values are considered. Defaults to 20000.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="c1"># Data path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+
+        <span class="c1"># Geometry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh_dim</span> <span class="o">=</span> <span class="n">mesh_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_dim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">mesh_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">mesh_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">mesh_dim</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">database_inputs</span> <span class="o">=</span> <span class="n">database_inputs</span> <span class="k">if</span> <span class="n">database_inputs</span> <span class="o">!=</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">inputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reference_outpus</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;dose&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">:</span>    
+            <span class="k">assert</span> <span class="n">inp</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">database_inputs</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inp</span><span class="si">}</span><span class="s2"> is not a valid feature&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span>
+        <span class="k">assert</span> <span class="n">Output</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_outpus</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">Output</span><span class="si">}</span><span class="s2"> is not a valid output&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Output</span> <span class="o">=</span> <span class="n">Output</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_indices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_map_inputs</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_channels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">sample_per_case</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dim</span><span class="p">,</span> <span class="s2">&quot;The number of values per case is greater than the maximum number of values available&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="n">sample_per_case</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_list</span><span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="c1"># ********************************************************************</span>
+<span class="c1">#                           Public members</span>
+<span class="c1"># ********************************************************************</span>
+
+<div class="viewcode-block" id="database_reader.read_data"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.database_reader.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">out_log_scale</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_inp_files</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_clip_values</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;read data in database folder</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            out_log_scale (bool, optional): Use log scale for output. Defaults to True.</span>
+<span class="sd">            num_inp_files (int, optional): Take a random sub set of database of num_inp_files. If None, takes all the files present</span>
+<span class="sd">            out_clip_values (list[float], optional): list clip values ([min clip, max clip]) for output. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+ 
+        <span class="n">path_to_database</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_database_path</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">(</span><span class="n">path_to_database</span><span class="p">)</span> <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_database</span><span class="p">,</span> <span class="n">f</span><span class="p">))]</span>
+
+        <span class="k">if</span> <span class="n">num_inp_files</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sample_files</span><span class="p">(</span><span class="n">num_inp_files</span><span class="o">=</span><span class="n">num_inp_files</span><span class="p">)</span>
+
+        <span class="c1">#Initialize input and output dictionary to empty lists</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_input_output</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;0&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_process_data</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> 
+                                 <span class="n">path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_database</span> <span class="p">,</span> <span class="n">f</span><span class="p">),</span> 
+                                 <span class="n">out_log_scale</span><span class="o">=</span><span class="n">out_log_scale</span><span class="p">,</span> 
+                                 <span class="n">samples_per_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span>
+                                 <span class="n">out_clip_values</span><span class="o">=</span><span class="n">out_clip_values</span><span class="p">)</span>
+
+        <span class="c1"># Permutation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span><span class="p">()</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="database_reader.read_data_from_file"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.database_reader.read_data_from_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_data_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">files</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">out_log_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">out_clip_values</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;read data present in files list in the database folder</span>
+
+
+<span class="sd">        Args:</span>
+<span class="sd">            files (list[str]): list of files to be read, e.g., [&#39;0_10_1_1100&#39;, &#39;0_20_1_1100&#39;, ...]</span>
+<span class="sd">            out_log_Scale (bool, optional): Use log scale for output. Defaults to True.</span>
+<span class="sd">            out_clip_values (list[float], optional): list clip values ([min clip, max clip]) for output. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+    
+        <span class="n">path_to_database</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_database_path</span><span class="p">()</span>
+        <span class="c1">#Initialize input dictionary to empty lists</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_input_output</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_process_data</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_to_database</span> <span class="p">,</span> <span class="n">f</span><span class="p">),</span> 
+                                <span class="n">samples_per_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span><span class="p">,</span>
+                                <span class="n">out_log_scale</span><span class="o">=</span><span class="n">out_log_scale</span><span class="p">,</span>
+                                <span class="n">out_clip_values</span><span class="o">=</span><span class="n">out_clip_values</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="database_reader.shuffle"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.database_reader.shuffle">[docs]</a>    <span class="k">def</span> <span class="nf">shuffle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Randomize input and output order</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="n">shuffle</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Output</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">shuffle</span><span class="p">]</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Output</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Output</span><span class="p">][</span><span class="n">shuffle</span><span class="p">]</span></div>
+        <span class="c1"># print(f&quot;Y size {self.Y[self.Output].size()}&quot;)</span>
+
+<div class="viewcode-block" id="database_reader.split_train_val"><a class="viewcode-back" href="../../../pkdnn.net.html#pkdnn.net.datamanager.database_reader.split_train_val">[docs]</a>    <span class="k">def</span> <span class="nf">split_train_val</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">perc</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.85</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]],</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]]]:</span>
+        <span class="sd">&quot;&quot;&quot;Split into train and validation set</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            perc (float, optional): Percentage for train set. Defaults to 0.85.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[tuple[dict[str,torch.tensor], dict[str,torch.tensor]], tuple[dict[str,torch.tensor], dict[str,torch.tensor]]]: </span>
+<span class="sd">            returns two tuples of (input training, output training)  and (input validation, output validation) </span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="n">n_train</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Output</span><span class="p">])</span><span class="o">*</span><span class="n">perc</span><span class="p">)</span>
+        <span class="c1"># print(f&quot;N TRAIN: {n_train}&quot;)</span>
+
+        <span class="n">XTrain</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">XVal</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">:</span>
+            <span class="n">XTrain</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">n_train</span><span class="p">]</span>
+            <span class="n">XVal</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">n_train</span><span class="p">:]</span>
+
+
+        <span class="n">YTrain</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">YVal</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">YTrain</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Output</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Output</span><span class="p">][:</span><span class="n">n_train</span><span class="p">]</span>
+        <span class="n">YVal</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Output</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Output</span><span class="p">][</span><span class="n">n_train</span><span class="p">:]</span>
+
+        
+        <span class="k">return</span> <span class="p">(</span><span class="n">XTrain</span><span class="p">,</span> <span class="n">YTrain</span><span class="p">),</span> <span class="p">(</span><span class="n">XVal</span><span class="p">,</span> <span class="n">YVal</span><span class="p">)</span></div>
+
+
+<span class="c1"># ********************************************************************</span>
+<span class="c1">#                           Private members</span>
+<span class="c1"># ********************************************************************</span>
+
+    <span class="k">def</span> <span class="nf">_map_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">list_of_ind</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">database_inputs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">inp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">:</span>
+                <span class="n">list_of_ind</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_indices</span> <span class="o">=</span> <span class="n">list_of_ind</span>
+
+    <span class="k">def</span> <span class="nf">_LH_sampling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">:</span><span class="nb">int</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Quasi Monte Carlo samping over mesh indices</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            n_samples (int): number of desired samples</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[int]: array indices of LH sampling</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sampler</span> <span class="o">=</span> <span class="n">qmc</span><span class="o">.</span><span class="n">LatinHypercube</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">low</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">sample</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">l_bounds</span><span class="o">=</span><span class="n">low</span><span class="p">,</span> <span class="n">u_bounds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_dim</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n_samples</span><span class="p">)</span>
+        <span class="n">ind_sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_index</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ind_sample</span>
+
+    <span class="k">def</span> <span class="nf">_get_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]])</span><span class="o">-&gt;</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Transform [i,j,k] indices into array index</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            list[list[int]]: list of [i,j,k] indices of LH sampling</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[int]: array indices of LH sampling</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span>   <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_dim</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">*</span><span class="n">ind_coord</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_dim</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">ind_coord</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ind_coord</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">ind_coord</span> <span class="ow">in</span> <span class="n">sample</span> <span class="p">]</span>
+    
+    <span class="k">def</span> <span class="nf">_database_path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">str</span><span class="p">:</span>
+        <span class="n">current_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+        <span class="n">relative_path</span> <span class="o">=</span> <span class="s2">&quot;..&quot;</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_dir</span><span class="p">,</span> <span class="n">relative_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_initialize_input_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">names</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">names</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Output</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">_sample_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_inp_files</span><span class="p">):</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_list</span><span class="p">)),</span> <span class="n">num_inp_files</span><span class="p">)</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span> <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_list</span> <span class="o">=</span> <span class="n">files</span>
+        <span class="k">return</span>      
+
+    <span class="k">def</span> <span class="nf">_process_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">out_log_scale</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+                     <span class="n">samples_per_file</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                     <span class="n">out_clip_values</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        
+        
+        <span class="k">if</span> <span class="n">samples_per_file</span><span class="o">!=</span><span class="kc">None</span> <span class="ow">and</span> <span class="n">samples_per_file</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dim</span><span class="p">:</span>
+            <span class="n">lhs_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_LH_sampling</span><span class="p">(</span><span class="n">samples_per_file</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lhs_indices</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="n">arr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_item</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        
+        <span class="c1"># Make output</span>
+        <span class="n">out_arr</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">n_dim</span><span class="p">]</span>
+        <span class="n">msk_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_output</span><span class="p">(</span><span class="n">out_arr</span><span class="p">,</span> <span class="n">out_log_scale</span><span class="p">,</span> <span class="n">lhs_indices</span><span class="p">,</span> <span class="n">out_clip_values</span><span class="p">)</span>
+        
+        <span class="c1"># Make inputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_process_input</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">lhs_indices</span><span class="p">,</span> <span class="n">msk_ind</span><span class="p">)</span>
+        
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">_process_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">out_arr</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">out_log_scale</span><span class="p">:</span><span class="nb">bool</span><span class="p">,</span> 
+                       <span class="n">lhs_indices</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_clip_values</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Process the output data from one file in the database.</span>
+<span class="sd">        The processing is made through:</span>
+<span class="sd">        1. Latin Hypercube Sampling</span>
+<span class="sd">        2. Clipping</span>
+<span class="sd">        3. Log scaling</span>
+<span class="sd">        4. Assign to self.Y dicitonary</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[int]: mask for clipping. If no clipping values were used, returns None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="n">out_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">out_arr</span><span class="p">)</span>
+        
+        <span class="c1"># Latin hypercube sampling</span>
+        <span class="k">if</span> <span class="n">lhs_indices</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_tensor</span> <span class="o">=</span> <span class="n">out_tensor</span><span class="p">[</span><span class="n">lhs_indices</span><span class="p">]</span>
+        
+        <span class="c1"># Clip values</span>
+        <span class="k">if</span> <span class="n">out_clip_values</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span> <span class="n">out_tensor</span>  <span class="o">&lt;</span>  <span class="n">out_clip_values</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span> <span class="n">out_tensor</span>  <span class="o">&gt;</span> <span class="n">out_clip_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="n">msk_ind</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">msk</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span><span class="p">]</span>
+            <span class="n">out_tensor</span>  <span class="o">=</span>  <span class="n">out_tensor</span><span class="p">[</span><span class="n">msk_ind</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msk_ind</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Log scaling</span>
+        <span class="k">if</span> <span class="n">out_log_scale</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Output</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span>
+                <span class="n">out_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span> <span class="n">out_tensor</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">Output</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;dose&quot;</span><span class="p">:</span>
+                <span class="n">out_arr</span> <span class="o">=</span> <span class="n">out_tensor</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+                <span class="n">out_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">out_arr</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
+                <span class="c1"># Bound dose=0 values to minimum dose available</span>
+                <span class="nb">min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">out_arr</span><span class="p">)</span>
+                <span class="n">out_arr</span><span class="p">[</span><span class="n">out_arr</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span>
+                <span class="n">out_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">out_arr</span><span class="p">)</span>
+        
+        <span class="c1"># Assign</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Output</span><span class="p">]</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Output</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Output</span><span class="p">],</span> <span class="n">out_tensor</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Output</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_tensor</span>
+        
+        <span class="k">return</span> <span class="n">msk_ind</span>
+
+    <span class="k">def</span> <span class="nf">_process_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">lhs_indices</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="n">msk_ind</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>  
+        
+        <span class="c1"># MAKE INPUT</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_indices</span><span class="p">:</span>
+            <span class="n">input_arr</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">n_dim</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">n_dim</span><span class="p">]</span>
+
+            <span class="k">if</span><span class="p">(</span><span class="n">i</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span> <span class="c1">#Energy</span>
+                <span class="n">energy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">])</span> 
+                <span class="n">tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span> <span class="p">[</span> <span class="n">energy</span> <span class="p">]</span> <span class="p">)</span>
+                <span class="n">tensor</span> <span class="o">=</span> <span class="n">tensor</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_dim</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">input_arr</span><span class="p">)</span>
+
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database_inputs</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="c1"># Latin hypercube sampling</span>
+            <span class="k">if</span> <span class="n">lhs_indices</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">tensor</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">[</span><span class="n">lhs_indices</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">msk_ind</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">tensor</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">[</span><span class="n">msk_ind</span><span class="p">]</span>
+
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">tensor</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">tensor</span>
+        <span class="k">return</span>
+    
+    <span class="k">def</span> <span class="nf">_get_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Binary file reader</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fn (str): file</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.array: 1D array of values. The values are concateneted in this order:</span>
+<span class="sd">            output - dist_source_tally - dist_shield_tally - mfp - theta - fi</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="n">a</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s1">&#39;f&#39;</span><span class="p">)</span>
+        <span class="n">a</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span> <span class="o">//</span> <span class="n">a</span><span class="o">.</span><span class="n">itemsize</span><span class="p">)</span>
+        <span class="k">return</span>  <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">a</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Mario Belotti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
