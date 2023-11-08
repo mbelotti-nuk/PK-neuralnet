@@ -243,8 +243,9 @@ class database_reader:
         self.input_indices = []
         self._map_inputs()
         self.n_channels = len(inputs)
-
-        assert sample_per_case <= self.n_dim, "The number of values per case is greater than the maximum number of values available"
+        
+        if sample_per_case != None:
+            assert sample_per_case <= self.n_dim, "The number of values per case is greater than the maximum number of values available"
         self.n_samples = sample_per_case
 
         self.file_list= []
@@ -273,17 +274,19 @@ class database_reader:
 
         #Initialize input and output dictionary to empty lists
         self._initialize_input_output()
-
+        fill_pointer = 0
         for f in self.file_list:
             if f.split('_')[0] == "0":
-                self._process_data(file=f, 
+                fill_pointer = self._process_data(fill_pointer=fill_pointer, file=f, 
                                  path=os.path.join(path_to_database , f), 
                                  out_log_scale=out_log_scale, 
                                  samples_per_file=self.n_samples,
                                  out_clip_values=out_clip_values)
+        # Resize input output
+        for inp_type in self.X:
+            self.X[inp_type] = self.X[inp_type][:fill_pointer]
+        self.Y[self.Output] = self.Y[self.Output][:fill_pointer]
 
-        # Permutation
-        self.shuffle()
         return
 
     def read_data_from_file(self, files:list[str], out_log_scale=True,out_clip_values:list[float]=None):
@@ -299,11 +302,18 @@ class database_reader:
         path_to_database = self._database_path()
         #Initialize input dictionary to empty lists
         self._initialize_input_output()
+        fill_pointer = 0
         for f in files:
-            self._process_data(f, path=os.path.join(path_to_database , f), 
+            fill_pointer = self._process_data(f, fill_pointer=fill_pointer, path=os.path.join(path_to_database , f), 
                                 samples_per_file=self.n_samples,
                                 out_log_scale=out_log_scale,
                                 out_clip_values=out_clip_values)
+            
+        # Resize input output
+        for inp_type in self.X:
+            self.X[inp_type] = self.X[inp_type][:fill_pointer]
+        self.Y[self.Output] = self.Y[self.Output][:fill_pointer]
+
         return
 
     def shuffle(self):
@@ -325,7 +335,13 @@ class database_reader:
         Returns:
             tuple[tuple[dict[str,torch.tensor], dict[str,torch.tensor]], tuple[dict[str,torch.tensor], dict[str,torch.tensor]]]: 
             returns two tuples of (input training, output training)  and (input validation, output validation) 
-        """        
+        """       
+
+
+        # Permutation
+        self.shuffle()
+
+
         n_train = int(len(self.Y[self.Output])*perc)
         # print(f"N TRAIN: {n_train}")
 
@@ -391,8 +407,13 @@ class database_reader:
     
     def _initialize_input_output(self):
         for names in self.inputs:
-            self.X[names] = None
-        self.Y[self.Output] = None
+            if self.n_samples == None:
+                n = self.n_dim
+            else:
+                n = self.n_samples
+            nf = len(self.file_list)
+            self.X[names] = torch.empty(n*nf, dtype=torch.float32) #None
+        self.Y[self.Output] = torch.empty(n*nf, dtype=torch.float32)#None
         return
 
     def _sample_files(self, num_inp_files):
@@ -401,7 +422,7 @@ class database_reader:
         self.file_list = files
         return      
 
-    def _process_data(self, file:str, path:str, out_log_scale:bool=True, 
+    def _process_data(self, file:str, fill_pointer:int, path:str, out_log_scale:bool=True, 
                      samples_per_file:int=None, 
                      out_clip_values:list[float]=None):
         
@@ -415,14 +436,14 @@ class database_reader:
         
         # Make output
         out_arr = arr[0:self.n_dim]
-        msk_ind = self._process_output(out_arr, out_log_scale, lhs_indices, out_clip_values)
+        msk_ind = self._process_output(fill_pointer, out_arr, out_log_scale, lhs_indices, out_clip_values)
         
         # Make inputs
-        self._process_input(arr, file, lhs_indices, msk_ind)
+        fill_pointer = self._process_input(fill_pointer, arr, file, lhs_indices, msk_ind)
         
-        return
+        return fill_pointer
 
-    def _process_output(self, out_arr:np.array, out_log_scale:bool, 
+    def _process_output(self, fill_pointer:int, out_arr:np.array, out_log_scale:bool, 
                        lhs_indices:None, out_clip_values:list[float]=None) -> list[int]:
         """Process the output data from one file in the database.
         The processing is made through:
@@ -461,20 +482,25 @@ class database_reader:
                 out_tensor = torch.from_numpy(out_arr)
         
         # Assign
-        if self.Y[self.Output] != None:
-            self.Y[self.Output] = torch.cat([self.Y[self.Output], out_tensor])
-        else:
-            self.Y[self.Output] = out_tensor
+        # if self.Y[self.Output] != None:
+        #     self.Y[self.Output] = torch.cat([self.Y[self.Output], out_tensor])
+        # else:
+        #     self.Y[self.Output] = out_tensor
+        
+        #############################################################
+        self.Y[self.Output][fill_pointer:fill_pointer+ out_tensor.size(0)] = out_tensor
+        #############################################################
         
         return msk_ind
 
-    def _process_input(self, arr:np.array, file:str, lhs_indices:list[int]=None,
+    def _process_input(self, fill_pointer:int, arr:np.array, file:str, lhs_indices:list[int]=None,
                       msk_ind:list[int]=None):  
         
         # MAKE INPUT
+        
         for i in self.input_indices:
             input_arr = arr[(i-1)*self.n_dim : (i)*self.n_dim]
-
+            
             if(i==1): #Energy
                 energy = float(file.split('_')[2]) 
                 tensor = torch.tensor( [ energy ] )
@@ -491,11 +517,19 @@ class database_reader:
                 tensor = tensor[msk_ind]
 
 
-            if self.X[name] != None:
-                self.X[name] = torch.cat([self.X[name], tensor])
-            else:
-                self.X[name] = tensor
-        return
+            # if self.X[name] != None:
+            #     self.X[name] = torch.cat([self.X[name], tensor])
+            # else:
+            #     self.X[name] = tensor
+
+        #############################################################
+            to_fill = fill_pointer+tensor.size(0)
+            #print(f"{fill_pointer} to {to_fill}")
+            self.X[name][fill_pointer:to_fill] = tensor
+
+        fill_pointer = to_fill
+        #############################################################
+        return fill_pointer
     
     def _get_item(self, fn:str) -> np.array:
         """Binary file reader
