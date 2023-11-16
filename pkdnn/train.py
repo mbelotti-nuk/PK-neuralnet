@@ -13,7 +13,7 @@ from pkdnn.functionalities.graphics import kde_plot
 from pkdnn.functionalities.config import load_config, check_train_config
 from pkdnn.net.trainFunctions import train_model
 from pkdnn.net.pk_nn import pknn, make_prediction
-from pkdnn.net.datamanager import Scaler, Dataset, database_reader 
+from pkdnn.net.datamanager import Scaler, Dataset, Errors_dataset, database_reader 
 
 from .predict import make_prediction
 import torch
@@ -74,7 +74,9 @@ def set_training_vars(config, model):
 def input_data_processing(config):
     # Read data
     Reader = database_reader(config['io_paths']['path_to_database'], config['out_spec']['mesh_dim'], 
-                    config['inp_spec']['inputs'], config['inp_spec']['database_inputs'], config['out_spec']['output'], sample_per_case=config['nn_spec']['samples_per_case'])
+                    config['inp_spec']['inputs'], config['inp_spec']['database_inputs'], config['out_spec']['output'], 
+                    sample_per_case=config['nn_spec']['samples_per_case'],
+                    save_errors=config['out_spec']['errors'] )
     Reader.read_data(num_inp_files = config['nn_spec']['n_files'], out_log_scale=config['out_spec']['out_log_scale'],out_clip_values=config['out_spec']['out_clip'])
 
     # Split into Train and Validatioin
@@ -82,12 +84,20 @@ def input_data_processing(config):
 
     # Scale
     scaler = Scaler(config['inp_spec']['inp_scaletype'], config['out_spec']['out_scaletype'], config['out_spec']['out_log_scale'])
-    TrainSet = ( scaler.fit_and_scale(TrainSet[0], TrainSet[1]) )
-    ValSet = ( scaler.scale(ValSet[0], ValSet[1]) )    
+    scaled_trainset = ( scaler.fit_and_scale(TrainSet[0], TrainSet[1]) )
+    scaled_valset = ( scaler.scale(ValSet[0], ValSet[1]) )    
 
     # Build datasets
-    train_dataset = Dataset(TrainSet[0], TrainSet[1])
-    validation_dataset = Dataset(ValSet[0], ValSet[1])
+    if config['metrics']['error_loss'] :
+        data = {"x":scaled_trainset[0], "y": scaled_trainset[1], "errors": TrainSet[2]  }
+        train_dataset = Errors_dataset(data)
+        data = {"x":scaled_valset[0], "y": scaled_valset[1], "errors": ValSet[2]  }
+        validation_dataset =Errors_dataset(data)
+    else:
+        data = {"x":scaled_trainset[0], "y": scaled_trainset[1] }
+        train_dataset = Dataset(data)
+        data = {"x":scaled_valset[0], "y": scaled_valset[1] }
+        validation_dataset = Dataset(data)
 
     return train_dataset, validation_dataset, scaler
 
@@ -147,8 +157,8 @@ def main():
     pkdnn_model, train_loss, test_loss = train_model(
         model, train_dataset, validation_dataset, optimizer, device=device, epochs=config['training_parameters']['n_epochs'], batch_size=config['training_parameters']['batch_size'],
         patience=config['training_parameters']['patience'], save_path=save_path, loss=loss, accuracy=accuracy, lr_scheduler=config['lr_scheduler'],
-        mixed_precision=config['training_parameters']['mixed_precision']
-    )
+        mixed_precision=config['training_parameters']['mixed_precision'],
+        errors=config['metrics']['error_loss']    )
     
 
 

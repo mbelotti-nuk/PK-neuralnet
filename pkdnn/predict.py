@@ -36,7 +36,8 @@ def main():
     # Read Test File
     Reader = database_reader(path=config['io_paths']['path_to_file'], mesh_dim=config['out_spec']['mesh_dim'], 
                           inputs=config['inp_spec']['inputs'], database_inputs=config['inp_spec']['database_inputs'], 
-                          Output=config['out_spec']['output'], sample_per_case=n)
+                          Output=config['out_spec']['output'], sample_per_case=n,
+                          save_errors=config['out_spec']['errors'])
     Reader.read_data_from_file([config['io_paths']['filename']], out_log_scale=config['out_spec']['out_log_scale'])
 
     # Prepare input-output

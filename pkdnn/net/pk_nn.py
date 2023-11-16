@@ -29,19 +29,56 @@ class pknn(nn.Module):
      
 
 def make_prediction( dataset, model, scaler, config, test_file=False ) -> (torch.tensor, torch.tensor, torch.tensor):
+    loader = torch.utils.data.DataLoader(dataset, batch_size=64, shuffle=False) 
     
-    X, Y = dataset.getall()
+    predictions = torch.empty(dataset.num_elements(), dtype=torch.float32)
+    real = torch.empty(dataset.num_elements(), dtype=torch.float32)
 
-    out = model(X.to("cpu").unsqueeze(0))
+    print(dataset.num_elements())
+    ptr = 0
+    for batch_idx, tensors in enumerate(loader):
+      
+        # unpack    
+        if len(tensors) == 2:
+            x, y = tensors
+            errors = None
+        else:
+            x, y, errors = tensors
+        
+        pred = model(x)
 
-    # Denormalize
-    Y = scaler.denormalize(Y.detach())
-    out = scaler.denormalize(out.detach())
+        # Denormalize
+        y = scaler.denormalize(y.detach())
+        pred = scaler.denormalize(pred.detach())
 
-    Errors = 100*(out-Y)/Y
+
+        ptr_to = y.size().numel() + ptr
+        predictions[ptr: ptr_to] = pred.flatten()
+        real[ptr: ptr_to] = y.flatten()
+
+        ptr = ptr_to
+        del pred 
+
     
-    if test_file:
-        out = out.flatten().reshape((config['out_spec']['mesh_dim'][0], config['out_spec']['mesh_dim'][1], config['out_spec']['mesh_dim'][2]))
-        Y = Y.flatten().reshape((config['out_spec']['mesh_dim'][0], config['out_spec']['mesh_dim'][1], config['out_spec']['mesh_dim'][2]))
+    diffs = predictions-real
+    errors = 100*diffs/real
 
-    return (Errors, out, Y)
+    errors = errors.to("cpu")
+    predictions =  predictions.to("cpu")
+    real = real.to("cpu")
+
+    # X, Y = dataset.getall()
+
+    # out = model(X.to("cpu").unsqueeze(0))
+
+    # # Denormalize
+    # Y = scaler.denormalize(Y.detach())
+    # out = scaler.denormalize(out.detach())
+
+    # Errors = 100*(out-Y)/Y
+    
+    # if test_file:
+    #     out = out.flatten().reshape((config['out_spec']['mesh_dim'][0], config['out_spec']['mesh_dim'][1], config['out_spec']['mesh_dim'][2]))
+    #     Y = Y.flatten().reshape((config['out_spec']['mesh_dim'][0], config['out_spec']['mesh_dim'][1], config['out_spec']['mesh_dim'][2]))
+
+    return (errors, predictions, real)

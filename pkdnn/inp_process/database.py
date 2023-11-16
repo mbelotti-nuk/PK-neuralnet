@@ -228,22 +228,6 @@ class input_admin:
                     read = True
         return energy, data
 
-        downE = 0
-        downMuE = 0
-        upE = 0
-        upMuE = 0
-        for i in range(0, len(energies)):
-            e = energies[i]
-            mu_e = datas[i]
-                
-            if(e <= E):
-                downE = e
-                downMuE = mu_e
-            else:
-                upE = e
-                upMuE = mu_e
-                break
-        return self._interp(E, downE, upE, downMuE, upMuE)
 
     def _define_data(self, energies:list[float], datas:list[float])->float:
         """Browse the energy bins until the bin in which self.energy fall is found.
@@ -363,12 +347,13 @@ class database_maker:
 
         self.database_input = {}
         self.database_output = []
+        self.database_errors = []
 
 # ********************************************************************
 #                           Public members
 # ********************************************************************
 
-    def read(self, filename:str, inputs:list[str], output:str, n_samples:int=None, max_error:float=None):
+    def read(self, filename:str, inputs:list[str], output:str, n_samples:int=None, max_error:float=None, save_errors:bool=False):
         """Reads a raw MCNP file (named 'filename') and extract the list of desidered inputs and the desired output.
         After the reading process, two variables named 'database_input' and 'database_output' are exctracted.
 
@@ -457,16 +442,20 @@ class database_maker:
                 self.database_output = self.reader._doses[ind_sample]/np.array(dose_direct_contribution)
             else:
                 self.database_output = self.reader._doses[ind_sample]
+            if save_errors: 
+                self.database_errors = self.reader.errors[ind_sample]
         else:
             if output.lower() == 'b':
                 self.database_output = self.reader._doses/np.array(dose_direct_contribution)
             else:
                 self.database_output = self.reader._doses
+            if save_errors:
+                self.database_errors = self.reader.errors
 
         return
     
 
-    def save_to_binary(self, save_path:str):
+    def save_to_binary(self, save_path:str, save_errors:bool):
         """Save the variables 'database_output' and 'database_input' to save_path.
         The variables are saved with this order: output, inputs[0], inputs[1] ...
 
@@ -474,6 +463,8 @@ class database_maker:
             save_path (str): absolute path were to save the database input/output info
         """        
         lst = [np.array(i[1]) for i in self.database_input.items()]
+        if save_errors:
+            lst.insert(0, np.array(self.database_errors))
         lst.insert(0, np.array(self.database_output))
         lst = np.concatenate(lst, axis=None)
         buffer = self._binary_converter(lst)

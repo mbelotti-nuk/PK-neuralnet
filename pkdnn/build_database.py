@@ -21,6 +21,8 @@ def write_specifics(config):
     fout = open(join(config['io_paths']['database_folder_path'],'Database_specifics.txt'),'w')
     lines = ""
     lines+= f"Output:\t\t{config['out_spec']['output']}\n"
+    if config['out_spec']['errors']:
+        lines+= f"Errors \t\t\n"
     for i, inp in enumerate(config['inp_spec']['inputs']):
         lines+= f"Input{i}:\t\t{inp}\n"
 
@@ -76,9 +78,9 @@ def main():
 
         counter += 1 
         print(f"Processing {filename}; number {counter} of {len(lst)}")
-        database_mkr.read(filename, inputs=config['inp_spec']['inputs'], output=config['out_spec']['output'])
+        database_mkr.read(filename, inputs=config['inp_spec']['inputs'], output=config['out_spec']['output'], save_errors=config['out_spec']['errors'] )
 
-        database_mkr.save_to_binary(join(config['io_paths']['database_folder_path'], filename))
+        database_mkr.save_to_binary(join(config['io_paths']['database_folder_path'], filename), save_errors=config['out_spec']['errors'])
 
 if __name__ == '__main__':
     main()

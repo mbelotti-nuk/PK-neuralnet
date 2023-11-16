@@ -32,12 +32,21 @@ def load_config():
 
 
 def check_train_config(config):
-    entries = ["save_directory", "inputs", "database_inputs", "inp_scaletype",
-                "output", "out_scaletype", "out_clip", "out_log_scale", "path_to_database",
-                "mesh_dim", "n_files", "samples_per_case", "percentage", "f_maps", "batch_size",
-                "n_epochs", "patience", "loss", "accuracy", "optimizer", "lr_scheduler", "mixed_precision"]
+
+    entries = [     {"io_paths": ["save_directory","path_to_database" ]},
+                    {"inp_spec": ["database_inputs", "inp_scaletype"]},
+                    {"out_spec": ["output", "out_scaletype", "out_clip", "out_log_scale", "mesh_dim", "errors"]},
+                    {"nn_spec": ["f_maps","n_files", "samples_per_case", "percentage" ]},
+                    {"training_parameters": ["batch_size", "n_epochs", "patience", "mixed_precision"]},
+                    {"metrics": ["loss", "error_loss","accuracy"]},
+                    {"optimizer": ["type", "learning_rate", "weight_decay"]},
+                    {"lr_scheduler": ["factor", "patience"]} ] 
+
 
     for e in entries:
-        assert e in config, f"The entry {e} is missing in the .yaml file"
+        key = list(e.keys())[0]
+        assert key in config, f"The entry {key} is missing in the .yaml file"
+        for v in e.values():
+            assert v in config[key], f"The entry {v} in {key} is missing in the .yaml file"      
 
 

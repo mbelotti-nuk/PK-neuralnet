@@ -10,38 +10,64 @@ from os.path import isfile, join
 from scipy.stats import qmc
 from typing import List as list, Dict as dict, Tuple as tuple
 
+
+
 class Dataset(Dataset):
-    def __init__(self, X:dict[str,torch.tensor], Y:dict[str,torch.tensor]):
-        self.X = X
-        self.Y = Y
-        self.out_key = next(iter(self.Y)) 
+    def __init__(self, data):
+        # Input
+        inp_keys = data["x"].keys()
+        lst = [data["x"][inp_type] for inp_type in inp_keys ]
+        self.inp = torch.stack(lst, dim=1)
+
+        # Output
+        out_key = next(iter(data["y"])) 
+        self.out = data["y"][out_key].unsqueeze(1)
 
     def __len__(self):
-        return len(self.Y[self.out_key])
+        return len(self.out)
 
     def __getitem__(self, index):
-        lst=[]
-        for key in self.X:
-            lst.append(self.X[key][index])
 
-        x = torch.stack(lst, dim=0)       
+        x = self.inp[index]
 
-        y =self.Y[self.out_key][index]
-        y = y.unsqueeze(-1)
-       
-        return x, y
-
-    def getall(self) -> tuple[torch.tensor, torch.tensor]:
-        lst=[]
-        for key in self.X:
-            lst.append(self.X[key])
-
-        x = torch.stack(lst, dim=1)       
-
-        y =self.Y[self.out_key]
-        y = y.unsqueeze(-1)
+        y =self.out[index]
         
         return x, y
+
+    def num_elements(self):
+        return self.out.size().numel()
+
+
+
+class Errors_dataset(Dataset):
+    def __init__(self, data):
+        # Input
+        inp_keys = data["x"].keys()
+        lst = [data["x"][inp_type] for inp_type in inp_keys ]
+        self.inp = torch.stack(lst, dim=1)
+
+        # Output
+        out_key = next(iter(data["y"])) 
+        self.out = data["y"][out_key].unsqueeze(1)
+
+        # Errros
+        self.errors = data["errors"].unsqueeze(1)
+
+    def __len__(self):
+        return len(self.out)
+
+    def __getitem__(self, index):
+
+        x = self.inp[index]
+
+        y = self.out[index]
+        
+        error = self.errors[index]
+        
+        return x, y, error
+
+    def num_elements(self):
+        return self.out.size().numel()
 
 
 
@@ -210,7 +236,8 @@ class database_reader:
     """class that reads and manage data from database
     """    
     def __init__(self, path:str, mesh_dim:list[int], inputs:list[str], 
-                 database_inputs:list[str]=None, Output:str='Dose', sample_per_case:int=20000):
+                 database_inputs:list[str]=None, Output:str='Dose', sample_per_case:int=20000,
+                 save_errors:bool=False):
         """Class that reads and manage data from database
 
         Args:
@@ -233,6 +260,9 @@ class database_reader:
         self.n_dim = int(mesh_dim[0]*mesh_dim[1]*mesh_dim[2])
 
 
+        # ERORRSSS
+        self.save_errors= save_errors
+
         self.database_inputs = database_inputs if database_inputs != None else inputs
         self.reference_outpus = ['b', 'dose']
         for inp in inputs:    
@@ -240,7 +270,9 @@ class database_reader:
         self.inputs = inputs
         assert Output.lower() in self.reference_outpus, f"{Output} is not a valid output"
         self.Output = Output
-        self.input_indices = []
+        
+        self.input_indices = {}
+        
         self._map_inputs()
         self.n_channels = len(inputs)
         
@@ -252,6 +284,8 @@ class database_reader:
 
         self.X = {}
         self.Y = {}
+        self.Errors = {}
+        self.path_to_database = ""
 
 # ********************************************************************
 #                           Public members
@@ -265,10 +299,11 @@ class database_reader:
             num_inp_files (int, optional): Take a random sub set of database of num_inp_files. If None, takes all the files present
             out_clip_values (list[float], optional): list clip values ([min clip, max clip]) for output. Defaults to None.
         """
- 
-        path_to_database = self._database_path()
-        self.file_list = [f for f in listdir(path_to_database) if isfile(join(path_to_database, f))]
 
+        # define database files
+        self.get_list_files()
+
+        # sample a number of files equal to num_inp_files
         if num_inp_files != None:
             self._sample_files(num_inp_files=num_inp_files)
 
@@ -276,16 +311,18 @@ class database_reader:
         self._initialize_input_output()
         fill_pointer = 0
         for f in self.file_list:
-            if f.split('_')[0] == "0":
-                fill_pointer = self._process_data(fill_pointer=fill_pointer, file=f, 
-                                 path=os.path.join(path_to_database , f), 
+            fill_pointer = self._process_data(fill_pointer=fill_pointer, file=f, 
+                                 path=os.path.join(self.path_to_database , f), 
                                  out_log_scale=out_log_scale, 
                                  samples_per_file=self.n_samples,
                                  out_clip_values=out_clip_values)
+        
         # Resize input output
         for inp_type in self.X:
             self.X[inp_type] = self.X[inp_type][:fill_pointer]
         self.Y[self.Output] = self.Y[self.Output][:fill_pointer]
+        if self.save_errors:
+            self.Errors["errors"] = self.Errors["errors"][:fill_pointer]
 
         return
 
@@ -326,7 +363,7 @@ class database_reader:
         self.Y[self.Output] = self.Y[self.Output][shuffle]
         # print(f"Y size {self.Y[self.Output].size()}")
 
-    def split_train_val(self, perc:float=0.85)->tuple[tuple[dict[str,torch.tensor], dict[str,torch.tensor]], tuple[dict[str,torch.tensor], dict[str,torch.tensor]]]:
+    def split_train_val(self, perc:float=0.85):
         """Split into train and validation set
 
         Args:
@@ -339,26 +376,37 @@ class database_reader:
 
 
         # Permutation
-        self.shuffle()
+        #self.shuffle()
 
-
+        shuffle = torch.randperm(self.Y[self.Output].size()[0]) 
         n_train = int(len(self.Y[self.Output])*perc)
-        # print(f"N TRAIN: {n_train}")
 
         XTrain = {}
         XVal = {}
         for key in self.X:
-            XTrain[key] = self.X[key][0:n_train]
-            XVal[key] = self.X[key][n_train:]
+            XTrain[key] = self.X[key][shuffle[:n_train]]
+            XVal[key] = self.X[key][shuffle[n_train:]]
 
 
         YTrain = {}
         YVal = {}
-        YTrain[self.Output] = self.Y[self.Output][:n_train]
-        YVal[self.Output] = self.Y[self.Output][n_train:]
+        YTrain[self.Output] = self.Y[self.Output][shuffle[:n_train]]
+        YVal[self.Output] = self.Y[self.Output][shuffle[n_train:]]
 
+        if self.Errors != None:
+            out_set = [XTrain, YTrain, self.Errors["errors"][shuffle[:n_train]]], [XVal, YVal, self.Errors["errors"][shuffle[n_train:]]]
+        else:
+            out_set = [XTrain, YTrain], [XVal, YVal]
         
-        return (XTrain, YTrain), (XVal, YVal)
+        return out_set
+
+
+    def get_list_files(self):
+        self.path_to_database = self._database_path()
+        self.file_list = [f for f in listdir(self.path_to_database) if isfile(join(self.path_to_database, f))]
+        # check all files are database files
+        self.file_list = [f for f in self.file_list if f.split('_')[0] == "0"]
+        return
 
 
 # ********************************************************************
@@ -366,13 +414,18 @@ class database_reader:
 # ********************************************************************
 
     def _map_inputs(self):
-        list_of_ind = []
-        i = 1
+        #list_of_ind = []
+        
+        shift = 1
+        # second place are errors if are saved
+        if self.save_errors:
+            shift +=1
         for inp in self.database_inputs:
             if inp in self.inputs:
-                list_of_ind.append(i)
-            i += 1
-        self.input_indices = list_of_ind
+                #list_of_ind.append(i)
+                self.input_indices[inp] = shift
+            shift += 1
+        #self.input_indices = list_of_ind
 
     def _LH_sampling(self, n_samples:int)->list[int]:
         """Quasi Monte Carlo samping over mesh indices
@@ -414,6 +467,8 @@ class database_reader:
             nf = len(self.file_list)
             self.X[names] = torch.empty(n*nf, dtype=torch.float32) #None
         self.Y[self.Output] = torch.empty(n*nf, dtype=torch.float32)#None
+        if self.save_errors:
+            self.Errors["errors"] = torch.empty(n*nf, dtype=torch.float32)
         return
 
     def _sample_files(self, num_inp_files):
@@ -436,7 +491,9 @@ class database_reader:
         
         # Make output
         out_arr = arr[0:self.n_dim]
-        msk_ind = self._process_output(fill_pointer, out_arr, out_log_scale, lhs_indices, out_clip_values)
+        if self.save_errors:
+            out_err = arr[self.n_dim:2*self.n_dim]
+        msk_ind = self._process_output(fill_pointer, out_arr, out_log_scale, out_errors=out_err, lhs_indices=lhs_indices, out_clip_values=out_clip_values)
         
         # Make inputs
         fill_pointer = self._process_input(fill_pointer, arr, file, lhs_indices, msk_ind)
@@ -444,7 +501,9 @@ class database_reader:
         return fill_pointer
 
     def _process_output(self, fill_pointer:int, out_arr:np.array, out_log_scale:bool, 
-                       lhs_indices:None, out_clip_values:list[float]=None) -> list[int]:
+                        out_errors:np.array=None,
+                        lhs_indices=None, 
+                        out_clip_values:list[float]=None) -> list[int]:
         """Process the output data from one file in the database.
         The processing is made through:
         1. Latin Hypercube Sampling
@@ -456,16 +515,22 @@ class database_reader:
             list[int]: mask for clipping. If no clipping values were used, returns None.
         """        
         out_tensor = torch.from_numpy(out_arr)
+        if self.save_errors:
+            out_errors = torch.from_numpy(out_errors)
         
         # Latin hypercube sampling
         if lhs_indices != None:
             out_tensor = out_tensor[lhs_indices]
+            if self.save_errors:
+                out_errors = out_errors[lhs_indices]
         
         # Clip values
         if out_clip_values != None:
             msk = np.array(( out_tensor  <  out_clip_values[1]) & ( out_tensor  > out_clip_values[0]))
             msk_ind = [i for i, x in enumerate(msk) if x]
             out_tensor  =  out_tensor[msk_ind]
+            if self.save_errors:
+                out_errors = out_errors[msk_ind]
         else:
             msk_ind = None
 
@@ -489,6 +554,8 @@ class database_reader:
         
         #############################################################
         self.Y[self.Output][fill_pointer:fill_pointer+ out_tensor.size(0)] = out_tensor
+        if self.save_errors:
+            self.Errors["errors"][fill_pointer:fill_pointer+ out_tensor.size(0)] = out_errors
         #############################################################
         
         return msk_ind
@@ -498,17 +565,26 @@ class database_reader:
         
         # MAKE INPUT
         
-        for i in self.input_indices:
-            input_arr = arr[(i-1)*self.n_dim : (i)*self.n_dim]
+        for inp_type in self.input_indices:
             
-            if(i==1): #Energy
+            # pointer that helps to get trough self.database_inputs
+            ref_pointer = 1
+            if self.save_errors:
+                ref_pointer = 2
+
+            #input_arr = arr[(i-1)*self.n_dim : (i)*self.n_dim]
+            
+            index = self.input_indices[inp_type]
+            input_arr = arr[ index*self.n_dim : (index+1)*self.n_dim ]
+            
+            if(inp_type.lower() == "energy"): #Energy
                 energy = float(file.split('_')[2]) 
                 tensor = torch.tensor( [ energy ] )
                 tensor = tensor.repeat( (self.n_dim) )
             else:
                 tensor = torch.from_numpy(input_arr)
 
-            name = self.database_inputs[i-1]
+            #name = self.database_inputs[i-ref_pointer]
 
             # Latin hypercube sampling
             if lhs_indices != None:
@@ -524,8 +600,9 @@ class database_reader:
 
         #############################################################
             to_fill = fill_pointer+tensor.size(0)
-            #print(f"{fill_pointer} to {to_fill}")
-            self.X[name][fill_pointer:to_fill] = tensor
+
+            self.X[inp_type][fill_pointer:to_fill] = tensor
+            #self.X[name][fill_pointer:to_fill] = tensor
 
         fill_pointer = to_fill
         #############################################################
