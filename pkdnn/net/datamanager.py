@@ -365,7 +365,6 @@ class database_reader:
         
         self.Y[self.Output] = self.Y[self.Output][shuffle]
 
-
     def split_train_val(self, perc:float=0.85):
         """Split into train and validation set
 
