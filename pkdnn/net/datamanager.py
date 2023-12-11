@@ -13,6 +13,8 @@ import pickle
 
 
 
+
+
 class Dataset(Dataset):
     def __init__(self, data):
         # Input
@@ -377,7 +379,7 @@ class database_reader:
             self.X[key] = self.X[key][shuffle]
         
         self.Y[self.Output] = self.Y[self.Output][shuffle]
-
+        # print(f"Y size {self.Y[self.Output].size()}")
 
     def split_train_val(self, perc:float=0.85):
         """Split into train and validation set
@@ -502,11 +504,7 @@ class database_reader:
         
         # Make output
         out_arr = arr[0:self.n_dim]
-        if self.save_errors:
-            out_err = arr[self.n_dim:2*self.n_dim]
-        else:
-            out_err = None
-        msk_ind = self._process_output(fill_pointer, out_arr, out_log_scale, out_errors=out_err, lhs_indices=lhs_indices, out_clip_values=out_clip_values)
+        msk_ind = self._process_output(fill_pointer, out_arr, out_log_scale, lhs_indices, out_clip_values)
         
         # Make inputs
         fill_pointer = self._process_input(fill_pointer, arr, file, lhs_indices, msk_ind)

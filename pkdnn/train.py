@@ -13,7 +13,7 @@ from pkdnn.functionalities.graphics import kde_plot
 from pkdnn.functionalities.config import load_config, check_train_config
 from pkdnn.net.trainFunctions import train_model
 from pkdnn.net.pk_nn import pknn, make_prediction
-from pkdnn.net.datamanager import Scaler, Dataset, Errors_dataset, database_reader, scaler_to_txt
+from pkdnn.net.datamanager import Scaler, Dataset, Errors_dataset, Errors_dataset, database_reader, scaler_to_txt
 
 from .predict import make_prediction
 import torch
