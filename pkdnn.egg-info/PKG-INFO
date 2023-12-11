@@ -1,0 +1,35 @@
+Metadata-Version: 1.0
+Name: pkdnn
+Version: 0.1.0
+Summary: Neural network train for Point Kernel applications
+Home-page: https://github.com/mbelotti-nuk/PK-neuralnet
+Author: Mario Belotti
+Author-email: mbelotti@ind.uned.es
+License: Copyright (c) 2023, Mario Belotti
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Description: # PK-neuralnet
+        A Python application for training/testing and exporting to NACARTE (SpaceClaim) of a Neural Network
+        
+        ## Installation
+        To install the package, download the project and type on your terminal: <br>
+        `make install`
+        
+        ## Functionalities
+        * Create a database <br>
+        `databasepknn --config /path/to/config.yaml` <br>
+        * Train a PK-neuralnet <br>
+        `trainpknn --config /path/to/config.yaml` <br>
+        * Prediction with a trained PK-neuralnet <br>
+        `predictpknn --config /path/to/config.yaml` <br>
+        * Export a trained PK-neuralnet to NACARTE <br>
+        `savepknn --config /path/to/config.yaml` <br>
+        
+Platform: UNKNOWN

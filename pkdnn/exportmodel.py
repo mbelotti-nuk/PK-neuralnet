@@ -9,6 +9,7 @@ import os
 from .net.pk_nn import pknn
 from .functionalities.config import load_config
 import pickle
+from pkdnn.net.datamanager import  scaler_to_txt
 
 def write_scale(scaler):
     frmt = '{0:<20} {1:<10} {2:>20} {3:>20}\n'
@@ -40,6 +41,9 @@ def main():
 
 
     scaler = pickle.load(open(config['io_paths']['path_to_scaler'], "rb", -1))
+
+    scaler_to_txt(config['io_paths']['path_to_scaler'], os.path.join(config['io_paths']["save_path"]))
+
     fout = open(os.path.join(config['io_paths']["save_path"], "Specifics_scaler.txt"),"w")
     fout.write(write_scale(scaler))
     fout.close()
