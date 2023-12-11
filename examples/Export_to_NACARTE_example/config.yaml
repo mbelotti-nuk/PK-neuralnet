@@ -8,6 +8,7 @@ io_paths:
   save_name: "PKDNN"
   #' Path to the '.pt' neural network model
   path_to_model: \absolute\path\to\neuralnet\NNmodel.pt
+  path_to_scaler: \absolute\path\to\neuralnet\Scaler.pickle
 
 #' Neural network specifications:
 nn_spec:

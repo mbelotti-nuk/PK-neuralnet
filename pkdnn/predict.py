@@ -36,20 +36,21 @@ def main():
     # Read Test File
     Reader = database_reader(path=config['io_paths']['path_to_file'], mesh_dim=config['out_spec']['mesh_dim'], 
                           inputs=config['inp_spec']['inputs'], database_inputs=config['inp_spec']['database_inputs'], 
-                          Output=config['out_spec']['output'], sample_per_case=n)
+                          Output=config['out_spec']['output'], sample_per_case=n,
+                          save_errors=config['out_spec']['errors'])
     Reader.read_data_from_file([config['io_paths']['filename']], out_log_scale=config['out_spec']['out_log_scale'])
 
     # Prepare input-output
     set = ( scaler.scale(Reader.X, Reader.Y) )    
     # Build dataset
-    pred_dataset = Dataset(set[0], set[1])
+    pred_dataset = Dataset({"x":set[0], "y": set[1]})
 
 
     # TEST
     errors, prediction, real = make_prediction(pred_dataset, model, scaler, config, test_file=True)
 
     kde_plot(errors.detach().flatten().tolist(), "Test errors", path=config['io_paths']['save_path'])
-    plot_2D(prediction, real, config['out_spec']['output'], path=config['io_paths']['save_path'] )
+    plot_2D( torch.reshape(prediction,  config['out_spec']['mesh_dim']), torch.reshape(real,  config['out_spec']['mesh_dim']), config['out_spec']['output'], path=config['io_paths']['save_path'] )
 
 
 if __name__ == '__main__':
