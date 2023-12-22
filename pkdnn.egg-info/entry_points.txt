@@ -1,6 +1,0 @@
-[console_scripts]
-databasepknn = pkdnn.build_database:main
-predictpknn = pkdnn.predict:main
-savepknn = pkdnn.exportmodel:main
-trainpknn = pkdnn.train:main
-

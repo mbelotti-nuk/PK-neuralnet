@@ -503,8 +503,15 @@ class database_reader:
         arr = self._get_item(path)
         
         # Make output
-        out_arr = arr[0:self.n_dim]
-        msk_ind = self._process_output(fill_pointer, out_arr, out_log_scale, lhs_indices, out_clip_values)
+        if self.save_errors:
+            out_arr = arr[0:self.n_dim]
+            out_err = arr[self.n_dim:self.n_dim*2]
+        else:
+            out_arr = arr[0:self.n_dim]
+            out_err = None
+        msk_ind = self._process_output(fill_pointer=fill_pointer, out_arr=out_arr, out_errors=out_err,
+                                       out_log_scale=out_log_scale, lhs_indices=lhs_indices, 
+                                       out_clip_values=out_clip_values)
         
         # Make inputs
         fill_pointer = self._process_input(fill_pointer, arr, file, lhs_indices, msk_ind)
