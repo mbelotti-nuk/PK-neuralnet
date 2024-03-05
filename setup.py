@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-
-
 from setuptools import setup, find_packages
 
 with open('README.md') as f:
@@ -19,7 +17,7 @@ setup(
     url='https://github.com/mbelotti-nuk/PK-neuralnet',
     license=license,
     #packages=find_packages(exclude=('tests', 'docs')),
-    packages = ['pkdnn', 'pkdnn.functionalities', 'pkdnn.net','pkdnn.export', 'pkdnn.inp_process'],
+    packages = ['pkdnn', 'pkdnn.functionalities', 'pkdnn.net','pkdnn.export', 'pkdnn.inp_process','nacarte'],
     entry_points={'console_scripts': [
         'trainpknn=pkdnn.train:main',
         'predictpknn=pkdnn.predict:main',
@@ -27,7 +25,7 @@ setup(
         'databasepknn=pkdnn.build_database:main']
         },
     py_version='>=3.8',
-    install_requires=['torch==2.0.0','numpy','matplotlib','seaborn','scipy','leb128'],
+    install_requires=['torch>=2.0.0','numpy','matplotlib','seaborn','scipy','leb128','PyYAML'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest']
 )

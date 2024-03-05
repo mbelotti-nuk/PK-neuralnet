@@ -1,11 +1,11 @@
 build:
-	python.exe setup.py bdist_wheel sdist
+	python3 setup.py bdist_wheel sdist
 install:
-	python.exe setup.py sdist
-	pip.exe install dist/pkdnn-0.1.0.tar.gz
+	python3 setup.py sdist
+	pip3 install dist/pkdnn-0.1.0.tar.gz
 	rm -r dist/ pkdnn.egg-info/ .eggs/
 test:
-	pytest.exe
+	pytest
 	rm -r .pytest_cache/
 uninstall:
-	pip.exe uninstall pkdnn
+	pip3 uninstall pkdnn
