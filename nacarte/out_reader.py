@@ -6,6 +6,14 @@ class MeshReader:
         pass
 
     def read_NACARTE_out(self, file:str) -> list[Tally]:
+        """
+        Reads NACARTE output file
+        Args:
+            file (str): path to NACARTE output file 
+
+        Returns:
+            list[Tally]: returns a list of the tallies result of NACARTE
+        """
         fin = open(file, "r")
         tallies = []
         header = True
@@ -26,10 +34,15 @@ class MeshReader:
 
 
     def read_meshtal(self, file:str) -> list[Tally]:
-        """
-        read a MCNP meshtal file. 
+        """Read a MCNP meshtal file. 
         Since NACARTE's output is listed in a different order,
         the tallies are re-ordered following NACARTE's convention
+
+        Args:
+            file (str): path to meshtal file
+
+        Returns:
+            list[Tally]: returns a list of the meshtal result of each tally
         """
         print("mcnp reading")
         fin = open(file, "r")
@@ -66,16 +79,6 @@ class MeshReader:
                 index = n_y * n_x * k + n_x * j + i
 
                 tallies[index] = Tally(x=lsplit[1], y=lsplit[2], z=lsplit[3], result=lsplit[4], error=lsplit[5]) 
-
-                # if k < n_z-1: 
-                #     k+=1
-                # else:
-                #     k = 0
-                #     if j < n_y-1:
-                #         j +=1
-                #     else:
-                #         j = 0 
-                #         i += 1
 
                 counter += 1
 

@@ -5,7 +5,7 @@ io_paths:
   #' Path to the folder in which to save files of the database
   database_folder_path: ""
   #' Path to the folder in which are stored MCNP results in binary file
-  raw_path : \absolute\path\to\raw_files_folder\
+  raw_path : ./examples/data_example/raw/ #\absolute\path\to\raw_files_folder\
 
 
 
@@ -20,9 +20,11 @@ inp_spec:
 out_spec:
   #' the available outputs are:
   #' 'B', 'Dose'
-  output : 'B'
+  output : 'Dose'
   #' Number of mesh subdivisions on x, y and z 
   mesh_dim: [80,100,35]
+  #' Add mcnp errors to the database
+  errors: true
 
 
 #' Geometric specifications of the irradiation configuration
@@ -44,9 +46,9 @@ mat_spec:
   #' density of the material
   ro : 2.2
   #' Path to flux to dose conversion coefficient
-  path_to_dose_conversion : \absolute\path\to\coefficients\doseEquivalentConversion.txt
+  path_to_dose_conversion : ./examples/data_example/resources/doseEquivalentConversion.txt
   #' Path to mass attenuation coefficient
-  path_to_mass_att_coeff : \absolute\path\to\coefficients\massAttCoeff.xml
+  path_to_mass_att_coeff : ./examples/data_example/resources/massAttCoeff.xml
 
 
 

@@ -1,4 +1,4 @@
-from pkdnn.net.datamanager import database_reader
+from pknn.net.datamanager import database_reader
 import os
 
 

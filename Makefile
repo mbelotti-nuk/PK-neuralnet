@@ -1,11 +1,20 @@
+PYTHON := $(shell command -v python3 2> /dev/null)
+PIP = pip3
+
+ifeq ($(PYTHON),)
+    PYTHON := python
+	PIP := pip
+endif
+
 build:
-	python3 setup.py bdist_wheel sdist
+	PYTHON setup.py bdist_wheel sdist
 install:
-	python3 setup.py sdist
-	pip3 install dist/pkdnn-0.1.0.tar.gz
-	rm -r dist/ pkdnn.egg-info/ .eggs/
+	PYTHON setup.py sdist
+	PIP install dist/pkuned-0.1.0.tar.gz
+	rm -r dist/ pkuned.egg-info/ .eggs/
+	rm -r build
 test:
 	pytest
 	rm -r .pytest_cache/
 uninstall:
-	pip3 uninstall pkdnn
+	PIP uninstall pk_uned
