@@ -11,7 +11,9 @@ build:
 install:
 	PYTHON setup.py sdist
 	PIP install dist/pkuned-0.1.0.tar.gz
-	rm -r dist/ pkuned.egg-info/ .eggs/
+	rm -r dist/ 
+	rm -r pkuned.egg-info/ 
+	rm -r eggs/
 	rm -r build
 test:
 	pytest

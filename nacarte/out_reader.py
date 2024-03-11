@@ -1,4 +1,6 @@
 from collections import namedtuple
+from typing import List as list
+
 Tally = namedtuple("Tally", ['x', 'y', 'z', 'result', 'error'])
 
 class MeshReader:
