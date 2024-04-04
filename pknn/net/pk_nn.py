@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from typing import List as list
+from typing import List as list, Tuple as tuple
 
 class pknn(nn.Module):
     """Deep Neural Network for Point Kernel applications
@@ -28,7 +28,7 @@ class pknn(nn.Module):
         return out
      
 
-def make_prediction( dataset, model, scaler, config, test_file=False ) -> (torch.tensor, torch.tensor, torch.tensor):
+def make_prediction( dataset, model, scaler, config, test_file=False ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     loader = torch.utils.data.DataLoader(dataset, batch_size=64, shuffle=False) 
     
     predictions = torch.empty(dataset.num_elements(), dtype=torch.float32)
