@@ -324,7 +324,7 @@ class input_admin:
     def _get_polar_coordinates(self, point):
         theta = np.arccos( point[2]/(self.dist_source_tally)  )
         fi = np.sign(point[1]) * np.arccos( point[0] / (LA.norm(np.array([ point[0], point[1] ]))) )
-
+    
         return math.degrees(theta), math.degrees(fi)
 
 
