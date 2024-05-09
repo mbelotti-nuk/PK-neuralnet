@@ -186,7 +186,7 @@ def train(scope, train_dataset:Dataset, val_dataset:Dataset,
     epochs = scope["epochs"]
     model = scope["model"]
     scope["best_train_loss"], scope["best_val_loss"]  = float("inf"), float("inf")
-    scope["best_model"] = None
+    scope["best_model"] = copy.deepcopy(model)
 
     scope = copy.copy(scope)
 
