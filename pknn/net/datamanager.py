@@ -12,19 +12,14 @@ from typing import List as list, Dict as dict, Tuple as tuple
 import pickle
 
 
-
-
-
 class Dataset(Dataset):
     def __init__(self, data):
         # Input
-        inp_keys = data["x"].keys()
-        lst = [data["x"][inp_type] for inp_type in inp_keys ]
-        self.inp = torch.stack(lst, dim=1)
+        _in, _out = list(data.keys())
+        self.inp = torch.stack(list(data[_in].values()), dim=1)
 
         # Output
-        out_key = next(iter(data["y"])) 
-        self.out = data["y"][out_key].unsqueeze(1)
+        self.out = data[_out].values().unsqueeze(1)
 
     def __len__(self):
         return len(self.out)
@@ -33,7 +28,7 @@ class Dataset(Dataset):
 
         x = self.inp[index]
 
-        y =self.out[index]
+        y = self.out[index]
         
         return x, y
 
@@ -41,20 +36,17 @@ class Dataset(Dataset):
         return self.out.size().numel()
 
 
-
 class Errors_dataset(Dataset):
     def __init__(self, data):
+
         # Input
-        inp_keys = data["x"].keys()
-        lst = [data["x"][inp_type] for inp_type in inp_keys ]
-        self.inp = torch.stack(lst, dim=1)
+        self._in, self._out, self._errors = list(data.keys())
+        self.inp = torch.stack(list(data[self._in].values()), dim=1)
 
         # Output
-        out_key = next(iter(data["y"])) 
-        self.out = data["y"][out_key].unsqueeze(1)
+        self.out = data[self._out].values().unsqueeze(1)
 
-        # Errros
-        self.errors = data["errors"].unsqueeze(1)
+        self.errors = data[self._errors].unsqueeze(1)
 
     def __len__(self):
         return len(self.out)
@@ -71,6 +63,7 @@ class Errors_dataset(Dataset):
 
     def num_elements(self):
         return self.out.size().numel()
+
 
 
 

@@ -11,7 +11,7 @@ from pknn.functionalities.graphics import kde_plot
 from pknn.functionalities.config import load_config, check_train_config
 from pknn.net.trainFunctions import train_model
 from pknn.net.pk_nn import pknn, make_prediction
-from pknn.net.datamanager import Scaler, Dataset, Errors_dataset, Errors_dataset, database_reader, scaler_to_txt
+from pknn.net.datamanager import Scaler, Dataset, Errors_dataset, database_reader, scaler_to_txt
 
 from .predict import make_prediction
 import torch
@@ -87,7 +87,7 @@ def input_data_processing(config):
 
     # Build datasets
     if config['metrics']['error_loss'] :
-        data = {"x":scaled_trainset[0], "y": scaled_trainset[1], "errors": TrainSet[2]  }
+        data = {"x": scaled_trainset[0], "y": scaled_trainset[1], "errors": TrainSet[2]  }
         train_dataset = Errors_dataset(data)
         data = {"x":scaled_valset[0], "y": scaled_valset[1], "errors": ValSet[2]  }
         validation_dataset =Errors_dataset(data)
@@ -96,6 +96,7 @@ def input_data_processing(config):
         train_dataset = Dataset(data)
         data = {"x":scaled_valset[0], "y": scaled_valset[1] }
         validation_dataset = Dataset(data)
+
 
     return train_dataset, validation_dataset, scaler
 

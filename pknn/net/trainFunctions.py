@@ -138,8 +138,11 @@ def epoch(scope, loader, training=False):
                 loss.backward()
                 optimizer.step()
             
-            # weights update
-            optimizer.zero_grad()
+            ###############################
+            for param in model.parameters():
+                param.grad = None
+            #optimizer.zero_grad()
+            ###############################
             
             if batch_idx % 10000 == 0:
                 this_loss, this_acc, this_current = loss.item(), acc.item(), (batch_idx + 1) * len(tensors[0])
@@ -160,7 +163,8 @@ def epoch(scope, loader, training=False):
             scheduler.step(loss)
             print(f"\tlearning rate: {optimizer.param_groups[0]['lr']}\t")
 
-    torch.cuda.empty_cache()
+    if scope["device"] == "cuda":
+        torch.cuda.empty_cache()
     
     return total_loss, total_acc
 
@@ -186,13 +190,18 @@ def train(scope, train_dataset:Dataset, val_dataset:Dataset,
     epochs = scope["epochs"]
     model = scope["model"]
     scope["best_train_loss"], scope["best_val_loss"]  = float("inf"), float("inf")
-    scope["best_model"] = None
+    scope["best_model"] = copy.deepcopy(model)
 
     scope = copy.copy(scope)
 
     # Build dataloaders for training and validation
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False) 
+    if scope["device"] == "cuda" or scope["device"] == "mps":
+        pin = True
+    else:
+        pin = False
+
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=pin)
+    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False, pin_memory=pin) 
     
     # Begin training
     skips = 0
@@ -269,7 +278,7 @@ def train_model(model, train_dataset:Dataset, val_dataset:Dataset,
     scope["val_dataset"] = val_dataset
     scope["optimizer"] = optimizer
     scope["scaler"] = scaler
-
+    
     if mixed_precision:
         scope["grad_scaler"] = torch.cuda.amp.GradScaler()
     else:
