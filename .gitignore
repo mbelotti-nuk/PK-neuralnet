@@ -10,3 +10,6 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 __pycache__/
+.vscode
+docs/
+make_docs/

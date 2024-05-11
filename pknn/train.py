@@ -76,7 +76,7 @@ def input_data_processing(config):
                     sample_per_case=config['nn_spec']['samples_per_case'],
                     save_errors=config['out_spec']['errors'] )
     Reader.read_data(num_inp_files = config['nn_spec']['n_files'], out_log_scale=config['out_spec']['out_log_scale'],out_clip_values=config['out_spec']['out_clip'])
-
+    
     # Split into Train and Validatioin
     TrainSet, ValSet = Reader.split_train_val(config['nn_spec']['percentage'])
 
@@ -150,7 +150,7 @@ def main():
     # TRAINING
     # ======================================================================================
     # ======================================================================================
-    
+    print("Start training")
     # Set seed 
     torch.manual_seed(0)
     pkdnn_model, train_loss, test_loss = train_model(
