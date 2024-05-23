@@ -268,10 +268,14 @@ def train_model(model, train_dataset:Dataset, val_dataset:Dataset,
     scope = {}
     
     scope["model"] = model
-    scope["loss_func"] = loss if loss!= None else nn.MSELoss()
-    if errors:
-        print("\n\n Use of error informed loss function \n\n")
-        scope["loss_func"] = error_loss 
+    if loss is None:
+        if errors:
+            print("\n\n Use of error informed loss function \n\n")
+            scope["loss_func"] = error_loss 
+        else: 
+            scope["loss_func"] = nn.MSELoss()
+    else:
+        scope["loss_func"] = loss 
     scope["acc_func"] = accuracy if accuracy!=None else nn.L1Loss()
     
     scope["train_dataset"] = train_dataset
