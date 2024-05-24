@@ -346,10 +346,9 @@ class database_reader:
         
         #Initialize input dictionary to empty lists
         self._initialize_input_output()
-        
+        print("Start reading")
         fill_pointer = 0
         for f in files:
-            print(f"reading {f}")
             fill_pointer = self._process_data(f, fill_pointer=fill_pointer, path=os.path.join(path_to_database , f), 
                                 samples_per_file=self.n_samples,
                                 out_log_scale=out_log_scale,
@@ -360,7 +359,7 @@ class database_reader:
         for inp_type in self.X:
             self.X[inp_type] = self.X[inp_type][:fill_pointer]
         self.Y[self.Output] = self.Y[self.Output][:fill_pointer]
-
+        print("End reading")
 
         return
 

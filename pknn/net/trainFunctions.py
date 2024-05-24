@@ -51,16 +51,13 @@ def print_scores(t0, train_loss, val_loss, train_acc, val_acc):
     return
 
 
-def loss_acc_calculation(pred, y, loss_fn, acc_fn, errors=None):
-    if errors != None:
-        loss = loss_fn(pred, y, errors)
-    else:
-        loss = loss_fn(pred, y)
-    acc =  acc_fn(pred, y)
+def loss_acc_calculation(vals, loss_fn, acc_fn):
+    loss = loss_fn(*vals)
+    acc =  acc_fn(vals[0], vals[1])
     return loss, acc
 
 
-def fwd_calculation(tensors, model, loss_fn, acc_fn, scaler, grad_scaler=None):
+def fwd_calculation(tensors, model, loss_fn, acc_fn, scaler,is_error_loss, grad_scaler=None):
     
     # unpack
     if len(tensors) == 2:
@@ -79,7 +76,8 @@ def fwd_calculation(tensors, model, loss_fn, acc_fn, scaler, grad_scaler=None):
                 y = scaler.denormalize(y)
                 pred = scaler.denormalize(pred)
             
-            loss, acc = loss_acc_calculation(pred, y, loss_fn, acc_fn, errors)
+            vals = [pred, y, errors] if is_error_loss else [pred, y]
+            loss, acc = loss_acc_calculation(vals, loss_fn, acc_fn)
     else:
         # Compute prediction and loss
         pred =model(x)
@@ -88,7 +86,8 @@ def fwd_calculation(tensors, model, loss_fn, acc_fn, scaler, grad_scaler=None):
             y = scaler.denormalize(y)
             pred = scaler.denormalize(pred)
 
-        loss, acc = loss_acc_calculation(pred, y,loss_fn, acc_fn ,errors)
+        vals = [pred, y, errors] if is_error_loss else [pred, y]
+        loss, acc = loss_acc_calculation(vals, loss_fn, acc_fn)
     # delete prediction tensor
     del pred
     
@@ -112,6 +111,7 @@ def epoch(scope, loader, training=False):
     grad_scaler, scheduler = scope["grad_scaler"], scope["scheduler"]
     
     scaler = scope["scaler"]
+    is_error_loss = scope["error_loss"]
 
     scope = copy.copy(scope)
 
@@ -126,7 +126,7 @@ def epoch(scope, loader, training=False):
     for batch_idx, tensors in enumerate(loader):
 
         tensors = to_device(tensors, scope)
-        loss, acc  = fwd_calculation(tensors, model, loss_func, acc_func, scaler, grad_scaler)
+        loss, acc  = fwd_calculation(tensors, model, loss_func, acc_func, scaler, is_error_loss, grad_scaler)
 
         if training:
             # backward pass
@@ -268,10 +268,12 @@ def train_model(model, train_dataset:Dataset, val_dataset:Dataset,
     scope = {}
     
     scope["model"] = model
+    scope["error_loss"] = False
     if loss is None:
         if errors:
             print("\n\n Use of error informed loss function \n\n")
             scope["loss_func"] = error_loss 
+            scope["error_loss"] = True
         else: 
             scope["loss_func"] = nn.MSELoss()
     else:
