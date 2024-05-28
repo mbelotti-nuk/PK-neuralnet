@@ -12,7 +12,6 @@ def error_loss(output, target, errors):
     loss = torch.mean(( ( (output - target)/(errors) ) **2 ) )
     return loss
 
-
 def plot_results(train_loss_values, val_loss_values, train_acc_values, val_acc_values, save_path=None):
     plt.plot( train_loss_values, label = "Train Loss")
     plt.plot( val_loss_values, label = "Validation Loss")
@@ -37,7 +36,6 @@ def plot_results(train_loss_values, val_loss_values, train_acc_values, val_acc_v
     else:
         plt.savefig("NN_Accuracy.png")
     plt.close()
-
 
 def print_scores(t0, train_loss, val_loss, train_acc, val_acc):
     print("\n")
@@ -195,17 +193,24 @@ def train(scope, train_dataset:Dataset, val_dataset:Dataset,
     scope = copy.copy(scope)
 
     # Build dataloaders for training and validation
-    if scope["device"] == "cuda" or scope["device"] == "mps":
-        pin = True
-    else:
-        pin = False
+    pin = True if (scope["device"] == "cuda" or scope["device"] == "mps") else False
+    shuffle_loader = False if scope["shuffle"] else True
 
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=pin)
+
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=shuffle_loader, pin_memory=pin)
     val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False, pin_memory=pin) 
     
     # Begin training
     skips = 0
     for epoch_id in range(1, epochs + 1):
+
+        if scope["shuffle"]:
+            # the Dataloader has direct reference to the Dataset 
+            # so if I change something on the Dataset,
+            # also the Dataloader will be affected
+            train_dataset.shuffle_indices()
+            val_dataset.shuffle_indices()
+
 
         scope["epoch"] = epoch_id
         print(f"Epoch # {epoch_id}\n-------------------------------", flush=True)
@@ -258,10 +263,23 @@ def train(scope, train_dataset:Dataset, val_dataset:Dataset,
     return scope["best_model"],  scope["best_train_loss"], scope["best_val_loss"]
 
 
-def train_model(model, train_dataset:Dataset, val_dataset:Dataset, 
-                optimizer, scaler=None, mixed_precision:bool=True, scheduler:bool=True, 
-                epochs:int=100, batch_size:int=256, patience:int=10, device:int=0, save_path:str=None,
-                loss=None, accuracy=None, lr_scheduler=None, errors=False,**kwargs):
+def train_model(model, 
+                train_dataset:Dataset, 
+                val_dataset:Dataset, 
+                optimizer,
+                scaler=None, 
+                mixed_precision:bool=True, 
+                scheduler:bool=True, 
+                epochs:int=100, 
+                batch_size:int=256, 
+                patience:int=10, 
+                device:int=0, 
+                save_path:str=None,
+                loss=None, 
+                accuracy=None, 
+                lr_scheduler=None, 
+                errors=False, 
+                shuffle_indices =False, **kwargs):
     
     model = model.to(device)
     
@@ -298,6 +316,6 @@ def train_model(model, train_dataset:Dataset, val_dataset:Dataset,
     scope["epochs"] = epochs
     scope["batch_size"] = batch_size
     scope["device"] = device
-
+    scope["shuffle"] = shuffle_indices
     return train(scope, train_dataset, val_dataset, 
            batch_size=batch_size, patience=patience, save_path=save_path)

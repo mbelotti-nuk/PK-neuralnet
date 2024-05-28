@@ -78,7 +78,7 @@ def input_data_processing(config):
     Reader.read_data(num_inp_files = config['nn_spec']['n_files'], out_log_scale=config['out_spec']['out_log_scale'],out_clip_values=config['out_spec']['out_clip'])
     
     # Split into Train and Validatioin
-    TrainSet, ValSet = Reader.split_train_val(config['nn_spec']['percentage'])
+    TrainSet, ValSet = Reader.split_train_val(config['nn_spec']['percentage'], shuffle_in_train=config["shuffle_train"])
 
     # Scale
     scaler = Scaler(config['inp_spec']['inp_scaletype'], config['out_spec']['out_scaletype'], config['out_spec']['out_log_scale'])
@@ -111,6 +111,9 @@ def main():
         print(f"Couldn't open config. file")
         return
 
+    if config["shuffle_train"] == True:
+        assert config['nn_spec']['samples_per_case'] is None 
+        
     #check_train_config(config)
     
     device, save_path = set_environment(config)

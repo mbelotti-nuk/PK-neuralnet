@@ -13,7 +13,7 @@ import pickle
 
 
 class Dataset(Dataset):
-    def __init__(self, data):
+    def __init__(self, data, samples_per_case=None, n_cases=None, mesh_dim=None):
         # Input
         _in, _out = list(data.keys())
         self.inp = torch.stack(list(data[_in].values()), dim=1)
@@ -21,10 +21,23 @@ class Dataset(Dataset):
         # Output
         self.out = data[_out].values().unsqueeze(1)
 
+        # Bootstrapping
+        self.samples_per_case = samples_per_case
+        self.n_cases = n_cases
+        self.mesh_dim = mesh_dim
+        if self.samples_per_case != None:
+            self.shuffle_indices()
+
     def __len__(self):
-        return len(self.out)
+        if self.samples_per_case:
+            return self.samples_per_case * self.n_cases
+        else:
+            return len(self.out)
 
     def __getitem__(self, index):
+
+        if self.samples_per_case != None:
+            index = self.shuffled_ind[index]
 
         x = self.inp[index]
 
@@ -34,6 +47,24 @@ class Dataset(Dataset):
 
     def num_elements(self):
         return self.out.size().numel()
+    
+    def shuffle_indices(self):
+        if self.samples_per_case is None:
+            return
+        self.shuffled_ind = [] 
+        # for each simulation sample a LHS distributed set of indices
+        for n_case in range(0,self.n_cases):
+            sampler = qmc.LatinHypercube(d=3)
+            low = [0,0,0]
+            sample = sampler.integers(l_bounds=low, u_bounds=self.mesh_dim, n=self.samples_per_case)
+            self.shuffled_ind.extend( self._get_index(sample, ind_bias=n_case*self.dim_mesh ) )
+
+    @property
+    def dim_mesh(self):
+        return self.mesh_dim[0]*self.mesh_dim[1]*self.mesh_dim[2]    
+    
+    def _get_index(self, sample, ind_bias):
+        return [   (self.mesh_dim[1]*self.mesh_dim[2])*ind_coord[0] + self.mesh_dim[2]*ind_coord[1] + ind_coord[2] + ind_bias for ind_coord in sample ]
 
 
 class Errors_dataset(Dataset):
@@ -265,7 +296,7 @@ class database_reader:
         self.n_dim = int(mesh_dim[0]*mesh_dim[1]*mesh_dim[2])
 
 
-        # ERORRSSS
+        # ERORRS
         self.save_errors= save_errors
 
         self.database_inputs = database_inputs if database_inputs != None else inputs
@@ -342,6 +373,7 @@ class database_reader:
         """        
          # initialize files list to be read
         self.file_list = files
+        random.shuffle(self.file_list)
         path_to_database = self._database_path()
         
         #Initialize input dictionary to empty lists
@@ -373,7 +405,7 @@ class database_reader:
         self.Y[self.Output] = self.Y[self.Output][shuffle]
         # print(f"Y size {self.Y[self.Output].size()}")
 
-    def split_train_val(self, perc:float=0.85):
+    def split_train_val(self, perc:float=0.85, shuffle_in_train=False):
         """Split into train and validation set
 
         Args:
@@ -384,9 +416,13 @@ class database_reader:
             returns two tuples of (input training, output training)  and (input validation, output validation) 
         """       
 
-
-        shuffle = torch.randperm(self.Y[self.Output].size()[0]) 
-        n_train = int(len(self.Y[self.Output])*perc)
+        if shuffle_in_train:
+            shuffle = torch.range(0, self.Y[self.Output].size()[0])
+            n_train_files = int(len(self.file_list) * perc)
+            n_train = n_train_files * self.n_dim
+        else:
+            shuffle = torch.randperm(self.Y[self.Output].size()[0]) 
+            n_train = int(len(self.Y[self.Output])*perc)
 
         XTrain = {}
         XVal = {}
@@ -413,6 +449,7 @@ class database_reader:
         self.file_list = [f for f in listdir(self.path_to_database) if isfile(join(self.path_to_database, f))]
         # check all files are database files
         self.file_list = [f for f in self.file_list if f.split('_')[0] == "0"]
+        random.shuffle(self.file_list)
         return
 
 
