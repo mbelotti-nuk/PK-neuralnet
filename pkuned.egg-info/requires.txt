@@ -1,0 +1,7 @@
+torch>=2.0.0
+numpy
+matplotlib
+seaborn
+scipy
+leb128
+PyYAML

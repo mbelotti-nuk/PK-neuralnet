@@ -83,5 +83,6 @@ class MeshReader:
                 tallies[index] = Tally(x=lsplit[1], y=lsplit[2], z=lsplit[3], result=lsplit[4], error=lsplit[5]) 
 
                 counter += 1
-
-        return tallies
+                
+        infos = {"nx":n_x, "ny":n_y, "nz":n_z}
+        return tallies, infos
