@@ -45,6 +45,9 @@ def main():
     - ro : density of the wall's material.\n
     - path_to_dose_conversion : absolute path to the flux to dose conversion factors.\n
     - path_to_mass_att_coeff : absolute path to the mass attenuation coefficients of the wall's material.\n
+
+    - l coeff. spherical harmonic
+    - m, coeff. spherical harmonic
     """    
     try:
         config = load_config()
@@ -71,14 +74,25 @@ def main():
 
     counter = 0
     write_specifics(config)
+    l = str(config['inp_spec']['l'])
+    m = str(config['inp_spec']['m'])
 
+    lm = ""
+    if l == "0":
+        lm = "0"
+        spherical = False
+    else:
+        lm = l+m
+        spherical = True
+    
     for filename in lst:
-        if filename.split('_')[0] != "0":
+        if filename.split('_')[0] != lm:
             continue
 
         counter += 1 
         print(f"Processing {filename}; number {counter} of {len(lst)}")
-        database_mkr.read(filename, inputs=config['inp_spec']['inputs'], output=config['out_spec']['output'], save_errors=config['out_spec']['errors'] )
+        database_mkr.read(filename, inputs=config['inp_spec']['inputs'], output=config['out_spec']['output'], 
+                          save_errors=config['out_spec']['errors'], spherical=spherical )
 
         database_mkr.save_to_binary(join(config['io_paths']['database_folder_path'], filename), save_errors=config['out_spec']['errors'])
 

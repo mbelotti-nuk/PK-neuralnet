@@ -117,6 +117,22 @@ class input_admin:
         dose = self.dose_conversion_factor*uncoll_fi*attenuation
 
         return dose
+    
+    def sphere_dose_direct_contribution(self, tally:list[float]):
+        self.dist_source_tally = tally[0]
+        self.delta_t = self._slab_thickness
+        self.dist_source_shield = self.p0
+        self.dist_shield_tally = tally[0] - self.p1
+
+        # POLAR COORDINATES
+        self.theta, self.fi = tally[1], tally[2]
+
+        attenuation = math.exp(- self.mu * self.ro * self.delta_t) # t must be in cm
+        uncoll_fi = 1/(4*math.pi*self.dist_source_tally**2) # [ gamma/cm^2 ]
+        dose = self.dose_conversion_factor*uncoll_fi*attenuation
+
+        return dose
+
 
     def get_coefficients(self):
         return {    'energy': self.energy,  'slab_thickness': self._slab_thickness,             'dist_source_tally': self.dist_source_tally, \
@@ -361,7 +377,7 @@ class database_maker:
 #                           Public members
 # ********************************************************************
 
-    def read(self, filename:str, inputs:list[str], output:str, n_samples:int=None, max_error:float=None, save_errors:bool=False):
+    def read(self, filename:str, inputs:list[str], output:str, n_samples:int=None, max_error:float=None, save_errors:bool=False, spherical=False):
         """Reads a raw MCNP file (named 'filename') and extract the list of desidered inputs and the desired output.
         After the reading process, two variables named 'database_input' and 'database_output' are exctracted.
 
@@ -373,7 +389,11 @@ class database_maker:
             number of samples. Defaults to None.
             max_error (float, optional): the MCNP values with error>max_error are not considered. Error is given as relative error, 
             spanning from 0 to 1. Defaults to None.
+            spherical (bool): if the MCNP geometrical configuration was spherical
         """    
+
+        self.spherical = spherical
+
         self._check_compliance(inputs, output)
 
         # Get variables from filename
@@ -381,21 +401,28 @@ class database_maker:
         slab_thickness = float(filename.split('_')[1])
         delta_y = float(filename.split('_')[3])
         
-        
         self.inp_adm.slab_thickness = slab_thickness 
         self.rad_source[1] = delta_y # y position of the source is the one present in filename
 
         # Define tallies mesh geometry
-        py1 = self.py0 + slab_thickness
-        origin = [-800, py1, 165]
-        end = [800, 4000 + slab_thickness, 765]
+        if spherical:
+            py1 = delta_y + slab_thickness
+            origin = [py1, 0 , 0]
+            end =   [py1+2000, 180, 360]
+            # Set the energy and the wall in self.inp_adm
+            self._retrieve_case(energy, [delta_y, py1])
+        else:
+            py1 = self.py0 + slab_thickness
+            origin = [-800, py1, 165]
+            end = [800, 4000 + slab_thickness, 765]
+            # Set the energy and the wall in self.inp_adm
+            self._retrieve_case(energy, [self.py0, py1])
         
         # Read values from binary files containing MCNP results
         self.reader.set_mesh(origin, end, self.mesh_dim)
         self.reader.binary_reader(filename)
 
         # Collect values
-        #self.errors = self.reader.errors
         coord = self.reader.coordinates
 
         # Filter by errors
@@ -418,9 +445,6 @@ class database_maker:
         else:
             coord_sample = coord
 
-
-        # Set the energy and the wall in self.inp_adm
-        self._retrieve_case(energy, [self.py0, py1])
 
 
         self.database_input = {key:[] for key in inputs}
@@ -481,7 +505,10 @@ class database_maker:
 # ********************************************************************
 
     def _task(self, t):
-        dose = self.inp_adm.calculate_dose_direct_contribution( self.rad_source, t )
+        if self.spherical:
+            dose = self.inp_adm.sphere_dose_direct_contribution(t) 
+        else:
+            dose = self.inp_adm.calculate_dose_direct_contribution( self.rad_source, t )
         coeff = self.inp_adm.get_coefficients()
         lst_coeffs = []
         for key in self.database_input.keys():
