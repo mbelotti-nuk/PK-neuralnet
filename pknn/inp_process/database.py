@@ -1,5 +1,6 @@
 import random
 from scipy.stats import qmc
+from scipy.special import sph_harm
 import numpy as np
 import struct
 from .binaryreader import raw_reader
@@ -88,6 +89,10 @@ class input_admin:
         self.theta = 0
         self.fi = 0
         self._slab_thickness = 0
+        self.hrm = 0
+        # coefficients spherical harmonics
+        self.l = 0
+        self.m = 0
 
 # ********************************************************************
 #                           Public members
@@ -126,6 +131,8 @@ class input_admin:
 
         # POLAR COORDINATES
         self.theta, self.fi = tally[1], tally[2]
+        
+        self.hrm = self._harmonic(np.deg2rad(self.theta), np.deg2rad(self.fi))
 
         attenuation = math.exp(- self.mu * self.ro * self.delta_t) # t must be in cm
         uncoll_fi = 1/(4*math.pi*self.dist_source_tally**2) # [ gamma/cm^2 ]
@@ -133,12 +140,11 @@ class input_admin:
 
         return dose
 
-
     def get_coefficients(self):
         return {    'energy': self.energy,  'slab_thickness': self._slab_thickness,             'dist_source_tally': self.dist_source_tally, \
                     'delta_t':self.delta_t,  'angle':self.angle,                         'theta':self.theta,\
                     'fi':self.fi ,          'dist_source_shield':self.dist_source_shield,    'dist_shield_tally':self.dist_shield_tally,\
-                    'mfp':self.delta_t * self.ro* self.mu }
+                    'mfp':self.delta_t * self.ro* self.mu, 'harmonic':self.hrm }
     
     def define_wall_coords(self, plane_coord:list[float]):
         """Instantiates the coordinates of the planes that defines the wall
@@ -167,6 +173,10 @@ class input_admin:
         self.mu = self._define_mass_att_coeff()
         self.dose_conversion_factor = self._define_data(self.cv_energies, self.cvs)
 
+    def define_harmonic(self, l, m):
+        self.l = l
+        self.m = m
+
     @property
     def slab_thickness(self):
         return self._slab_thickness
@@ -179,6 +189,14 @@ class input_admin:
 #                           Private members
 # ********************************************************************
 
+    def _harmonic(self, theta, phi):
+        Y = sph_harm(abs(self.m), self.l, phi, theta)
+        if self.m < 0:
+            Y = np.sqrt(2) * (-1)**self.m * Y.imag
+        elif self.m > 0:
+            Y = np.sqrt(2) * (-1)**self.m * Y.real
+        return Y.real
+    
     def _define_mass_att_coeff(self) -> float:
         """Calculates the mass attenuation coefficient for the material defined
         in the input manager at the energy self.energy.
@@ -344,8 +362,6 @@ class input_admin:
         return math.degrees(theta), math.degrees(fi)
 
 
-
-
 class database_maker:
     """Read a raw MCNP file to extract input/output informations. The aim of this class is to create binary database file. 
     """    
@@ -377,7 +393,7 @@ class database_maker:
 #                           Public members
 # ********************************************************************
 
-    def read(self, filename:str, inputs:list[str], output:str, n_samples:int=None, max_error:float=None, save_errors:bool=False, spherical=False):
+    def read(self, filename:str, inputs:list[str], output:str, n_samples:int=None, max_error:float=None, save_errors:bool=False):
         """Reads a raw MCNP file (named 'filename') and extract the list of desidered inputs and the desired output.
         After the reading process, two variables named 'database_input' and 'database_output' are exctracted.
 
@@ -392,7 +408,16 @@ class database_maker:
             spherical (bool): if the MCNP geometrical configuration was spherical
         """    
 
-        self.spherical = spherical
+        lm = filename.split("_")[0]
+        if len(lm) == 1 and lm == "0":
+            self.spherical = False
+        else:
+            l = lm[0]
+            m = lm[1]
+            self.spherical = True
+            # set the values of the spherical harmonics
+            self.inp_adm.define_harmonic(float(l), float(m))
+
 
         self._check_compliance(inputs, output)
 
@@ -405,7 +430,7 @@ class database_maker:
         self.rad_source[1] = delta_y # y position of the source is the one present in filename
 
         # Define tallies mesh geometry
-        if spherical:
+        if self.spherical:
             py1 = delta_y + slab_thickness
             origin = [py1, 0 , 0]
             end =   [py1+2000, 180, 360]
@@ -534,7 +559,7 @@ class database_maker:
     
     def _check_compliance(self, inputs:list[str], output:str):
         inp_ref = ['energy','slab_thickness', 'dist_source_tally', 'delta_t', 'angle','theta',\
-                    'fi', 'dist_source_shield', 'dist_shield_tally', 'mfp']
+                    'fi', 'dist_source_shield', 'dist_shield_tally', 'mfp', 'harmonic']
         out_ref = ['b', 'dose']
         for i in inputs:
             if i not in inp_ref:

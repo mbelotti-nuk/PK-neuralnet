@@ -35,6 +35,7 @@ def main():
     n = int(config['out_spec']['mesh_dim'][0]*config['out_spec']['mesh_dim'][1]*config['out_spec']['mesh_dim'][2])
     # Read Test File
     Reader = database_reader(path=config['io_paths']['path_to_file'], mesh_dim=config['out_spec']['mesh_dim'], 
+                             l = config['inp_spec']['l'], m=config['inp_spec']['m'],
                           inputs=config['inp_spec']['inputs'], database_inputs=config['inp_spec']['database_inputs'], 
                           Output=config['out_spec']['output'], sample_per_case=n,
                           save_errors=config['out_spec']['errors'])

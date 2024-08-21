@@ -74,25 +74,16 @@ def main():
 
     counter = 0
     write_specifics(config)
-    l = str(config['inp_spec']['l'])
-    m = str(config['inp_spec']['m'])
 
-    lm = ""
-    if l == "0":
-        lm = "0"
-        spherical = False
-    else:
-        lm = l+m
-        spherical = True
-    
     for filename in lst:
-        if filename.split('_')[0] != lm:
+        if len(filename.split('_')[0]) != 4:
+            print(f"file {filename} was not read")
             continue
 
         counter += 1 
         print(f"Processing {filename}; number {counter} of {len(lst)}")
         database_mkr.read(filename, inputs=config['inp_spec']['inputs'], output=config['out_spec']['output'], 
-                          save_errors=config['out_spec']['errors'], spherical=spherical )
+                          save_errors=config['out_spec']['errors'])
 
         database_mkr.save_to_binary(join(config['io_paths']['database_folder_path'], filename), save_errors=config['out_spec']['errors'])
 

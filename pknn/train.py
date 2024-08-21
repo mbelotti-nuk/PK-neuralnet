@@ -72,12 +72,13 @@ def set_training_vars(config, model):
 def input_data_processing(config):
     # Read data
     Reader = database_reader(config['io_paths']['path_to_database'], config['out_spec']['mesh_dim'], 
-                    config['inp_spec']['inputs'], config['inp_spec']['database_inputs'], config['out_spec']['output'], 
+                    config['inp_spec']['inputs'], config['inp_spec']['l'], config['inp_spec']['m'],
+                    config['inp_spec']['database_inputs'], config['out_spec']['output'], 
                     sample_per_case=config['nn_spec']['samples_per_case'],
                     save_errors=config['out_spec']['errors'] )
     Reader.read_data(num_inp_files = config['nn_spec']['n_files'], out_log_scale=config['out_spec']['out_log_scale'],out_clip_values=config['out_spec']['out_clip'])
     
-    # Split into Train and Validatioin
+    # Split into Train and Validation
     TrainSet, ValSet = Reader.split_train_val(config['nn_spec']['percentage'], shuffle_in_train=config["shuffle_train"])
 
     # Scale

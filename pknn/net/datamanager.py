@@ -8,7 +8,7 @@ import numpy as np
 from os import listdir
 from os.path import isfile, join
 from scipy.stats import qmc
-from typing import List as list, Dict as dict, Tuple as tuple
+#from typing import List as list, Dict as dict, Tuple as tuple
 import pickle
 
 
@@ -19,7 +19,7 @@ class Dataset(Dataset):
         self.inp = torch.stack(list(data[_in].values()), dim=1)
 
         # Output
-        self.out = data[_out].values().unsqueeze(1)
+        self.out = list(data[_out].values())[0].unsqueeze(1)
 
         # Bootstrapping
         self.samples_per_case = samples_per_case
@@ -71,11 +71,12 @@ class Errors_dataset(Dataset):
     def __init__(self, data):
 
         # Input
+        
         self._in, self._out, self._errors = list(data.keys())
         self.inp = torch.stack(list(data[self._in].values()), dim=1)
 
         # Output
-        self.out = data[self._out].values().unsqueeze(1)
+        self.out = list(data[self._out].values())[0].unsqueeze(1)
 
         self.errors = data[self._errors].unsqueeze(1)
 
@@ -271,7 +272,7 @@ def scaler_to_txt(path_to_scaler, save_path):
 class database_reader:
     """class that reads and manage data from database
     """    
-    def __init__(self, path:str, mesh_dim:list[int], inputs:list[str], 
+    def __init__(self, path:str, mesh_dim:list[int], inputs:list[str], l:int, m:int,
                  database_inputs:list[str]=None, Output:str='Dose', sample_per_case:int=20000,
                  save_errors:bool=False):
         """Class that reads and manage data from database
@@ -290,6 +291,9 @@ class database_reader:
         """        
         # Data path
         self.path = path
+
+        self.l = l
+        self.m = m
 
         # Geometry
         self.mesh_dim = mesh_dim
@@ -448,7 +452,10 @@ class database_reader:
         self.path_to_database = self._database_path()
         self.file_list = [f for f in listdir(self.path_to_database) if isfile(join(self.path_to_database, f))]
         # check all files are database files
-        self.file_list = [f for f in self.file_list if f.split('_')[0] == "0"]
+        if self.l == 0 and self.m ==0:
+            self.file_list = [f for f in self.file_list if f.split('_')[0] == "0"]
+        else:
+            self.file_list = [f for f in self.file_list if f.split('_')[0] == f"{self.l}{self.m}"]
         random.shuffle(self.file_list)
         return
 
