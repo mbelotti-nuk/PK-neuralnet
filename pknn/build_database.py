@@ -76,7 +76,7 @@ def main():
     write_specifics(config)
 
     for filename in lst:
-        if len(filename.split('_')[0]) != 4:
+        if len(filename.split('_')) != 4:
             print(f"file {filename} was not read")
             continue
 

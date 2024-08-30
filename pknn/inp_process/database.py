@@ -124,7 +124,9 @@ class input_admin:
         return dose
     
     def sphere_dose_direct_contribution(self, tally:list[float]):
+        # distance equal to the radius
         self.dist_source_tally = tally[0]
+        # intersected thickness equal to the slab thickness due to spherical wall
         self.delta_t = self._slab_thickness
         self.dist_source_shield = self.p0
         self.dist_shield_tally = tally[0] - self.p1
@@ -136,7 +138,7 @@ class input_admin:
 
         attenuation = math.exp(- self.mu * self.ro * self.delta_t) # t must be in cm
         uncoll_fi = 1/(4*math.pi*self.dist_source_tally**2) # [ gamma/cm^2 ]
-        dose = self.dose_conversion_factor*uncoll_fi*attenuation
+        dose = self.hrm * self.dose_conversion_factor * uncoll_fi * attenuation
 
         return dose
 
@@ -426,25 +428,29 @@ class database_maker:
         slab_thickness = float(filename.split('_')[1])
         delta_y = float(filename.split('_')[3])
         
+        # set thickness slab
         self.inp_adm.slab_thickness = slab_thickness 
-        self.rad_source[1] = delta_y # y position of the source is the one present in filename
 
         # Define tallies mesh geometry
         if self.spherical:
             py1 = delta_y + slab_thickness
-            origin = [py1, 0 , 0]
-            end =   [py1+2000, 180, 360]
+            # coordinates r, theta, phi
+            mesh_origin = [py1, 0 , 0]
+            mesh_end =   [py1+2000, 180, 360]
+
             # Set the energy and the wall in self.inp_adm
             self._retrieve_case(energy, [delta_y, py1])
+            
         else:
+            self.rad_source[1] = delta_y # y position of the source is the one present in filename
             py1 = self.py0 + slab_thickness
-            origin = [-800, py1, 165]
-            end = [800, 4000 + slab_thickness, 765]
+            mesh_origin = [-800, py1, 165]
+            mesh_end = [800, 4000 + slab_thickness, 765]
             # Set the energy and the wall in self.inp_adm
             self._retrieve_case(energy, [self.py0, py1])
         
         # Read values from binary files containing MCNP results
-        self.reader.set_mesh(origin, end, self.mesh_dim)
+        self.reader.set_mesh(mesh_origin, mesh_end, self.mesh_dim)
         self.reader.binary_reader(filename)
 
         # Collect values
@@ -455,10 +461,10 @@ class database_maker:
             self.reader.filter(max_error)
 
         # Sample a sub-set of the inputs if required
-        if n_samples != None:
+        if n_samples:
             # Sample coordinates and their index 
             # if there's a max_error specification, sampling is random
-            if (max_error!=None):
+            if max_error:
                 ind_sample = random.sample(range(0, len(self.reader._doses)), n_samples)
             # if there's not a max_error specification, sampling is made trough latin hypercube sampling
             else:
@@ -490,7 +496,7 @@ class database_maker:
 
         
         # Set output
-        if n_samples != None:
+        if n_samples:
             if output.lower() == 'b':
                 self.database_output = self.reader.doses[ind_sample]/np.array(dose_direct_contribution)
             else:

@@ -76,7 +76,10 @@ def input_data_processing(config):
                     config['inp_spec']['database_inputs'], config['out_spec']['output'], 
                     sample_per_case=config['nn_spec']['samples_per_case'],
                     save_errors=config['out_spec']['errors'] )
-    Reader.read_data(num_inp_files = config['nn_spec']['n_files'], out_log_scale=config['out_spec']['out_log_scale'],out_clip_values=config['out_spec']['out_clip'])
+    Reader.read_data(num_inp_files = config['nn_spec']['n_files'], 
+                     out_log_scale=config['out_spec']['out_log_scale'],
+                     out_clip_values=config['out_spec']['out_clip'],
+                     std_clip=config['out_spec']['std_clip'])
     
     # Split into Train and Validation
     TrainSet, ValSet = Reader.split_train_val(config['nn_spec']['percentage'], shuffle_in_train=config["shuffle_train"])
@@ -185,7 +188,7 @@ def main():
     # ======================================================================================
     
     pkdnn_model.to("cpu")
-    res = make_prediction(validation_dataset, pkdnn_model, scaler, config)
+    res = make_prediction(validation_dataset, pkdnn_model, scaler)
     errors = res[0]
     kde_plot(errors.detach().flatten().tolist(), "Test set errors", path=save_path)
 

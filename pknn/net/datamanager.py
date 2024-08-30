@@ -331,7 +331,7 @@ class database_reader:
 #                           Public members
 # ********************************************************************
 
-    def read_data(self, out_log_scale:bool=True, num_inp_files:int=None, out_clip_values:list[float]=None):
+    def read_data(self, out_log_scale:bool=True, num_inp_files:int=None, out_clip_values:list[float]=None, std_clip:bool=False):
         """read data in database folder
 
         Args:
@@ -364,9 +364,12 @@ class database_reader:
         if self.save_errors:
             self.Errors["errors"] = self.Errors["errors"][:fill_pointer]
 
+        if std_clip:
+            self._std_clip()
+
         return
 
-    def read_data_from_file(self, files:list[str], out_log_scale=True,out_clip_values:list[float]=None):
+    def read_data_from_file(self, files:list[str], out_log_scale=True, out_clip_values:list[float]=None, std_clip:bool=False):
         """read data present in files list in the database folder
 
 
@@ -396,6 +399,9 @@ class database_reader:
             self.X[inp_type] = self.X[inp_type][:fill_pointer]
         self.Y[self.Output] = self.Y[self.Output][:fill_pointer]
         print("End reading")
+
+        if std_clip:
+            self._std_clip()
 
         return
 
@@ -447,7 +453,6 @@ class database_reader:
         
         return out_set
 
-
     def get_list_files(self):
         self.path_to_database = self._database_path()
         self.file_list = [f for f in listdir(self.path_to_database) if isfile(join(self.path_to_database, f))]
@@ -463,6 +468,19 @@ class database_reader:
 # ********************************************************************
 #                           Private members
 # ********************************************************************
+
+    def _std_clip(self):
+        std_y = torch.std(self.Y[self.Output])
+        low_margin = -3*std_y
+        high_margin = 3*std_y
+
+        msk = np.array(( self.Y[self.Output] > low_margin) & ( self.Y[self.Output] < high_margin))
+        for inp_type in self.X:
+            self.X[inp_type] = self.X[inp_type][msk]
+        self.Y[self.Output] = self.Y[self.Output][msk]
+        self.Errors["errors"] = self.Errors["errors"][msk]
+
+        return
 
     def _map_inputs(self):
         shift = 1

@@ -48,7 +48,7 @@ def main():
 
 
     # TEST
-    errors, prediction, real = make_prediction(pred_dataset, model, scaler, config, test_file=True)
+    errors, prediction, real = make_prediction(pred_dataset, model, scaler)
 
     kde_plot(errors.detach().flatten().tolist(), "Test errors", path=config['io_paths']['save_path'])
     plot_2D( torch.reshape(prediction,  config['out_spec']['mesh_dim']), torch.reshape(real,  config['out_spec']['mesh_dim']), config['out_spec']['output'], path=config['io_paths']['save_path'] )

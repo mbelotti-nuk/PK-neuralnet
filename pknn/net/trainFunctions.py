@@ -158,7 +158,7 @@ def epoch(scope, loader, training=False):
   
     if not training:
         if scheduler != None:
-            scheduler.step(loss)
+            scheduler.step(total_loss)
             print(f"\tlearning rate: {optimizer.param_groups[0]['lr']}\t")
 
     if scope["device"] == "cuda":

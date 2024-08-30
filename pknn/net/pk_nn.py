@@ -28,7 +28,7 @@ class pknn(nn.Module):
         return out
      
 
-def make_prediction( dataset, model, scaler, config, test_file=False ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+def make_prediction( dataset, model, scaler ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     loader = torch.utils.data.DataLoader(dataset, batch_size=64, shuffle=False) 
     
     predictions = torch.empty(dataset.num_elements(), dtype=torch.float32)
