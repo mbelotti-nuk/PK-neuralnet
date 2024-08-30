@@ -1,5 +1,6 @@
 from collections import namedtuple
 from typing import List as list
+from typing import Tuple as tuple
 
 Tally = namedtuple("Tally", ['x', 'y', 'z', 'result', 'error'])
 
@@ -35,7 +36,7 @@ class MeshReader:
         return tallies
 
 
-    def read_meshtal(self, file:str) -> list[Tally]:
+    def read_meshtal(self, file:str) -> tuple[list[Tally], dict]:
         """Read a MCNP meshtal file. 
         Since NACARTE's output is listed in a different order,
         the tallies are re-ordered following NACARTE's convention
@@ -45,6 +46,7 @@ class MeshReader:
 
         Returns:
             list[Tally]: returns a list of the meshtal result of each tally
+            dict : nx, ny and nz
         """
         print("mcnp reading")
         fin = open(file, "r")
