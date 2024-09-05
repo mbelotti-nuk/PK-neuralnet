@@ -504,6 +504,7 @@ class database_reader:
             list[int]: array indices of LH sampling
         """
         sampler = qmc.LatinHypercube(d=3)
+        
         low = [0,0,0]
         sample = sampler.integers(l_bounds=low, u_bounds=self.mesh_dim, n=n_samples)
         ind_sample = self._get_index(sample)

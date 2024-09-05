@@ -180,6 +180,8 @@ def train(scope, train_dataset:Dataset, val_dataset:Dataset,
         save_path (str, optional): path in which save NN checkpoints. Defaults to None.
 
     """
+
+
     early_stopping = EarlyStopping(patience, verbose=True)
 
     train_loss_values, val_loss_values = [], []

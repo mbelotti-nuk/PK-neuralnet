@@ -17,6 +17,7 @@ from .predict import make_prediction
 import torch
 import gc
 import pickle
+import numpy as np
 
 
 def set_environment(config):
@@ -46,6 +47,17 @@ def set_environment(config):
         os.mkdir(save_path)
 
     return device, save_path
+
+def set_seed(seed: int = 1337) -> None:
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    # When running on the CuDNN backend, two further options must be set
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    # Set a fixed value for the hash seed
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    print(f"Random seed set as {seed}")
 
 
 def set_training_vars(config, model):
@@ -108,6 +120,8 @@ def input_data_processing(config):
 
 def main():
     
+    set_seed()
+
     try:
         config = load_config()
     except Exception as e: 
@@ -158,8 +172,7 @@ def main():
     # ======================================================================================
     # ======================================================================================
     print("Start training")
-    # Set seed 
-    torch.manual_seed(0)
+
     pkdnn_model, train_loss, test_loss = train_model(
         model, train_dataset, validation_dataset, optimizer, device=device, epochs=config['training_parameters']['n_epochs'], batch_size=config['training_parameters']['batch_size'],
         patience=config['training_parameters']['patience'], save_path=save_path, loss=loss, accuracy=accuracy, lr_scheduler=config['lr_scheduler'],

@@ -29,6 +29,11 @@ class pknn(nn.Module):
      
 
 def make_prediction( dataset, model, scaler ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    
+    # set the model in evaluation mode
+    model.eval()
+
+    # create data loader
     loader = torch.utils.data.DataLoader(dataset, batch_size=64, shuffle=False) 
     
     predictions = torch.empty(dataset.num_elements(), dtype=torch.float32)
@@ -53,6 +58,7 @@ def make_prediction( dataset, model, scaler ) -> tuple[torch.Tensor, torch.Tenso
 
 
         ptr_to = y.size().numel() + ptr
+        # fill out torch arrays
         predictions[ptr: ptr_to] = pred.flatten()
         real[ptr: ptr_to] = y.flatten()
 
@@ -67,18 +73,5 @@ def make_prediction( dataset, model, scaler ) -> tuple[torch.Tensor, torch.Tenso
     predictions =  predictions.to("cpu")
     real = real.to("cpu")
 
-    # X, Y = dataset.getall()
-
-    # out = model(X.to("cpu").unsqueeze(0))
-
-    # # Denormalize
-    # Y = scaler.denormalize(Y.detach())
-    # out = scaler.denormalize(out.detach())
-
-    # Errors = 100*(out-Y)/Y
-    
-    # if test_file:
-    #     out = out.flatten().reshape((config['out_spec']['mesh_dim'][0], config['out_spec']['mesh_dim'][1], config['out_spec']['mesh_dim'][2]))
-    #     Y = Y.flatten().reshape((config['out_spec']['mesh_dim'][0], config['out_spec']['mesh_dim'][1], config['out_spec']['mesh_dim'][2]))
 
     return (errors, predictions, real)
