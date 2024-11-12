@@ -117,9 +117,9 @@ class input_admin:
         # POLAR COORDINATES
         self.theta, self.fi = self._get_polar_coordinates(sourceToTally)
 
-        attenuation = math.exp(- self.mu * self.ro * self.delta_t) # t must be in cm
+        self.attenuation = math.exp(- self.mu * self.ro * self.delta_t) # t must be in cm
         uncoll_fi = 1/(4*math.pi*self.dist_source_tally**2) # [ gamma/cm^2 ]
-        dose = self.dose_conversion_factor*uncoll_fi*attenuation
+        dose = self.dose_conversion_factor*uncoll_fi*self.attenuation
 
         return dose
     
@@ -136,9 +136,9 @@ class input_admin:
         
         self.hrm = self._harmonic(np.deg2rad(self.theta), np.deg2rad(self.fi))
 
-        attenuation = math.exp(- self.mu * self.ro * self.delta_t) # t must be in cm
+        self.attenuation = math.exp(- self.mu * self.ro * self.delta_t) # t must be in cm
         uncoll_fi = 1/(4*math.pi*self.dist_source_tally**2) # [ gamma/cm^2 ]
-        dose = self.hrm * self.dose_conversion_factor * uncoll_fi * attenuation
+        dose = self.hrm * self.dose_conversion_factor * uncoll_fi * self.attenuation
 
         return dose
 
@@ -146,7 +146,7 @@ class input_admin:
         return {    'energy': self.energy,  'slab_thickness': self._slab_thickness,             'dist_source_tally': self.dist_source_tally, \
                     'delta_t':self.delta_t,  'angle':self.angle,                         'theta':self.theta,\
                     'fi':self.fi ,          'dist_source_shield':self.dist_source_shield,    'dist_shield_tally':self.dist_shield_tally,\
-                    'mfp':self.delta_t * self.ro* self.mu, 'harmonic':self.hrm }
+                    'mfp':self.delta_t * self.ro* self.mu, 'harmonic':self.hrm, 'attenuation':self.attenuation }
     
     def define_wall_coords(self, plane_coord:list[float]):
         """Instantiates the coordinates of the planes that defines the wall
@@ -483,15 +483,22 @@ class database_maker:
         dose_direct_contribution = []
         inp_coeffs = []
 
-        # Calculate direct contribution to dose and get inputs
-
-        with Pool(5) as p:
+        # Calculate direct contribution to dose and get inputs        
+        with Pool(3) as p:
             dose_direct_contribution, inp_coeffs = zip(*p.map(self._task, coord_sample.tolist()))
+
+        # dose_direct_contribution = np.zeros(len(self.reader.coordinates))
+        # inp_coeffs = np.zeros((len(self.reader.coordinates), len(inputs)))
+        # for i, c in enumerate(self.reader.coordinates):
+        #     dose, lst_coeffs = self._task(c)
+        #     dose_direct_contribution[i] = dose
+        #     inp_coeffs[i,:] = lst_coeffs
 
         for i in range(0, len(inp_coeffs)):
             n_key = 0    
             for key in self.database_input.keys():
                 self.database_input[key].append( inp_coeffs[i][n_key] )
+                #self.database_input[key].append( inp_coeffs[i, n_key] )
                 n_key += 1
 
         
@@ -565,7 +572,7 @@ class database_maker:
     
     def _check_compliance(self, inputs:list[str], output:str):
         inp_ref = ['energy','slab_thickness', 'dist_source_tally', 'delta_t', 'angle','theta',\
-                    'fi', 'dist_source_shield', 'dist_shield_tally', 'mfp', 'harmonic']
+                    'fi', 'dist_source_shield', 'dist_shield_tally', 'mfp', 'harmonic', 'attenuation']
         out_ref = ['b', 'dose']
         for i in inputs:
             if i not in inp_ref:

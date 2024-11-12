@@ -1,6 +1,7 @@
 from collections import namedtuple
 from typing import List as list
 from typing import Tuple as tuple
+import numpy as np
 
 Tally = namedtuple("Tally", ['x', 'y', 'z', 'result', 'error'])
 
@@ -8,7 +9,7 @@ class MeshReader:
     def __init__(self) -> None:
         pass
 
-    def read_NACARTE_out(self, file:str) -> list[Tally]:
+    def read_NACARTE_out(self, file:str, mcnp_order=False) -> list[Tally]:
         """
         Reads NACARTE output file
         Args:
@@ -19,6 +20,7 @@ class MeshReader:
         """
         fin = open(file, "r")
         tallies = []
+        x_ax, y_ax, z_ax = [], [], []
         header = True
         for line in fin:
             line = line.replace(",", ".")
@@ -33,10 +35,42 @@ class MeshReader:
             else:
                 err = None
             tallies.append( Tally(x=lsplit[0], y=lsplit[1], z=lsplit[2], result=lsplit[3], error=err) )
+
+            if mcnp_order:
+                x_ax.append(lsplit[0])
+                y_ax.append(lsplit[1])
+                z_ax.append(lsplit[2])
+        
+
+        if mcnp_order:
+            x_ax = np.unique(x_ax)
+            y_ax = np.unique(y_ax)
+            z_ax = np.unique(z_ax)
+
+            n_x = len(x_ax)
+            n_y = len(y_ax)
+            n_z = len(z_ax)
+
+            temp = tallies
+
+            for counter in range(0, len(tallies)):
+                k = counter % n_z
+                j = ( counter//n_z ) % n_y
+                i = ( counter // (n_z*n_y) ) % n_x
+                index = n_y * n_z * i + n_z * j + k
+
+                _i = counter % n_x
+                _j = ( counter//n_x ) % n_y
+                _k = ( counter // (n_x*n_y) ) % n_z
+                _index = n_y * n_x * _k + n_x * _j + _i
+
+                tallies[index] = temp[_index]
+
+
         return tallies
 
 
-    def read_meshtal(self, file:str) -> tuple[list[Tally], dict]:
+    def read_meshtal(self, file:str, mcnp_order=False) -> tuple[list[Tally], dict]:
         """Read a MCNP meshtal file. 
         Since NACARTE's output is listed in a different order,
         the tallies are re-ordered following NACARTE's convention
@@ -80,7 +114,10 @@ class MeshReader:
                 j = ( counter//n_z ) % n_y
                 i = ( counter // (n_z*n_y) ) % n_x
 
-                index = n_y * n_x * k + n_x * j + i
+                if mcnp_order:
+                    index = n_y * n_z * i + n_z * j + k
+                else:
+                    index = n_y * n_x * k + n_x * j + i
 
                 tallies[index] = Tally(x=lsplit[1], y=lsplit[2], z=lsplit[3], result=lsplit[4], error=lsplit[5]) 
 

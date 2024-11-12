@@ -9,7 +9,7 @@ import numpy as np
 import os
 
 def error_loss(output, target, errors):
-    loss = torch.mean(( ( (output - target)/(errors) ) **2 ) )
+    loss = torch.mean( ((output - target)/errors )**2 )
     return loss
 
 def plot_results(train_loss_values, val_loss_values, train_acc_values, val_acc_values, save_path=None):

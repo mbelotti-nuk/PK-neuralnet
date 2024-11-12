@@ -40,8 +40,10 @@ def set_environment(config):
 
     # Create path for save directory
     parent_dir = config['io_paths']['save_directory']
-    directory ="Model_output_"+str(config['out_spec']['output'])+"_fmaps_"+str(config['nn_spec']['f_maps'])
+    name = map(str, config['nn_spec']['f_maps'])
+    directory ="nn_"+ '_'.join( name )
     save_path = os.path.join(parent_dir,directory)
+    
     # Make directory 
     if not os.path.isdir(save_path):
         os.mkdir(save_path)

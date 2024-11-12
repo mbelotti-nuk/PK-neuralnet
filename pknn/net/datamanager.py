@@ -1,3 +1,12 @@
+
+import sys
+
+# Check Python version
+if sys.version_info < (3, 9):
+    from typing import List, Dict as dict, Tuple as tuple  # Import from typing for Python 3.8
+
+
+
 import torch
 from torch.utils.data import Dataset
 import torch.nn.functional as F
@@ -8,7 +17,6 @@ import numpy as np
 from os import listdir
 from os.path import isfile, join
 from scipy.stats import qmc
-#from typing import List as list, Dict as dict, Tuple as tuple
 import pickle
 
 
@@ -55,7 +63,7 @@ class Dataset(Dataset):
         # for each simulation sample a LHS distributed set of indices
         for n_case in range(0,self.n_cases):
             sampler = qmc.LatinHypercube(d=3)
-            low = [0,0,0]
+            low = [0,0,2]
             sample = sampler.integers(l_bounds=low, u_bounds=self.mesh_dim, n=self.samples_per_case)
             self.shuffled_ind.extend( self._get_index(sample, ind_bias=n_case*self.dim_mesh ) )
 
@@ -193,7 +201,7 @@ class Scaler:
         return X, Y
 
 
-    def denormalize(self, Y:torch.tensor) -> torch.tensor:
+    def denormalize(self, Y:torch.tensor, pw10=False) -> torch.tensor:
 
         """Re-scale the output to its starting values
 
@@ -203,12 +211,19 @@ class Scaler:
         :rtype: torch.tensor
         """
 
+        def log_to_unscaled(y):
+            if pw10:
+                y = torch.pow(10, y)
+            else:
+                y = torch.exp(y)
+            return y
+
         Y = self._rescale(Y, self.output_scale_type[self.out_key])
         if self.log_scale:
             if self.out_key.lower() == "b":
-                Y = torch.exp(Y) - 1
+                Y = log_to_unscaled(Y) - 1
             else:
-                Y = torch.exp(Y) 
+                Y = log_to_unscaled(Y) #torch.exp(Y) 
 
         return Y
 
@@ -272,8 +287,8 @@ def scaler_to_txt(path_to_scaler, save_path):
 class database_reader:
     """class that reads and manage data from database
     """    
-    def __init__(self, path:str, mesh_dim:list[int], inputs:list[str], l:int, m:int,
-                 database_inputs:list[str]=None, Output:str='Dose', sample_per_case:int=20000,
+    def __init__(self, path:str, mesh_dim:List[int], inputs:List[str], l:int, m:int,
+                 database_inputs:List[str]=None, Output:str='Dose', sample_per_case:int=20000,
                  save_errors:bool=False):
         """Class that reads and manage data from database
 
@@ -331,7 +346,7 @@ class database_reader:
 #                           Public members
 # ********************************************************************
 
-    def read_data(self, out_log_scale:bool=True, num_inp_files:int=None, out_clip_values:list[float]=None, std_clip:bool=False):
+    def read_data(self, out_log_scale:bool=True, num_inp_files:int=None, out_clip_values:List[float]=None, std_clip:bool=False):
         """read data in database folder
 
         Args:
@@ -369,7 +384,7 @@ class database_reader:
 
         return
 
-    def read_data_from_file(self, files:list[str], out_log_scale=True, out_clip_values:list[float]=None, std_clip:bool=False):
+    def read_data_from_file(self, files:List[str], out_log_scale=True, out_clip_values:List[float]=None, std_clip:bool=False):
         """read data present in files list in the database folder
 
 
@@ -494,7 +509,7 @@ class database_reader:
             shift += 1
         #self.input_indices = list_of_ind
 
-    def _LH_sampling(self, n_samples:int)->list[int]:
+    def _LH_sampling(self, n_samples:int)->List[int]:
         """Quasi Monte Carlo samping over mesh indices
 
         Args:
@@ -510,7 +525,7 @@ class database_reader:
         ind_sample = self._get_index(sample)
         return ind_sample
 
-    def _get_index(self, sample:list[list[int]])->list[int]:
+    def _get_index(self, sample:List[List[int]])->List[int]:
         """Transform [i,j,k] indices into array index
 
         Args:
@@ -547,7 +562,7 @@ class database_reader:
 
     def _process_data(self, file:str, fill_pointer:int, path:str, out_log_scale:bool=True, 
                      samples_per_file:int=None, 
-                     out_clip_values:list[float]=None):
+                     out_clip_values:List[float]=None):
         
         
         if samples_per_file!=None and samples_per_file < self.n_dim:
@@ -576,7 +591,7 @@ class database_reader:
     def _process_output(self, fill_pointer:int, out_arr:np.array, out_log_scale:bool, 
                         out_errors:np.array=None,
                         lhs_indices=None, 
-                        out_clip_values:list[float]=None) -> list[int]:
+                        out_clip_values:List[float]=None) -> List[int]:
         """Process the output data from one file in the database.
         The processing is made through:
         1. Latin Hypercube Sampling
@@ -633,8 +648,8 @@ class database_reader:
         
         return msk_ind
 
-    def _process_input(self, fill_pointer:int, arr:np.array, file:str, lhs_indices:list[int]=None,
-                      msk_ind:list[int]=None):  
+    def _process_input(self, fill_pointer:int, arr:np.array, file:str, lhs_indices:List[int]=None,
+                      msk_ind:List[int]=None):  
         
         # MAKE INPUT
         
