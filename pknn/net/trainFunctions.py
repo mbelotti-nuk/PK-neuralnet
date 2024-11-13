@@ -56,7 +56,19 @@ def loss_acc_calculation(vals, loss_fn, acc_fn):
 
 
 def fwd_calculation(tensors, model, loss_fn, acc_fn, scaler,is_error_loss, grad_scaler=None):
+    def perform_evaluation(x, y, errors):
+        # Compute prediction and loss
+        pred =model(x)
+        if scaler != None:
+            y = scaler.denormalize(y)
+            pred = scaler.denormalize(pred)
+
+        vals = [pred, y, errors] if is_error_loss else [pred, y]
+        loss, acc = loss_acc_calculation(vals, loss_fn, acc_fn)
+        del pred
+        return loss, acc
     
+
     # unpack
     if len(tensors) == 2:
         x, y = tensors
@@ -66,28 +78,10 @@ def fwd_calculation(tensors, model, loss_fn, acc_fn, scaler,is_error_loss, grad_
 
 
     if grad_scaler != None:
-        with torch.cuda.amp.autocast():
-            # Compute prediction and loss
-            pred =model(x)
-            
-            if scaler != None:
-                y = scaler.denormalize(y)
-                pred = scaler.denormalize(pred)
-            
-            vals = [pred, y, errors] if is_error_loss else [pred, y]
-            loss, acc = loss_acc_calculation(vals, loss_fn, acc_fn)
+        with torch.amp.autocast():
+            loss, acc = perform_evaluation(x, y, errors)
     else:
-        # Compute prediction and loss
-        pred =model(x)
-        
-        if scaler != None:
-            y = scaler.denormalize(y)
-            pred = scaler.denormalize(pred)
-
-        vals = [pred, y, errors] if is_error_loss else [pred, y]
-        loss, acc = loss_acc_calculation(vals, loss_fn, acc_fn)
-    # delete prediction tensor
-    del pred
+        loss, acc = perform_evaluation(x, y, errors)
     
     return loss, acc
 
@@ -158,11 +152,14 @@ def epoch(scope, loader, training=False):
   
     if not training:
         if scheduler != None:
-            scheduler.step(total_loss)
             print(f"\tlearning rate: {optimizer.param_groups[0]['lr']}\t")
+            scheduler.step(total_loss)
+            
 
     if scope["device"] == "cuda":
         torch.cuda.empty_cache()
+    elif scope["device"] == "mps":
+        torch.mps.empty_cache()
     
     return total_loss, total_acc
 
@@ -281,7 +278,7 @@ def train_model(model,
                 accuracy=None, 
                 lr_scheduler=None, 
                 errors=False, 
-                shuffle_indices =False, **kwargs):
+                shuffle_indices = False, **kwargs):
     
     model = model.to(device)
     
@@ -306,7 +303,7 @@ def train_model(model,
     scope["scaler"] = scaler
     
     if mixed_precision:
-        scope["grad_scaler"] = torch.cuda.amp.GradScaler()
+        scope["grad_scaler"] = torch.amp.GradScaler()
     else:
         scope["grad_scaler"] = None
         

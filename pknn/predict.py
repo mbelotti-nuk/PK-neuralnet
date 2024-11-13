@@ -24,7 +24,7 @@ def main():
     # Load Neural Net 
     try:
         model = pknn(config['nn_spec']['f_maps']) 
-        model.load_state_dict(torch.load(config['io_paths']["path_to_model"]))
+        model.load_state_dict(torch.load(config['io_paths']["path_to_model"], weights_only=True))
     except Exception as e:
         print(e)
         print("Failed to create NN model")

@@ -18,6 +18,7 @@ from os import listdir
 from os.path import isfile, join
 from scipy.stats import qmc
 import pickle
+from typing import List 
 
 
 class Dataset(Dataset):
@@ -63,7 +64,7 @@ class Dataset(Dataset):
         # for each simulation sample a LHS distributed set of indices
         for n_case in range(0,self.n_cases):
             sampler = qmc.LatinHypercube(d=3)
-            low = [0,0,2]
+            low = [0,0,0]
             sample = sampler.integers(l_bounds=low, u_bounds=self.mesh_dim, n=self.samples_per_case)
             self.shuffled_ind.extend( self._get_index(sample, ind_bias=n_case*self.dim_mesh ) )
 
@@ -520,7 +521,7 @@ class database_reader:
         """
         sampler = qmc.LatinHypercube(d=3)
         
-        low = [0,0,0]
+        low = [0,0,2]
         sample = sampler.integers(l_bounds=low, u_bounds=self.mesh_dim, n=n_samples)
         ind_sample = self._get_index(sample)
         return ind_sample
