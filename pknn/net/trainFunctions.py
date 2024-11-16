@@ -251,7 +251,9 @@ def train(scope, train_dataset:Dataset, val_dataset:Dataset,
             # so if I change something on the Dataset,
             # also the Dataloader will be affected
             train_dataset.shuffle_indices()
-            val_dataset.shuffle_indices()
+
+            ## no shuffle of validation set, keep it as it is
+            #val_dataset.shuffle_indices()
         # ============================================================
 
 
