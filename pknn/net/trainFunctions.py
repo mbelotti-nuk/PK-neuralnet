@@ -139,12 +139,12 @@ def epoch(scope, loader, training=False):
             if batch_idx % 10000 == 0:
                 this_loss, this_acc, this_current = loss.item(), acc.item(), (batch_idx + 1) * len(tensors[0])
                 print(f"loss: {this_loss:>7f} acc:{this_acc:>7f} [{this_current:>5d}/{size:>5d}]")
-        
-        
+               
         size_of_inp = tensors[1].size().numel()
         total_loss += loss.item() * size_of_inp
         total_acc += acc.item() * size_of_inp 
         batches += size_of_inp
+
 
     # Calculate total loss and accuracy    
     total_loss= total_loss/ batches
@@ -203,14 +203,6 @@ def train(scope, train_dataset:Dataset, val_dataset:Dataset,
     skips = 0
     for epoch_id in range(1, epochs + 1):
 
-        if scope["shuffle"]:
-            # the Dataloader has direct reference to the Dataset 
-            # so if I change something on the Dataset,
-            # also the Dataloader will be affected
-            train_dataset.shuffle_indices()
-            val_dataset.shuffle_indices()
-
-
         scope["epoch"] = epoch_id
         print(f"Epoch # {epoch_id}\n-------------------------------", flush=True)
         
@@ -253,6 +245,13 @@ def train(scope, train_dataset:Dataset, val_dataset:Dataset,
         if early_stopping.early_stop:
             print("Early stopping", flush=True)
             break
+
+        if scope["shuffle"]:
+            # the Dataloader has direct reference to the Dataset 
+            # so if I change something on the Dataset,
+            # also the Dataloader will be affected
+            train_dataset.shuffle_indices()
+            val_dataset.shuffle_indices()
         # ============================================================
 
 

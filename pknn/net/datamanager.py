@@ -26,7 +26,7 @@ class Dataset(Dataset):
         # Input
         _in, _out = list(data.keys())
         self.inp = torch.stack(list(data[_in].values()), dim=1)
-
+        
         # Output
         self.out = list(data[_out].values())[0].unsqueeze(1)
 
@@ -55,7 +55,10 @@ class Dataset(Dataset):
         return x, y
 
     def num_elements(self):
-        return self.out.size().numel()
+        if self.samples_per_case != None:
+            return self.n_cases
+        else:
+            return self.out.size().numel()
     
     def shuffle_indices(self):
         if self.samples_per_case is None:
@@ -77,7 +80,7 @@ class Dataset(Dataset):
 
 
 class Errors_dataset(Dataset):
-    def __init__(self, data):
+    def __init__(self, data, samples_per_case=None,  n_cases=None, mesh_dim=None):
 
         # Input
         
@@ -89,10 +92,23 @@ class Errors_dataset(Dataset):
 
         self.errors = data[self._errors].unsqueeze(1)
 
+        # Bootstrapping
+        self.samples_per_case = samples_per_case
+        self.n_cases = n_cases
+        self.mesh_dim = mesh_dim
+        if self.samples_per_case != None:
+            self.shuffle_indices()
+
     def __len__(self):
-        return len(self.out)
+        if self.samples_per_case:
+            return self.samples_per_case * self.n_cases
+        else:
+            return len(self.out)
 
     def __getitem__(self, index):
+
+        if self.samples_per_case != None:
+            index = self.shuffled_ind[index]
 
         x = self.inp[index]
 
@@ -105,8 +121,20 @@ class Errors_dataset(Dataset):
     def num_elements(self):
         return self.out.size().numel()
 
+    def shuffle_indices(self):
+        if self.samples_per_case is None:
+            return
+        self.shuffled_ind = [] 
+        # for each simulation sample a LHS distributed set of indices
+        for n_case in range(0,self.n_cases):
+            sampler = qmc.LatinHypercube(d=3)
+            low = [0,0,0]
+            sample = sampler.integers(l_bounds=low, u_bounds=self.mesh_dim, n=self.samples_per_case)
+            self.shuffled_ind.extend( self._get_index(sample, ind_bias=n_case*self.dim_mesh ) )
 
-
+    def _get_index(self, sample, ind_bias):
+        return [   (self.mesh_dim[1]*self.mesh_dim[2])*ind_coord[0] + self.mesh_dim[2]*ind_coord[1] + ind_coord[2] + ind_bias for ind_coord in sample ]
+    
 
 class Scaler:    
     """Class that handles scaling input and output
@@ -442,10 +470,11 @@ class database_reader:
             returns two tuples of (input training, output training)  and (input validation, output validation) 
         """       
 
+        n_train_files = None
         if shuffle_in_train:
-            shuffle = torch.range(0, self.Y[self.Output].size()[0])
+            shuffle = torch.arange(0, self.Y[self.Output].size()[0])
             n_train_files = int(len(self.file_list) * perc)
-            n_train = n_train_files * self.n_dim
+            n_train = int(n_train_files * self.n_dim)
         else:
             shuffle = torch.randperm(self.Y[self.Output].size()[0]) 
             n_train = int(len(self.Y[self.Output])*perc)
@@ -467,7 +496,7 @@ class database_reader:
         else:
             out_set = [XTrain, YTrain], [XVal, YVal]
         
-        return out_set
+        return out_set, n_train_files
 
     def get_list_files(self):
         self.path_to_database = self._database_path()
