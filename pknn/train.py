@@ -86,24 +86,28 @@ def set_training_vars(config, model):
 
 def input_data_processing(config):
     # Read data
-    if config["shuffle_train"]:
-        Npoints = None
+    if config['training_parameters']["shuffle_train"]:
+        n_data_points = None
     else:
-        Npoints = config['nn_spec']['samples_per_case']
+        n_data_points = config['nn_spec']['samples_per_case']
 
     Reader = database_reader(config['io_paths']['path_to_database'], config['out_spec']['mesh_dim'], 
                     config['inp_spec']['inputs'], config['inp_spec']['l'], config['inp_spec']['m'],
                     config['inp_spec']['database_inputs'], config['out_spec']['output'], 
-                    sample_per_case=Npoints,
+                    sample_per_case=n_data_points,
                     save_errors=config['out_spec']['errors'] )
     Reader.read_data(num_inp_files = config['nn_spec']['n_files'], 
                      out_log_scale=config['out_spec']['out_log_scale'],
                      out_clip_values=config['out_spec']['out_clip'],
                      std_clip=config['out_spec']['std_clip'])
     
+    # get variance in case output is not log scaled and to use variance-based mse
+    if not config['out_spec']['out_log_scale'] and config['metrics']['error_loss'] and config['out_spec']['errors']:
+        Reader.Errors['errors'] = Reader.Errors['errors']*Reader.Output[config['out_spec']['output']]**2
+
 
     # Split into Train and Validation
-    _out, n_train_files = Reader.split_train_val(config['nn_spec']['percentage'], shuffle_in_train=config["shuffle_train"])
+    _out, n_train_files = Reader.split_train_val(config['nn_spec']['percentage'], shuffle_in_train=config['training_parameters']["shuffle_train"])
     TrainSet, ValSet = _out
     # Scale
     scaler = Scaler(config['inp_spec']['inp_scaletype'], config['out_spec']['out_scaletype'], config['out_spec']['out_log_scale'])
@@ -111,7 +115,7 @@ def input_data_processing(config):
     scaled_valset = ( scaler.scale(ValSet[0], ValSet[1]) )    
 
     # Build datasets
-    if config["shuffle_train"]:
+    if config['training_parameters']["shuffle_train"]:
         options_train = [ config['nn_spec']['samples_per_case'], n_train_files , config['out_spec']['mesh_dim']]
         options_val = [ config['nn_spec']['samples_per_case'], len(Reader.file_list)-n_train_files , config['out_spec']['mesh_dim']]
     else:
@@ -193,7 +197,7 @@ def main():
         model, train_dataset, validation_dataset, optimizer, device=device, epochs=config['training_parameters']['n_epochs'], batch_size=config['training_parameters']['batch_size'],
         patience=config['training_parameters']['patience'], save_path=save_path, loss=loss, accuracy=accuracy, lr_scheduler=config['lr_scheduler'],
         mixed_precision=config['training_parameters']['mixed_precision'],
-        errors=config['metrics']['error_loss'], shuffle_indices=config["shuffle_train"]  )
+        errors=config['metrics']['error_loss'], shuffle_indices=config['training_parameters']["shuffle_train"]  )
     
 
 

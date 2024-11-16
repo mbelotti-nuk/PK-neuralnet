@@ -24,6 +24,9 @@ inp_spec:
   #' This input should be specified in case the Neural network Inputs (variable above) 
   #' is a subset of the actual database input set.
   database_inputs: null
+  #' precise spherical harmonic type
+  l: 0
+  m: 0
   
 
   

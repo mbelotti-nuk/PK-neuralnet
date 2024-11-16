@@ -26,6 +26,10 @@ inp_spec:
   #' Scaling type for each input
   inp_scaletype: {'energy': 'minmax', 'dist_source_tally': 'std', 'dist_shield_tally': 'std', 'mfp': 'std', 'theta': 'std', 'fi': 'std'}
 
+  #' precise spherical harmonic type
+  l: 0
+  m: 0
+
 
 
 
@@ -47,7 +51,11 @@ out_spec:
   #' Number of voxels in X, Y, Z directions for the reference mesh in the database
   mesh_dim: [80,100,35]
 
+  #' If the database input file contains MCNP errors or not
+  errors: true
 
+  #' Clips the training points by selecting just the ones with output (y) between y-3*std(y) and y+3*std(y)
+  std_clip: false
 
 
 
@@ -89,6 +97,9 @@ training_parameters:
   #' ref: https://pytorch.org/tutorials/recipes/recipes/amp_recipe.html
   mixed_precision: False
 
+  #' Resamples at each training epochs new training points (the number is equal to "samples_per_case")
+  shuffle_train: True
+
 
 
 
@@ -97,6 +108,8 @@ metrics:
   #'' Loss function
   loss: "mse"
 
+  #' use modified variance-based mse
+  error_loss: true
   #'' Accuracy function
   accuracy: "l1"
 

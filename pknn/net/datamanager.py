@@ -131,6 +131,10 @@ class Errors_dataset(Dataset):
             low = [0,0,0]
             sample = sampler.integers(l_bounds=low, u_bounds=self.mesh_dim, n=self.samples_per_case)
             self.shuffled_ind.extend( self._get_index(sample, ind_bias=n_case*self.dim_mesh ) )
+    
+    @property
+    def dim_mesh(self):
+        return self.mesh_dim[0]*self.mesh_dim[1]*self.mesh_dim[2]    
 
     def _get_index(self, sample, ind_bias):
         return [   (self.mesh_dim[1]*self.mesh_dim[2])*ind_coord[0] + self.mesh_dim[2]*ind_coord[1] + ind_coord[2] + ind_bias for ind_coord in sample ]

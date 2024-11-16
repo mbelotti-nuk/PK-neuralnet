@@ -14,6 +14,9 @@ inp_spec:
   #' the available inputs are:
   #' 'energy', 'slab_thickness', 'dist_source_tally', 'delta_t', 'angle', 'theta', 'fi', 'dist_source_wall', 'dist_wall_tally', 'mfp'
   inputs: ['energy', 'dist_source_tally','dist_shield_tally','mfp','theta','fi']
+  #' precise spherical harmonic type
+  l: 0
+  m: 0
 
 
 #' Output to be considered in the database files.
