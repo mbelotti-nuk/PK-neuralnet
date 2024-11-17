@@ -9,7 +9,7 @@ To run the command:
 import os
 from pknn.functionalities.graphics import kde_plot
 from pknn.functionalities.config import load_config, check_train_config
-from pknn.net.trainFunctions import train_model
+from pknn.net.train_functions import train_model
 from pknn.net.pk_nn import pknn, make_prediction
 from pknn.net.datamanager import Scaler, Dataset, Errors_dataset, database_reader, scaler_to_txt
 
@@ -85,6 +85,13 @@ def set_training_vars(config, model):
 
 
 def input_data_processing(config):
+    def to_data(set ,errors=None):
+        if errors is None:
+            print("BAU")
+            return {"x": set[0], "y": set[1]}
+        else:
+            return {"x": set[0], "y": set[1], "errors": errors }
+        
     # Read data
     if config['training_parameters']["shuffle_train"]:
         n_data_points = None
@@ -107,34 +114,35 @@ def input_data_processing(config):
 
 
     # Split into Train and Validation
-    _out, n_train_files = Reader.split_train_val(config['nn_spec']['percentage'], shuffle_in_train=config['training_parameters']["shuffle_train"])
-    TrainSet, ValSet = _out
+    out_set, n_train_files, n_val_files = Reader.split_train_val(config['nn_spec']['percentage'], shuffle_in_train=config['training_parameters']["shuffle_train"])
+    train_set, val_set, test_set = out_set
     # Scale
     scaler = Scaler(config['inp_spec']['inp_scaletype'], config['out_spec']['out_scaletype'], config['out_spec']['out_log_scale'])
-    scaled_trainset = ( scaler.fit_and_scale(TrainSet[0], TrainSet[1]) )
-    scaled_valset = ( scaler.scale(ValSet[0], ValSet[1]) )    
+    scaled_trainset = ( scaler.fit_and_scale(train_set[0], train_set[1]) )
+    scaled_valset = ( scaler.scale(val_set[0], val_set[1]) )  
+    scaled_testset = (scaler.scale(test_set[0], test_set[1]))  
 
     # Build datasets
     if config['training_parameters']["shuffle_train"]:
         options_train = [ config['nn_spec']['samples_per_case'], n_train_files , config['out_spec']['mesh_dim']]
-        options_val = [ config['nn_spec']['samples_per_case'], len(Reader.file_list)-n_train_files , config['out_spec']['mesh_dim']]
+        options_val = [ config['nn_spec']['samples_per_case'], n_val_files , config['out_spec']['mesh_dim']]
+        options_test = [ config['nn_spec']['samples_per_case'], len(Reader.file_list)-n_train_files-n_val_files , config['out_spec']['mesh_dim']]
     else:
         options_train = [None, None, None]
         options_val = [None, None, None]
+        options_test = [None, None, None]
 
     if config['metrics']['error_loss'] :
-        data = {"x": scaled_trainset[0], "y": scaled_trainset[1], "errors": TrainSet[2]  }
-        train_dataset = Errors_dataset(data, *options_train)
-        data = {"x":scaled_valset[0], "y": scaled_valset[1], "errors": ValSet[2]  }
-        validation_dataset =Errors_dataset(data, *options_val)
+        train_dataset = Errors_dataset(to_data(scaled_trainset, train_set[2]), *options_train)
+        validation_dataset = Errors_dataset(to_data(scaled_valset, val_set[2]), *options_val)
+        test_dataset = Errors_dataset(to_data(scaled_testset, test_set[2]), *options_test)
     else:
-        data = {"x":scaled_trainset[0], "y": scaled_trainset[1] }
-        train_dataset = Dataset(data, *options_train)
-        data = {"x":scaled_valset[0], "y": scaled_valset[1] }
-        validation_dataset = Dataset(data, *options_val)
+        train_dataset = Dataset(to_data(scaled_trainset), *options_train)
+        validation_dataset = Dataset(to_data(scaled_valset), *options_val)
+        test_dataset = Dataset(to_data(scaled_testset), *options_test)
 
 
-    return train_dataset, validation_dataset, scaler
+    return train_dataset, validation_dataset, test_dataset, scaler
 
 
 
@@ -177,7 +185,7 @@ def main():
     # ======================================================================================
     # ======================================================================================
 
-    train_dataset, validation_dataset, scaler = input_data_processing(config)
+    train_dataset, validation_dataset, test_dataset, scaler = input_data_processing(config)
     # Move Scaler
     with open(  os.path.join(save_path, "Scaler.pickle")  , "wb") as file_:
         pickle.dump(scaler, file_, -1)
@@ -216,12 +224,12 @@ def main():
 
     # ======================================================================================
     # ======================================================================================
-    # VALIDATION
+    # TEST
     # ======================================================================================
     # ======================================================================================
     
     pkdnn_model.to("cpu")
-    res = make_prediction(validation_dataset, pkdnn_model, scaler)
+    res = make_prediction(test_dataset, pkdnn_model, scaler)
     errors = res[0]
     kde_plot(errors.detach().flatten().tolist(), "Test set errors", path=save_path)
 

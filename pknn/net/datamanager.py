@@ -464,43 +464,60 @@ class database_reader:
         # print(f"Y size {self.Y[self.Output].size()}")
 
     def split_train_val(self, perc:float=0.85, shuffle_in_train=False):
-        """Split into train and validation set
+        """Split into train, validation set and test set
 
         Args:
             perc (float, optional): Percentage for train set. Defaults to 0.85.
 
-        Returns:
-            tuple[tuple[dict[str,torch.tensor], dict[str,torch.tensor]], tuple[dict[str,torch.tensor], dict[str,torch.tensor]]]: 
-            returns two tuples of (input training, output training)  and (input validation, output validation) 
         """       
 
         n_train_files = None
+        n_val_files = None
+        perc_val_test = 0.7
+
         if shuffle_in_train:
             shuffle = torch.arange(0, self.Y[self.Output].size()[0])
+            
             n_train_files = int(len(self.file_list) * perc)
+            n_val_files = int(len(self.file_list) * (1-perc) * perc_val_test )
+
             n_train = int(n_train_files * self.n_dim)
+            n_val = int( n_val_files * self.n_dim )
+
         else:
             shuffle = torch.randperm(self.Y[self.Output].size()[0]) 
             n_train = int(len(self.Y[self.Output])*perc)
+            n_val = int(len(self.Y[self.Output])* (1-perc) * perc_val_test)
 
-        XTrain = {}
-        XVal = {}
+
+        X_train = {}
+        X_val = {}
+        X_test = {}
+
         for key in self.X:
-            XTrain[key] = self.X[key][shuffle[:n_train]]
-            XVal[key] = self.X[key][shuffle[n_train:]]
+            X_train[key] = self.X[key][shuffle[:n_train]]
+            X_val[key] = self.X[key][shuffle[n_train:n_train+n_val]]
+            X_test[key] = self.X[key][shuffle[n_train+n_val:]]
 
 
-        YTrain = {}
-        YVal = {}
-        YTrain[self.Output] = self.Y[self.Output][shuffle[:n_train]]
-        YVal[self.Output] = self.Y[self.Output][shuffle[n_train:]]
+
+        Y_train = {}
+        Y_val = {}
+        Y_test = {}
+
+        Y_train[self.Output] = self.Y[self.Output][shuffle[:n_train]]
+        Y_val[self.Output] = self.Y[self.Output][shuffle[n_train:n_train+n_val]]
+        Y_test[self.Output] = self.Y[self.Output][shuffle[n_train+n_val:]]
+
 
         if self.Errors != None:
-            out_set = [XTrain, YTrain, self.Errors["errors"][shuffle[:n_train]]], [XVal, YVal, self.Errors["errors"][shuffle[n_train:]]]
+            out_set =   [X_train, Y_train, self.Errors["errors"][shuffle[:n_train]]], \
+                        [X_val, Y_val, self.Errors["errors"][shuffle[n_train:n_train+n_val]]], \
+                        [X_test, Y_test, self.Errors["errors"][shuffle[n_train+n_val:]]]
         else:
-            out_set = [XTrain, YTrain], [XVal, YVal]
+            out_set = [X_train, Y_train], [X_val, Y_val], [X_test, Y_test]
         
-        return out_set, n_train_files
+        return out_set, n_train_files, n_val_files
 
     def get_list_files(self):
         self.path_to_database = self._database_path()
