@@ -78,7 +78,7 @@ def fwd_calculation(tensors, model, loss_fn, acc_fn, scaler,is_error_loss, grad_
 
 
     if grad_scaler != None:
-        with torch.amp.autocast():
+        with torch.autocast(device_type="cuda"):
             loss, acc = perform_evaluation(x, y, errors)
     else:
         loss, acc = perform_evaluation(x, y, errors)
@@ -304,7 +304,7 @@ def train_model(model,
     scope["scaler"] = scaler
     
     if mixed_precision:
-        scope["grad_scaler"] = torch.amp.GradScaler()
+        scope["grad_scaler"] = torch.cuda.amp.GradScaler()
     else:
         scope["grad_scaler"] = None
         
