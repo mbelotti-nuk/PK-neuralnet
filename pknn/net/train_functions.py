@@ -199,6 +199,8 @@ def train(scope, train_dataset:Dataset, val_dataset:Dataset,
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=shuffle_loader, pin_memory=pin)
     val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False, pin_memory=pin) 
     
+    torch.backends.cudnn.benchmark = True
+    
     # Begin training
     skips = 0
     for epoch_id in range(1, epochs + 1):
