@@ -29,17 +29,22 @@ class MeshReader:
             if header: 
                 header = False
                 continue
-            lsplit = [float(i) for i in lsplit]
+            
+            lsplit = [i for i in lsplit]
             if len(lsplit) > 4:
                 err = lsplit[4]
             else:
                 err = None
-            tallies.append( Tally(x=lsplit[0], y=lsplit[1], z=lsplit[2], result=lsplit[3], error=err) )
+            tallies.append( Tally(x=float(lsplit[0]), 
+                                  y=float(lsplit[1]), 
+                                  z=float(lsplit[2]), 
+                                  result=float(lsplit[3]), 
+                                  error=float(err)) )
 
             if mcnp_order:
-                x_ax.append(lsplit[0])
-                y_ax.append(lsplit[1])
-                z_ax.append(lsplit[2])
+                x_ax.append(float(lsplit[0]))
+                y_ax.append(float(lsplit[1]))
+                z_ax.append(float(lsplit[2]))
         
 
         if mcnp_order:
@@ -51,21 +56,17 @@ class MeshReader:
             n_y = len(y_ax)
             n_z = len(z_ax)
 
-            temp = tallies
+            temp = [None for i in range(0,len(tallies))]
+            
+            counter = 0
+            for k in range(0,n_z):
+                for j in range(0,n_y):
+                    for i in range(0,n_x): 
+                        index = n_y * n_z * i + n_z * j + k                      
+                        temp[index] = tallies[counter]
+                        counter += 1
 
-            for counter in range(0, len(tallies)):
-                k = counter % n_z
-                j = ( counter//n_z ) % n_y
-                i = ( counter // (n_z*n_y) ) % n_x
-                index = n_y * n_z * i + n_z * j + k
-
-                _i = counter % n_x
-                _j = ( counter//n_x ) % n_y
-                _k = ( counter // (n_x*n_y) ) % n_z
-                _index = n_y * n_x * _k + n_x * _j + _i
-
-                tallies[index] = temp[_index]
-
+            tallies = temp
 
         return tallies
 

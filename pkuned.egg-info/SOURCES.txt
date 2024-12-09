@@ -22,11 +22,7 @@ pknn/net/__init__.py
 pknn/net/datamanager.py
 pknn/net/pk_nn.py
 pknn/net/pytorchtools.py
-<<<<<<< Updated upstream
 pknn/net/train_functions.py
-=======
-pknn/net/trainFunctions.py
->>>>>>> Stashed changes
 pkuned.egg-info/PKG-INFO
 pkuned.egg-info/SOURCES.txt
 pkuned.egg-info/dependency_links.txt
